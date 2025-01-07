@@ -29,7 +29,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## 📧 Contact
 
 **Terry**  
-[Email](emailto:hoyulee@yahoo.com.hk)  
+📧 [hoyulee@yahoo.com.hk](mailto:hoyulee@yahoo.com.hk)
 
 
 Project Link: [https://github.com/terri-yaki/Earth-Walker](https://github.com/terri-yaki/Earth-Walker)
