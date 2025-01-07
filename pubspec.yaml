@@ -1,0 +1,40 @@
+name: earth_walker
+description: A Flutter application for exploring maps, unlocking achievements, and awarding medals.
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.18.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Map Rendering and Geolocation
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  geolocator: ^13.0.2
+
+  # State Management
+  provider: ^6.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  lint: ^2.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/fonts/
+    - assets/img/
+
+
+  fonts:
+    - family: PixelFont
+      fonts:
+        - asset: assets/fonts/PressStart2P-Regular.ttf
+          weight: 400
+   #     - asset: assets/fonts/PressStart2P-Bold.ttf
+    #      weight: 700
