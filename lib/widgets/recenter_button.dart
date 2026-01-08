@@ -29,9 +29,9 @@ class RecenterButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FloatingActionButton(
       onPressed: () => _handleRecenter(context),
-      tooltip: 'Recenter Map',
       backgroundColor: Colors.green,
       child: const Icon(Icons.my_location),
+      tooltip: 'Recenter Map',
     );
   }
 }
