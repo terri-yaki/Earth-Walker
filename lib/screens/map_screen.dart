@@ -135,12 +135,10 @@ class _MapScreenState extends State<MapScreen> {
                           width: 80.0,
                           height: 80.0,
                           point: userLocationProvider.userLocation.coordinates,
-                          child: Container(
-                            child: Image.asset(
-                              'assets/img/user_m.png', // Ensure this path is correct
-                              width: 40,
-                              height: 40,
-                            ),
+                          child: Image.asset(
+                            'assets/img/user_m.png', // Ensure this path is correct
+                            width: 40,
+                            height: 40,
                           ),
                         ),
                       ],
