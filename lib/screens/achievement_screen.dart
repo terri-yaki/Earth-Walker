@@ -6,27 +6,29 @@ import '../providers/achievement_provider.dart';
 import '../utils/constants.dart';
 
 class AchievementScreen extends StatelessWidget {
+  const AchievementScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final achievementProvider = Provider.of<AchievementProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Achievements',
           style: AppTextStyles.appBarTitle,
         ),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             _buildPercentageRow(
                 'Country', achievementProvider.countryExplored, context),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             _buildPercentageRow(
                 'Continent', achievementProvider.continentExplored, context),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             _buildPercentageRow(
                 'World', achievementProvider.worldExplored, context),
           ],

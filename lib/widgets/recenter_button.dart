@@ -24,7 +24,7 @@ class RecenterButton extends StatelessWidget {
     await onRecenter();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: customText(text: 'Map recentered to your current location.'),
+        content: CustomText(text: 'Map recentered to your current location.'),
       ),
     );
   }
@@ -33,9 +33,9 @@ class RecenterButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FloatingActionButton(
       onPressed: () => _handleRecenter(context),
-      child: Icon(Icons.my_location),
       backgroundColor: Colors.green,
       tooltip: 'Recenter Map',
+      child: const Icon(Icons.my_location),
     );
   }
 }

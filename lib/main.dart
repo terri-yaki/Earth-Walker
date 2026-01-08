@@ -12,10 +12,12 @@ import 'screens/map_screen.dart';
 import 'utils/constants.dart';
 
 void main() {
-  runApp(EarthWalkerApp());
+  runApp(const EarthWalkerApp());
 }
 
 class EarthWalkerApp extends StatelessWidget {
+  const EarthWalkerApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -39,7 +41,7 @@ class EarthWalkerApp extends StatelessWidget {
             // Define other text styles as needed
           ),
         ),
-        home: MapScreen(),
+        home: const MapScreen(),
       ),
     );
   }

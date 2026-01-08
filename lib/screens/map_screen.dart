@@ -12,6 +12,8 @@ import '../widgets/text.dart'; // Ensure this points to your custom text widget
 import '../utils/constants.dart';
 
 class MapScreen extends StatefulWidget {
+  const MapScreen({Key? key}) : super(key: key);
+
   @override
   _MapScreenState createState() => _MapScreenState();
 }
@@ -53,7 +55,7 @@ class _MapScreenState extends State<MapScreen> {
   /// Displays a SnackBar with the given message.
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: customText(text: message)),
+      SnackBar(content: CustomText(text: message)),
     );
   }
 
@@ -63,22 +65,22 @@ class _MapScreenState extends State<MapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Earth Walker',
           style: AppTextStyles.appBarTitle,
         ),
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu),
+            icon: const Icon(Icons.menu),
             onPressed: () {
               Scaffold.of(context).openDrawer();
             },
           ),
         ),
       ),
-      drawer: HamburgerMenu(),
+      drawer: const HamburgerMenu(),
       body: _isLoading
-          ? Center(
+          ? const Center(
               child: CircularProgressIndicator(),
             )
           : Stack(
@@ -150,7 +152,7 @@ class _MapScreenState extends State<MapScreen> {
                   top: 20,
                   left: 20,
                   child: Container(
-                    padding: EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(8.0),

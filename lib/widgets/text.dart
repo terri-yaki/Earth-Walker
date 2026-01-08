@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import '../utils/constants.dart'; // Assuming you have a constants file for styles
 
-class customText extends StatelessWidget {
+class CustomText extends StatelessWidget {
   final String text;
   final TextStyle? style;
   final TextAlign? textAlign;
   final int? maxLines;
   final TextOverflow? overflow;
 
-  const customText({
+  const CustomText({
     Key? key,
     required this.text,
     this.style,
@@ -19,8 +19,8 @@ class customText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return customText(
-      text: text,
+    return Text(
+      text,
       style: style ?? AppTextStyles.defaultTextStyle,
       textAlign: textAlign ?? TextAlign.left,
       maxLines: maxLines,

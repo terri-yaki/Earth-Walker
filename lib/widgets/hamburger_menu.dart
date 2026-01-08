@@ -6,13 +6,15 @@ import '../screens/medal_screen.dart';
 // Import other screens as needed
 
 class HamburgerMenu extends StatelessWidget {
+  const HamburgerMenu({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          DrawerHeader(
+          const DrawerHeader(
             decoration: BoxDecoration(
               color: Colors.green,
             ),
@@ -26,7 +28,7 @@ class HamburgerMenu extends StatelessWidget {
             ),
           ),
           SwitchListTile(
-            title: Text('Toggle Exploration Log'),
+            title: const Text('Toggle Exploration Log'),
             value: true, // Replace with actual value from provider
             onChanged: (bool value) {
               // Implement toggle functionality
@@ -35,22 +37,22 @@ class HamburgerMenu extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: Icon(Icons.emoji_events),
-            title: Text('Achievements'),
+            leading: const Icon(Icons.emoji_events),
+            title: const Text('Achievements'),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => AchievementScreen()),
+                MaterialPageRoute(builder: (context) => const AchievementScreen()),
               );
             },
           ),
           ListTile(
-            leading: Icon(Icons.star),
-            title: Text('Medals'),
+            leading: const Icon(Icons.star),
+            title: const Text('Medals'),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => MedalScreen()),
+                MaterialPageRoute(builder: (context) => const MedalScreen()),
               );
             },
           ),
