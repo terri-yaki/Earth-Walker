@@ -37,6 +37,15 @@ class AchievementProvider with ChangeNotifier {
   /// True if the given title is already in the unlocked list.
   bool isUnlocked(String title) => _unlockedAchievements.contains(title);
 
+  /// Clear all unlocked achievements and notify listeners. Used by the
+  /// drawer's Reset Progress action. The thresholds map is left intact;
+  /// the user can re-earn the same badges by re-exploring.
+  void resetAchievements() {
+    if (_unlockedAchievements.isEmpty) return;
+    _unlockedAchievements.clear();
+    notifyListeners();
+  }
+
   /// Update the user’s exploration progress.
   /// In a real scenario, these would be derived from GPS / location history.
   void updateExploration(int countryValue, int continentValue, int worldValue) {

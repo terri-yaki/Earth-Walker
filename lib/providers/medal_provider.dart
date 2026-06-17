@@ -37,6 +37,14 @@ class MedalProvider with ChangeNotifier {
   bool isMedalAwarded(int medalId) {
     return _awardedMedals.contains(medalId);
   }
+
+  /// Clear all awarded medals and notify listeners. Used by the drawer's
+  /// Reset Progress action.
+  void resetMedals() {
+    if (_awardedMedals.isEmpty) return;
+    _awardedMedals.clear();
+    notifyListeners();
+  }
 }
 
 /// A simple data model for a medal.

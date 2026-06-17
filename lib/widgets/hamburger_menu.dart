@@ -1,9 +1,12 @@
 // lib/widgets/hamburger_menu.dart
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/achievement_provider.dart';
+import '../providers/medal_provider.dart';
+import '../providers/userlocation_provider.dart';
 import '../screens/achievement_screen.dart';
 import '../screens/medal_screen.dart';
-// Import other screens as needed
 
 class HamburgerMenu extends StatelessWidget {
   const HamburgerMenu({Key? key}) : super(key: key);
@@ -47,9 +50,62 @@ class HamburgerMenu extends StatelessWidget {
               );
             },
           ),
-          // Add more menu items like Settings, Offline Downloads
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.restart_alt, color: Colors.red),
+            title: const Text(
+              'Reset Progress',
+              style: TextStyle(color: Colors.red),
+            ),
+            onTap: () => _confirmReset(context),
+          ),
         ],
       ),
+    );
+  }
+
+  /// Show a confirmation dialog before wiping the user's visited cells,
+  /// unlocked achievements, and awarded medals.
+  Future<void> _confirmReset(BuildContext context) async {
+    final location = context.read<UserLocationProvider>();
+    final achievements = context.read<AchievementProvider>();
+    final medals = context.read<MedalProvider>();
+
+    final summary =
+        '${location.uniqueCellsVisited} cells visited, '
+        '${achievements.unlockedAchievements.length} badges unlocked, '
+        '${medals.awardedMedals.length} medals earned.';
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Reset progress?'),
+        content: Text(
+          'This will permanently clear your exploration history.\n\n$summary',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Reset'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+    if (!context.mounted) return;
+
+    location.resetExploration();
+    achievements.resetAchievements();
+    medals.resetMedals();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Progress reset.')),
     );
   }
 }

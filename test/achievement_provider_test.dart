@@ -38,5 +38,21 @@ void main() {
       p.updateExploration(0, 0, 50);
       expect(p.unlockedAchievements, afterFirst);
     });
+
+    test('resetAchievements clears all unlocked achievements', () {
+      final p = AchievementProvider();
+      p.updateExploration(0, 0, 99);
+      expect(p.unlockedAchievements, isNotEmpty);
+      p.resetAchievements();
+      expect(p.unlockedAchievements, isEmpty);
+    });
+
+    test('resetAchievements on empty state does not notify', () {
+      final p = AchievementProvider();
+      var notifyCount = 0;
+      p.addListener(() => notifyCount++);
+      p.resetAchievements();
+      expect(notifyCount, 0);
+    });
   });
 }
