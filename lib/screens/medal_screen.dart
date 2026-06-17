@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/medal_provider.dart';
 
 class MedalScreen extends StatelessWidget {
   const MedalScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Dummy data, replace with actual data from provider
-    final medals = [
-      {'title': 'Walker', 'description': '10% explored'},
-      {'title': 'Pioneer', 'description': '20% explored'},
-      // Add more medals as needed
-    ];
+    final medals = context.watch<MedalProvider>().medals;
 
     return Scaffold(
       appBar: AppBar(
@@ -19,10 +16,15 @@ class MedalScreen extends StatelessWidget {
       body: ListView.builder(
         itemCount: medals.length,
         itemBuilder: (context, index) {
+          final medal = medals[index];
+          final awarded = context.read<MedalProvider>().isMedalAwarded(medal.id);
           return ListTile(
-            leading: const Icon(Icons.emoji_events, color: Colors.amber),
-            title: Text(medals[index]['title']!),
-            subtitle: Text(medals[index]['description']!),
+            leading: Icon(
+              Icons.emoji_events,
+              color: awarded ? Colors.amber : Colors.grey,
+            ),
+            title: Text(medal.name),
+            subtitle: Text('${medal.condition}% explored'),
           );
         },
       ),

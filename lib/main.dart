@@ -5,7 +5,8 @@ import 'package:provider/provider.dart';
 
 // Import your custom providers
 import 'providers/userlocation_provider.dart';
-// Import other providers if any
+import 'providers/achievement_provider.dart';
+import 'providers/medal_provider.dart';
 
 // Import your screens and utilities
 import 'screens/map_screen.dart';
@@ -25,7 +26,12 @@ class EarthWalkerApp extends StatelessWidget {
         ChangeNotifierProvider<UserLocationProvider>(
           create: (_) => UserLocationProvider(),
         ),
-        // Add other providers here if needed
+        ChangeNotifierProvider<AchievementProvider>(
+          create: (_) => AchievementProvider(),
+        ),
+        ChangeNotifierProvider<MedalProvider>(
+          create: (_) => MedalProvider(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false, // Optional: Removes the debug banner
