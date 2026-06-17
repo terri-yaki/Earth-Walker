@@ -1,5 +1,8 @@
+// lib/screens/medal_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/achievement_provider.dart' show tierForThreshold, AchievementTier;
 import '../providers/medal_provider.dart';
 
 class MedalScreen extends StatelessWidget {
@@ -7,27 +10,92 @@ class MedalScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final medals = context.watch<MedalProvider>().medals;
+    final provider = context.watch<MedalProvider>();
+    final medals = provider.medals;
+    final awardedCount = provider.awardedMedals.length;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Medals'),
       ),
-      body: ListView.builder(
-        itemCount: medals.length,
-        itemBuilder: (context, index) {
-          final medal = medals[index];
-          final awarded = context.read<MedalProvider>().isMedalAwarded(medal.id);
-          return ListTile(
-            leading: Icon(
-              Icons.emoji_events,
-              color: awarded ? Colors.amber : Colors.grey,
+      body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: Text(
+              '$awardedCount of ${medals.length} earned',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            title: Text(medal.name),
-            subtitle: Text('${medal.condition}% explored'),
-          );
-        },
+          ),
+          ...medals.map((medal) {
+            final awarded = provider.isMedalAwarded(medal.id);
+            final tier = tierForThreshold(medal.condition);
+            return ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(
+                awarded ? Icons.emoji_events : Icons.lock_outline,
+                color: awarded ? _tierColor(tier) : Colors.grey,
+              ),
+              title: Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      medal.name,
+                      style: TextStyle(
+                        fontWeight:
+                            awarded ? FontWeight.bold : FontWeight.normal,
+                        color:
+                            awarded ? Colors.black : Colors.grey.shade600,
+                      ),
+                    ),
+                  ),
+                  if (awarded) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      _tierLabel(tier),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: _tierColor(tier),
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              subtitle: Text(
+                'Awarded at ${medal.condition}% world exploration',
+              ),
+            );
+          }),
+        ],
       ),
     );
+  }
+
+  Color _tierColor(AchievementTier tier) {
+    switch (tier) {
+      case AchievementTier.gold:
+        return const Color(0xFFD4A017);
+      case AchievementTier.silver:
+        return const Color(0xFF8E96A1);
+      case AchievementTier.bronze:
+        return const Color(0xFFB87333);
+    }
+  }
+
+  String _tierLabel(AchievementTier tier) {
+    switch (tier) {
+      case AchievementTier.gold:
+        return 'GOLD';
+      case AchievementTier.silver:
+        return 'SILVER';
+      case AchievementTier.bronze:
+        return 'BRONZE';
+    }
   }
 }
