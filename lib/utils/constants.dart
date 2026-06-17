@@ -39,13 +39,8 @@ class AppTextStyles {
     fontSize: 14,
   );
 
-  // Added styles to match MapScreen references
-  static const TextStyle bodyText = TextStyle(
-    fontFamily: 'PixelFont',
-    fontSize: 16,
-    color: Colors.black,
-  );
-
+  // bodyText1 / bodyText2 follow the Flutter ThemeData convention
+  // (bodyLarge / bodyMedium in the TextTheme below).
   static const TextStyle bodyText1 = TextStyle(
     fontFamily: 'PixelFont',
     fontSize: 16,

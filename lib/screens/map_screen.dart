@@ -160,13 +160,13 @@ class _MapScreenState extends State<MapScreen> {
                       children: [
                         Text(
                           'Country Explored: ${userLocationProvider.countryPercentage}%',
-                          style: AppTextStyles.bodyText.copyWith(
+                          style: AppTextStyles.bodyText1.copyWith(
                             color: Colors.white,
                           ),
                         ),
                         Text(
                           'Continent Explored: ${userLocationProvider.continentPercentage}%',
-                          style: AppTextStyles.bodyText.copyWith(
+                          style: AppTextStyles.bodyText1.copyWith(
                             color: Colors.white,
                           ),
                         ),
