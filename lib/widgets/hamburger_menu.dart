@@ -1,12 +1,14 @@
 // lib/widgets/hamburger_menu.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/achievement_provider.dart';
 import '../providers/medal_provider.dart';
 import '../providers/userlocation_provider.dart';
 import '../screens/achievement_screen.dart';
 import '../screens/medal_screen.dart';
+import '../utils/progress_summary.dart';
 
 class HamburgerMenu extends StatelessWidget {
   const HamburgerMenu({Key? key}) : super(key: key);
@@ -65,16 +67,19 @@ class HamburgerMenu extends StatelessWidget {
   }
 
   /// Show a confirmation dialog before wiping the user's visited cells,
-  /// unlocked achievements, and awarded medals.
+  /// unlocked achievements, and awarded medals. Includes a 'Copy' button
+  /// so the user can grab a text summary of their progress first.
   Future<void> _confirmReset(BuildContext context) async {
     final location = context.read<UserLocationProvider>();
     final achievements = context.read<AchievementProvider>();
     final medals = context.read<MedalProvider>();
 
-    final summary =
-        '${location.uniqueCellsVisited} cells visited, '
-        '${achievements.unlockedAchievements.length} badges unlocked, '
-        '${medals.awardedMedals.length} medals earned.';
+    final summary = formatProgressSummary(
+      cellsVisited: location.uniqueCellsVisited,
+      badgesUnlocked: achievements.unlockedAchievements.length,
+      medalsEarned: medals.awardedMedals.length,
+      metersWalked: location.totalDistanceMeters,
+    );
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -87,6 +92,15 @@ class HamburgerMenu extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
             child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: summary));
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                const SnackBar(content: Text('Progress copied to clipboard.')),
+              );
+            },
+            child: const Text('Copy'),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
