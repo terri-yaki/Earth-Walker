@@ -243,6 +243,12 @@ class _MapScreenState extends State<MapScreen> {
                             color: Colors.white,
                           ),
                         ),
+                        Text(
+                          'Days explored: ${userLocationProvider.daysExplored}',
+                          style: AppTextStyles.bodyText1.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
                       ],
                     ),
                   ),

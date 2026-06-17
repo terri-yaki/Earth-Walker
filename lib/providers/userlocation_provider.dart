@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_location.dart';
+import '../utils/exploration_days.dart';
 import '../utils/geohash.dart';
 import '../utils/visited_cells_store.dart';
 
@@ -161,6 +162,9 @@ class UserLocationProvider with ChangeNotifier {
   /// SharedPreferences key for the cumulative walking distance in meters.
   static const String _prefsKeyTotalDistance = 'urbix.total_distance_meters';
 
+  /// SharedPreferences key for the set of yyyy-mm-dd exploration day keys.
+  static const String _prefsKeyExplorationDays = 'urbix.exploration_days';
+
   /// Set of geohash cells the user has already visited.
   /// Tracked so revisiting the same cell doesn't inflate the count.
   /// Backed by SharedPreferences on disk; see [loadFromStorage] / [saveToStorage].
@@ -172,16 +176,23 @@ class UserLocationProvider with ChangeNotifier {
   /// as the user re-enters previously-visited cells. Cheap to keep.
   final List<LatLng> _visitedCellLocations = <LatLng>[];
 
+  /// Set of yyyy-mm-dd day keys on which the user has recorded at
+  /// least one new cell. Persisted to SharedPreferences.
+  final Set<String> _explorationDays = <String>{};
+
   /// Number of distinct cells the user has entered (read-only).
   int get uniqueCellsVisited => _visitedCells.length;
+
+  /// Number of distinct calendar days the user has explored on.
+  int get daysExplored => _explorationDays.length;
 
   /// One LatLng per visited cell, in visit order. Used by the map view
   /// to render the green exploration dots.
   List<LatLng> get visitedCellLocations =>
       List.unmodifiable(_visitedCellLocations);
 
-  /// Restore the visited-cell set and cumulative distance from
-  /// SharedPreferences. Call once at app startup (e.g. from
+  /// Restore the visited-cell set, cumulative distance, and exploration-day
+  /// set from SharedPreferences. Call once at app startup (e.g. from
   /// MapScreen.initState) so progress survives restarts. Silently
   /// no-ops on any storage error.
   Future<void> loadFromStorage() async {
@@ -191,6 +202,9 @@ class UserLocationProvider with ChangeNotifier {
         ..clear()
         ..addAll(cellsFromJson(prefs.getString(_prefsKeyVisitedCells)));
       _totalDistanceMeters = prefs.getDouble(_prefsKeyTotalDistance) ?? 0.0;
+      _explorationDays
+        ..clear()
+        ..addAll(cellsFromJson(prefs.getString(_prefsKeyExplorationDays)));
       _lastDistanceReference = null; // first new fix will set it
       _recalculatePercentages();
       notifyListeners();
@@ -199,15 +213,18 @@ class UserLocationProvider with ChangeNotifier {
     }
   }
 
-  /// Persist the current visited-cell set and cumulative distance to
-  /// SharedPreferences. Called automatically whenever a new cell is
-  /// recorded or the distance counter advances; can also be called
-  /// explicitly (e.g. on app pause) to guarantee a flush.
+  /// Persist the current visited-cell set, cumulative distance, and
+  /// exploration-day set to SharedPreferences. Called automatically
+  /// whenever a new cell is recorded or the distance counter advances;
+  /// can also be called explicitly (e.g. on app pause) to guarantee
+  /// a flush.
   Future<void> saveToStorage() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_prefsKeyVisitedCells, cellsToJson(_visitedCells));
       await prefs.setDouble(_prefsKeyTotalDistance, _totalDistanceMeters);
+      await prefs.setString(
+          _prefsKeyExplorationDays, cellsToJson(_explorationDays));
     } catch (e) {
       debugPrint('Failed to save visited cells: $e');
     }
@@ -245,6 +262,7 @@ class UserLocationProvider with ChangeNotifier {
     final cell = encodeGeohash(location.latitude, location.longitude, _geohashPrecision);
     if (_visitedCells.add(cell)) {
       _visitedCellLocations.add(location);
+      _explorationDays.add(dayKey(DateTime.now()));
       _recalculatePercentages();
       // Fire-and-forget save; failure is non-fatal.
       saveToStorage();
@@ -261,7 +279,7 @@ class UserLocationProvider with ChangeNotifier {
   }
 
   /// Resets all exploration percentages to zero, clears visited cells,
-  /// and zeros the cumulative distance counter.
+  /// and zeros the cumulative distance and days-explored counters.
   void resetExploration() {
     _countryPercentage = 0;
     _continentPercentage = 0;
@@ -270,6 +288,7 @@ class UserLocationProvider with ChangeNotifier {
     _visitedCellLocations.clear();
     _totalDistanceMeters = 0.0;
     _lastDistanceReference = null;
+    _explorationDays.clear();
     saveToStorage();
     notifyListeners();
   }
