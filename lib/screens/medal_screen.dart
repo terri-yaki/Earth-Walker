@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class MedalScreen extends StatelessWidget {
+  const MedalScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     // Dummy data, replace with actual data from provider
@@ -12,13 +14,13 @@ class MedalScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Medals'),
+        title: const Text('Medals'),
       ),
       body: ListView.builder(
         itemCount: medals.length,
         itemBuilder: (context, index) {
           return ListTile(
-            leading: Icon(Icons.emoji_events, color: Colors.amber),
+            leading: const Icon(Icons.emoji_events, color: Colors.amber),
             title: Text(medals[index]['title']!),
             subtitle: Text(medals[index]['description']!),
           );

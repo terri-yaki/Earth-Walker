@@ -2,12 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:latlong2/latlong.dart';
 
-import '../models/user_location.dart';
 import '../widgets/text.dart'; // Ensure this points to your custom text widget
-import '../utils/constants.dart';
 
 class RecenterButton extends StatelessWidget {
   final MapController mapController;
@@ -24,7 +20,7 @@ class RecenterButton extends StatelessWidget {
     await onRecenter();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: customText(text: 'Map recentered to your current location.'),
+        content: CustomText(text: 'Map recentered to your current location.'),
       ),
     );
   }
@@ -33,8 +29,8 @@ class RecenterButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FloatingActionButton(
       onPressed: () => _handleRecenter(context),
-      child: Icon(Icons.my_location),
       backgroundColor: Colors.green,
+      child: const Icon(Icons.my_location),
       tooltip: 'Recenter Map',
     );
   }
