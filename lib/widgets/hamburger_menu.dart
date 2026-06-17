@@ -29,11 +29,9 @@ class HamburgerMenu extends StatelessWidget {
           ),
           SwitchListTile(
             title: const Text('Toggle Exploration Log'),
-            value: true, // Replace with actual value from provider
+            value: true, // TODO: replace with real provider state
             onChanged: (bool value) {
-              // Implement toggle functionality
-              // For example:
-              // Provider.of<MapProvider>(context, listen: false).toggleExplorationLog(value);
+              // TODO: wire to UserLocationProvider.toggleExplorationLog(value)
             },
           ),
           ListTile(

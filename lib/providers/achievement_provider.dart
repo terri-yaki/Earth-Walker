@@ -31,7 +31,7 @@ class AchievementProvider with ChangeNotifier {
   List<String> get unlockedAchievements => List.unmodifiable(_unlockedAchievements);
 
   /// Update the user’s exploration progress.
-  /// In a real scenario, these might be computed from GPS data or MapProvider data.
+  /// In a real scenario, these would be derived from GPS / location history.
   void updateExploration(int countryValue, int continentValue, int worldValue) {
     _countryExplored = countryValue.clamp(0, 100);
     _continentExplored = continentValue.clamp(0, 100);
