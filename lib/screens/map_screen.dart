@@ -196,6 +196,12 @@ class _MapScreenState extends State<MapScreen> {
                             color: Colors.white,
                           ),
                         ),
+                        Text(
+                          'Distance: ${formatDistance(userLocationProvider.totalDistanceMeters)}',
+                          style: AppTextStyles.bodyText1.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -213,4 +219,12 @@ class _MapScreenState extends State<MapScreen> {
             ),
     );
   }
+}
+
+/// Format a distance in meters as a short, human-friendly string.
+/// < 1 km -> "X m", >= 1 km -> "X.Y km" with one decimal.
+String formatDistance(double meters) {
+  if (meters < 1000) return '${meters.toStringAsFixed(0)} m';
+  final km = meters / 1000;
+  return '${km.toStringAsFixed(1)} km';
 }
