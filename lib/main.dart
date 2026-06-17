@@ -26,11 +26,28 @@ class EarthWalkerApp extends StatelessWidget {
         ChangeNotifierProvider<UserLocationProvider>(
           create: (_) => UserLocationProvider(),
         ),
-        ChangeNotifierProvider<AchievementProvider>(
+        // Derive achievements from the location provider: every time
+        // UserLocationProvider notifies, push its percentages through.
+        ChangeNotifierProxyProvider<UserLocationProvider, AchievementProvider>(
           create: (_) => AchievementProvider(),
+          update: (_, location, achievements) {
+            achievements ??= AchievementProvider();
+            achievements.updateExploration(
+              location.countryPercentage,
+              location.continentPercentage,
+              location.worldPercentage,
+            );
+            return achievements;
+          },
         ),
-        ChangeNotifierProvider<MedalProvider>(
+        // Same for medals: world % drives the unlock thresholds.
+        ChangeNotifierProxyProvider<UserLocationProvider, MedalProvider>(
           create: (_) => MedalProvider(),
+          update: (_, location, medals) {
+            medals ??= MedalProvider();
+            medals.checkAndAwardMedals(location.worldPercentage);
+            return medals;
+          },
         ),
       ],
       child: MaterialApp(
