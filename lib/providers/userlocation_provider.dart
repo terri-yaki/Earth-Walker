@@ -133,8 +133,19 @@ class UserLocationProvider with ChangeNotifier {
   /// Backed by SharedPreferences on disk; see [loadFromStorage] / [saveToStorage].
   final Set<String> _visitedCells = <String>{};
 
+  /// Representative LatLng for each visited cell, used to render the
+  /// "footprint" overlay on the map. In-memory only — on app restart we
+  /// only have the geohash cells back, so the footprint will repopulate
+  /// as the user re-enters previously-visited cells. Cheap to keep.
+  final List<LatLng> _visitedCellLocations = <LatLng>[];
+
   /// Number of distinct cells the user has entered (read-only).
   int get uniqueCellsVisited => _visitedCells.length;
+
+  /// One LatLng per visited cell, in visit order. Used by the map view
+  /// to render the green exploration dots.
+  List<LatLng> get visitedCellLocations =>
+      List.unmodifiable(_visitedCellLocations);
 
   /// Restore the visited-cell set from SharedPreferences. Call once at
   /// app startup (e.g. from MapScreen.initState) so progress survives
@@ -177,6 +188,7 @@ class UserLocationProvider with ChangeNotifier {
   void _updateExploration(LatLng location) {
     final cell = encodeGeohash(location.latitude, location.longitude, _geohashPrecision);
     if (_visitedCells.add(cell)) {
+      _visitedCellLocations.add(location);
       _recalculatePercentages();
       // Fire-and-forget save; failure is non-fatal.
       saveToStorage();
@@ -198,6 +210,7 @@ class UserLocationProvider with ChangeNotifier {
     _continentPercentage = 0;
     _worldPercentage = 0;
     _visitedCells.clear();
+    _visitedCellLocations.clear();
     saveToStorage();
     notifyListeners();
   }

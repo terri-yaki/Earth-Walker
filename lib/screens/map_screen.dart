@@ -130,6 +130,24 @@ class _MapScreenState extends State<MapScreen> {
                         'user_agent': 'UrbixHK/1.0.0',
                       },
                     ),
+                    // Visited-cell footprint: one green dot per distinct
+                    // geohash-5 cell the user has entered this session.
+                    CircleLayer(
+                      circles: userLocationProvider.visitedCellLocations
+                          .map((point) => CircleMarker(
+                                point: point,
+                                // geohash-5 cells are ~2.4 km wide at the
+                                // equator; render at 800 m so adjacent
+                                // cells overlap visibly without dominating
+                                // the map at city zoom.
+                                radius: 800,
+                                useRadiusInMeter: true,
+                                color: Colors.green.withOpacity(0.25),
+                                borderColor: Colors.green,
+                                borderStrokeWidth: 1,
+                              ))
+                          .toList(),
+                    ),
                     // User Location Marker with Custom Image
                     MarkerLayer(
                       markers: [
