@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import '../models/user_location.dart';
+import '../utils/geohash.dart';
 
 /// A Provider that manages the user's location, map auto-centering,
 /// zoom level, and exploration percentages.
@@ -117,29 +118,44 @@ class UserLocationProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Geohash precision used for visited-cell tracking. Precision 5 is about
+  /// a 2.4 km × 2.4 km cell at the equator — a good size for "you walked
+  /// somewhere new" without inflating the count from GPS noise.
+  static const int _geohashPrecision = 5;
+
+  /// Set of geohash cells the user has already visited during this session.
+  /// Tracked so revisiting the same cell doesn't inflate the count.
+  final Set<String> _visitedCells = <String>{};
+
+  /// Number of distinct cells the user has entered (read-only).
+  int get uniqueCellsVisited => _visitedCells.length;
+
   /// Updates exploration percentages based on the user's location.
   ///
-  /// **Note:** Replace the placeholder logic with actual implementation
-  /// that calculates exploration based on geographical data.
+  /// Real implementation: encode the location to a geohash cell and track
+  /// the set of cells visited. Each new cell counts as 1% of the world,
+  /// capped at 100%. Re-visiting the same cell is a no-op.
+  ///
+  /// ponytail: the "1 cell = 1% world" scaling is intentionally generous so
+  /// the prototype feels responsive. A real implementation would divide by
+  /// a more honest denominator (e.g. total cells covering land) — easy
+  /// upgrade later, no architectural change required.
   void _updateExploration(LatLng location) {
-    // TODO: Implement real logic to calculate exploration based on location.
-
-    // Placeholder logic: Increment percentages.
-    _countryPercentage += 1;
-    _continentPercentage += 1;
-    _worldPercentage += 1;
-
-    // Cap percentages at 100%.
-    if (_countryPercentage > 100) _countryPercentage = 100;
-    if (_continentPercentage > 100) _continentPercentage = 100;
-    if (_worldPercentage > 100) _worldPercentage = 100;
+    final cell = encodeGeohash(location.latitude, location.longitude, _geohashPrecision);
+    if (_visitedCells.add(cell)) {
+      final next = _visitedCells.length.clamp(0, 100);
+      _countryPercentage = next;
+      _continentPercentage = next;
+      _worldPercentage = next;
+    }
   }
 
-  /// Resets all exploration percentages to zero.
+  /// Resets all exploration percentages to zero and clears visited cells.
   void resetExploration() {
     _countryPercentage = 0;
     _continentPercentage = 0;
     _worldPercentage = 0;
+    _visitedCells.clear();
     notifyListeners();
   }
 }
