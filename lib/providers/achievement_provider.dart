@@ -30,6 +30,13 @@ class AchievementProvider with ChangeNotifier {
 
   List<String> get unlockedAchievements => List.unmodifiable(_unlockedAchievements);
 
+  /// All achievement titles and the world-% threshold required to unlock them.
+  Map<String, int> get achievementThresholds =>
+      Map.unmodifiable(_achievementThresholds);
+
+  /// True if the given title is already in the unlocked list.
+  bool isUnlocked(String title) => _unlockedAchievements.contains(title);
+
   /// Update the user’s exploration progress.
   /// In a real scenario, these would be derived from GPS / location history.
   void updateExploration(int countryValue, int continentValue, int worldValue) {

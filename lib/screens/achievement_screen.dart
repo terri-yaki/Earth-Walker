@@ -10,7 +10,7 @@ class AchievementScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final achievementProvider = Provider.of<AchievementProvider>(context);
+    final achievementProvider = context.watch<AchievementProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -19,26 +19,43 @@ class AchievementScreen extends StatelessWidget {
           style: AppTextStyles.appBarTitle,
         ),
       ),
-      body: Padding(
+      body: ListView(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _buildPercentageRow(
-                'Country', achievementProvider.countryExplored, context),
-            const SizedBox(height: 10),
-            _buildPercentageRow(
-                'Continent', achievementProvider.continentExplored, context),
-            const SizedBox(height: 10),
-            _buildPercentageRow(
-                'World', achievementProvider.worldExplored, context),
-          ],
-        ),
+        children: [
+          _buildPercentageRow(
+              'Country', achievementProvider.countryExplored),
+          const SizedBox(height: 10),
+          _buildPercentageRow(
+              'Continent', achievementProvider.continentExplored),
+          const SizedBox(height: 10),
+          _buildPercentageRow('World', achievementProvider.worldExplored),
+          const SizedBox(height: 24),
+          Text(
+            'Badges',
+            style: AppTextStyles.achievementTitle,
+          ),
+          const SizedBox(height: 8),
+          if (achievementProvider.unlockedAchievements.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0),
+              child: Text(
+                'No badges yet. Keep exploring to unlock your first one!',
+                style: AppTextStyles.bodyText1,
+              ),
+            )
+          else
+            ...achievementProvider.achievementThresholds.entries
+                .map((entry) => _buildAchievementTile(
+                      title: entry.key,
+                      threshold: entry.value,
+                      unlocked: achievementProvider.isUnlocked(entry.key),
+                    )),
+        ],
       ),
     );
   }
 
-  Widget _buildPercentageRow(
-      String title, int percentage, BuildContext context) {
+  Widget _buildPercentageRow(String title, int percentage) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -51,6 +68,28 @@ class AchievementScreen extends StatelessWidget {
           style: AppTextStyles.achievementPercentage,
         ),
       ],
+    );
+  }
+
+  Widget _buildAchievementTile({
+    required String title,
+    required int threshold,
+    required bool unlocked,
+  }) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(
+        unlocked ? Icons.emoji_events : Icons.lock_outline,
+        color: unlocked ? Colors.amber : Colors.grey,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: unlocked ? FontWeight.bold : FontWeight.normal,
+          color: unlocked ? Colors.black : Colors.grey.shade600,
+        ),
+      ),
+      subtitle: Text('Unlocked at $threshold% world exploration'),
     );
   }
 }
