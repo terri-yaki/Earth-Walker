@@ -1,5 +1,6 @@
 // lib/providers/userlocation_provider.dart
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
@@ -93,7 +94,7 @@ class UserLocationProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       // Handle any errors
-      print('Error updating user location: $e');
+      debugPrint('Error updating user location: $e');
       throw e;
     }
   }
