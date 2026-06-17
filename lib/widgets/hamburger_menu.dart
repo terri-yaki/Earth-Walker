@@ -27,13 +27,6 @@ class HamburgerMenu extends StatelessWidget {
               ),
             ),
           ),
-          SwitchListTile(
-            title: const Text('Toggle Exploration Log'),
-            value: true, // TODO: replace with real provider state
-            onChanged: (bool value) {
-              // TODO: wire to UserLocationProvider.toggleExplorationLog(value)
-            },
-          ),
           ListTile(
             leading: const Icon(Icons.emoji_events),
             title: const Text('Achievements'),
