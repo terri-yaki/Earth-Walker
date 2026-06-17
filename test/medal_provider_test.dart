@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:earth_walker/providers/medal_provider.dart';
+import 'package:urbix/providers/medal_provider.dart';
 
 void main() {
   test('MedalProvider exposes the 7 medals in order', () {

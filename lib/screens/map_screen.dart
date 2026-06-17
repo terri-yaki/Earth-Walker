@@ -66,7 +66,7 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Earth Walker',
+          'Urbix HK',
           style: AppTextStyles.appBarTitle,
         ),
         leading: Builder(
@@ -125,7 +125,7 @@ class _MapScreenState extends State<MapScreen> {
                           "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                       subdomains: ['a', 'b', 'c'],
                       additionalOptions: {
-                        'user_agent': 'EarthWalkerApp/1.0.0',
+                        'user_agent': 'UrbixHK/1.0.0',
                       },
                     ),
                     // User Location Marker with Custom Image

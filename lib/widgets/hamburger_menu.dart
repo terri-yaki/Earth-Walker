@@ -19,7 +19,7 @@ class HamburgerMenu extends StatelessWidget {
               color: Colors.green,
             ),
             child: Text(
-              'Earth Walker',
+              'Urbix HK',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 24,

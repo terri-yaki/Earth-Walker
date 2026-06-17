@@ -1,6 +1,6 @@
-# Earth Walker - Application Fixes Summary
+# Urbix HK - Application Fixes Summary
 
-This document summarizes all the fixes applied to make the Earth Walker application runnable with proper Dart/Flutter syntax.
+This document summarizes all the fixes applied to make the Urbix HK application runnable with proper Dart/Flutter syntax.
 
 ## Critical Fixes
 
@@ -45,7 +45,7 @@ Widget build(BuildContext context) {
 **Files:** Multiple widget files
 **Issue:** Many StatelessWidget classes lacked proper const constructors.
 **Fix:** Added const constructors with Key? parameter to all StatelessWidget classes:
-- `lib/main.dart` - EarthWalkerApp
+- `lib/main.dart` - UrbixApp
 - `lib/screens/map_screen.dart` - MapScreen
 - `lib/screens/achievement_screen.dart` - AchievementScreen
 - `lib/screens/medal_screen.dart` - MedalScreen
@@ -136,7 +136,7 @@ The application now has:
 - ✅ All required assets in place
 - ✅ Proper Flutter project structure
 
-The Earth Walker application is now syntactically correct and ready to be built and run with Flutter.
+The Urbix HK application is now syntactically correct and ready to be built and run with Flutter.
 
 ## Next Steps for Development
 

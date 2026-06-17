@@ -13,11 +13,11 @@ import 'screens/map_screen.dart';
 import 'utils/constants.dart';
 
 void main() {
-  runApp(const EarthWalkerApp());
+  runApp(const UrbixApp());
 }
 
-class EarthWalkerApp extends StatelessWidget {
-  const EarthWalkerApp({Key? key}) : super(key: key);
+class UrbixApp extends StatelessWidget {
+  const UrbixApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +52,7 @@ class EarthWalkerApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false, // Optional: Removes the debug banner
-        title: 'Earth Walker',
+        title: 'Urbix HK',
         theme: ThemeData(
           primarySwatch: Colors.green,
           fontFamily: 'PixelFont', // Ensure this matches your pubspec.yaml

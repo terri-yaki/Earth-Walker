@@ -1,19 +1,19 @@
-# Earth Walker (developing)
+# Urbix HK (developing)
 
-**Earth Walker** is a Flutter application designed to inspire you to explore the world around you. Whether you're wandering through your city or venturing into the great outdoors, Earth Walker encourages you to *"go touch some grass"* by integrating real-life map exploration with engaging achievements and medals.
+**Urbix HK** is a Flutter application that turns Hong Kong into your playground. Whether you're weaving through Mong Kok, hiking the Dragon's Back, or just stepping out for milk tea, Urbix HK tracks where you've been and rewards you for getting out the door. Explore districts, earn medals, and watch your map of the city fill in.
 
 ---
 
 ## 🌟 Features
 
 - **Real-Time Location Tracking**  
-  Your current location is displayed on an interactive map, allowing you to navigate with ease.
+  Your current location is displayed on an interactive map powered by OpenStreetMap, so you always know where you are.
 
 - **Custom User Marker**  
   Spot your exact location with a personalized marker image, making your journey uniquely yours.
 
 - **Exploration Progress**  
-  Track your adventures with exploration percentages for your country, continent, and the world.
+  Track how much of your district, Hong Kong, and the wider world you've covered. (Country / continent / world percentages are wired up; HK-district breakdown is a planned extension.)
 
 - **Achievements & Medals**  
   Unlock achievements and earn medals as you explore new areas and reach milestones.
