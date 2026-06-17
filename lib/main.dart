@@ -10,6 +10,7 @@ import 'providers/medal_provider.dart';
 
 // Import your screens and utilities
 import 'screens/map_screen.dart';
+import 'screens/onboarding_screen.dart';
 import 'utils/constants.dart';
 
 void main() {
@@ -64,7 +65,7 @@ class UrbixApp extends StatelessWidget {
             // Define other text styles as needed
           ),
         ),
-        home: const MapScreen(),
+        home: const OnboardingScreen(),
       ),
     );
   }
