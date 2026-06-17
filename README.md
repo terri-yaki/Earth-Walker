@@ -26,21 +26,6 @@ Distributed under the CC BY-NC 4.0 License. See `LICENSE` for more information.
 
 ---
 
-## 📧 Contact
-
-**Terry**  
-📧 [hoyulee@yahoo.com.hk](mailto:hoyulee@yahoo.com.hk)
-
-
-Project Link: [https://github.com/terri-yaki/Earth-Walker](https://github.com/terri-yaki/Earth-Walker)
-
----
-
-*“I have no idea how to do this shxt.”*  
-— terriyaki
-
----
-
 # Acknowledgements
 
 - [OpenStreetMap](https://www.openstreetmap.org/) for providing free map data.
