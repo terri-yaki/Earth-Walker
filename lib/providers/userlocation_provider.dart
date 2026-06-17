@@ -4,8 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_location.dart';
 import '../utils/geohash.dart';
+import '../utils/visited_cells_store.dart';
 
 /// A Provider that manages the user's location, map auto-centering,
 /// zoom level, and exploration percentages.
@@ -123,12 +125,44 @@ class UserLocationProvider with ChangeNotifier {
   /// somewhere new" without inflating the count from GPS noise.
   static const int _geohashPrecision = 5;
 
-  /// Set of geohash cells the user has already visited during this session.
+  /// SharedPreferences key for the visited-cell set.
+  static const String _prefsKeyVisitedCells = 'urbix.visited_cells';
+
+  /// Set of geohash cells the user has already visited.
   /// Tracked so revisiting the same cell doesn't inflate the count.
+  /// Backed by SharedPreferences on disk; see [loadFromStorage] / [saveToStorage].
   final Set<String> _visitedCells = <String>{};
 
   /// Number of distinct cells the user has entered (read-only).
   int get uniqueCellsVisited => _visitedCells.length;
+
+  /// Restore the visited-cell set from SharedPreferences. Call once at
+  /// app startup (e.g. from MapScreen.initState) so progress survives
+  /// restarts. Silently no-ops on any storage error.
+  Future<void> loadFromStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _visitedCells
+        ..clear()
+        ..addAll(cellsFromJson(prefs.getString(_prefsKeyVisitedCells)));
+      _recalculatePercentages();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Failed to load visited cells: $e');
+    }
+  }
+
+  /// Persist the current visited-cell set to SharedPreferences. Called
+  /// automatically whenever a new cell is recorded; can also be called
+  /// explicitly (e.g. on app pause) to guarantee a flush.
+  Future<void> saveToStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_prefsKeyVisitedCells, cellsToJson(_visitedCells));
+    } catch (e) {
+      debugPrint('Failed to save visited cells: $e');
+    }
+  }
 
   /// Updates exploration percentages based on the user's location.
   ///
@@ -143,11 +177,19 @@ class UserLocationProvider with ChangeNotifier {
   void _updateExploration(LatLng location) {
     final cell = encodeGeohash(location.latitude, location.longitude, _geohashPrecision);
     if (_visitedCells.add(cell)) {
-      final next = _visitedCells.length.clamp(0, 100);
-      _countryPercentage = next;
-      _continentPercentage = next;
-      _worldPercentage = next;
+      _recalculatePercentages();
+      // Fire-and-forget save; failure is non-fatal.
+      saveToStorage();
     }
+  }
+
+  /// Recompute the three exploration percentages from [_visitedCells.length].
+  /// Called after loading from storage and after each new cell.
+  void _recalculatePercentages() {
+    final next = _visitedCells.length.clamp(0, 100);
+    _countryPercentage = next;
+    _continentPercentage = next;
+    _worldPercentage = next;
   }
 
   /// Resets all exploration percentages to zero and clears visited cells.
@@ -156,6 +198,7 @@ class UserLocationProvider with ChangeNotifier {
     _continentPercentage = 0;
     _worldPercentage = 0;
     _visitedCells.clear();
+    saveToStorage();
     notifyListeners();
   }
 }

@@ -31,13 +31,15 @@ class _MapScreenState extends State<MapScreen> {
   /// Initializes the map by fetching the user's location.
   Future<void> _initializeMap() async {
     try {
+      final provider =
+          Provider.of<UserLocationProvider>(context, listen: false);
+      // Restore any previously-visited cells from disk first so the
+      // exploration HUD shows accumulated progress on app start.
+      await provider.loadFromStorage();
       // Fetch and update the user's location using the provider
-      await Provider.of<UserLocationProvider>(context, listen: false)
-          .updateUserLocation();
+      await provider.updateUserLocation();
 
       // Move the map to the user's location with maximum zoom
-      UserLocationProvider provider =
-          Provider.of<UserLocationProvider>(context, listen: false);
       _mapController.move(provider.userLocation.coordinates, provider.currentZoom);
 
       setState(() {

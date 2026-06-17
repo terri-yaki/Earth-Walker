@@ -18,6 +18,9 @@ dependencies:
   # State Management
   provider: ^6.0.0
 
+  # Local persistence for visited geohash cells
+  shared_preferences: ^2.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
