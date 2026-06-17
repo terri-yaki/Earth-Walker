@@ -2,6 +2,32 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:urbix/providers/achievement_provider.dart';
 
 void main() {
+  group('newlyUnlockedBetween', () {
+    test('returns the items in current that were not in previous', () {
+      expect(
+        newlyUnlockedBetween(const <String>[], const ['Walker', 'Pioneer']),
+        equals(<String>['Walker', 'Pioneer']),
+      );
+      expect(
+        newlyUnlockedBetween(
+          const <String>['Walker'],
+          const <String>['Walker', 'Pioneer'],
+        ),
+        equals(<String>['Pioneer']),
+      );
+    });
+
+    test('returns an empty list when nothing changed', () {
+      expect(
+        newlyUnlockedBetween(
+          const <String>['Walker', 'Pioneer'],
+          const <String>['Walker', 'Pioneer'],
+        ),
+        isEmpty,
+      );
+    });
+  });
+
   group('AchievementProvider', () {
     test('starts with no unlocked achievements', () {
       final p = AchievementProvider();

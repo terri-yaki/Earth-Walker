@@ -1,5 +1,18 @@
 import 'package:flutter/material.dart';
 
+/// Return the achievement titles that appear in [current] but not in
+/// [previous], in [current]'s order. Used by the map view to surface
+/// a 'Badge unlocked: X' snackbar when the user crosses a threshold.
+///
+/// Pure function so it's unit-testable without a ChangeNotifier.
+List<String> newlyUnlockedBetween(
+  List<String> previous,
+  List<String> current,
+) {
+  final prior = previous.toSet();
+  return current.where((title) => !prior.contains(title)).toList();
+}
+
 /// Manages achievement logic, such as calculating
 /// how much of a country/continent/world is explored
 /// and unlocking new achievements.

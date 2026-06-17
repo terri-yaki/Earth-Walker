@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
+import '../providers/achievement_provider.dart';
 import '../providers/userlocation_provider.dart';
 import '../widgets/recenter_button.dart';
 import '../widgets/hamburger_menu.dart';
@@ -22,10 +23,50 @@ class _MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
   bool _isLoading = true;
 
+  /// Snapshot of unlocked achievements at the time of the last check.
+  /// Used to detect new unlocks on each AchievementProvider notification
+  /// and show a one-shot 'Badge unlocked: X' snackbar.
+  List<String> _lastSeenUnlocked = const <String>[];
+
   @override
   void initState() {
     super.initState();
     _initializeMap();
+    // Listen for new badge unlocks and surface a snackbar. We can't do
+    // this in build() (would re-trigger on every rebuild); a listener
+    // fires only when the provider actually notifies.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final achievements =
+          Provider.of<AchievementProvider>(context, listen: false);
+      _lastSeenUnlocked = List<String>.from(achievements.unlockedAchievements);
+      achievements.addListener(_onAchievementsChanged);
+    });
+  }
+
+  @override
+  void dispose() {
+    // Defensive: only remove if we successfully attached in initState.
+    try {
+      Provider.of<AchievementProvider>(context, listen: false)
+          .removeListener(_onAchievementsChanged);
+    } catch (_) {
+      // Provider may already be gone if the tree is being torn down.
+    }
+    super.dispose();
+  }
+
+  void _onAchievementsChanged() {
+    if (!mounted) return;
+    final achievements =
+        Provider.of<AchievementProvider>(context, listen: false);
+    final newOnes = newlyUnlockedBetween(
+      _lastSeenUnlocked,
+      achievements.unlockedAchievements,
+    );
+    _lastSeenUnlocked = List<String>.from(achievements.unlockedAchievements);
+    for (final title in newOnes) {
+      _showSnackBar('Badge unlocked: $title');
+    }
   }
 
   /// Initializes the map by fetching the user's location.
