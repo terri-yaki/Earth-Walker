@@ -1,0 +1,48 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel in-flight runs for the same branch on a new push.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Analyze + test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Pin to a specific Flutter version that ships with Dart 2.18 .. 2.19,
+      # which is what pubspec.yaml's `environment.sdk: ">=2.18.0 <3.0.0"`
+      # allows. Bump in lockstep with pubspec if you raise the SDK floor.
+      - name: Set up Flutter (3.13.9, Dart 3.1)
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.13.9"
+          channel: stable
+          cache: true
+
+      - name: Show tool versions
+        run: |
+          flutter --version
+          dart --version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Static analysis
+        # Treat any analyzer finding as a build failure so we don't
+        # quietly regress on lint issues. CI only — local dev still
+        # runs `flutter analyze` as a no-op.
+        run: flutter analyze --no-fatal-infos
+
+      - name: Run tests
+        run: flutter test
