@@ -28,6 +28,25 @@ void main() {
     });
   });
 
+  group('tierForThreshold', () {
+    test('low thresholds (10..40) are bronze', () {
+      for (final t in <int>[10, 20, 30, 40]) {
+        expect(tierForThreshold(t), AchievementTier.bronze, reason: 't=$t');
+      }
+    });
+
+    test('mid thresholds (50, 80) are silver', () {
+      for (final t in <int>[50, 80]) {
+        expect(tierForThreshold(t), AchievementTier.silver, reason: 't=$t');
+      }
+    });
+
+    test('99 and 100 are gold', () {
+      expect(tierForThreshold(99), AchievementTier.gold);
+      expect(tierForThreshold(100), AchievementTier.gold);
+    });
+  });
+
   group('AchievementProvider', () {
     test('starts with no unlocked achievements', () {
       final p = AchievementProvider();

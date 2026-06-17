@@ -76,20 +76,59 @@ class AchievementScreen extends StatelessWidget {
     required int threshold,
     required bool unlocked,
   }) {
+    final tier = tierForThreshold(threshold);
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Icon(
         unlocked ? Icons.emoji_events : Icons.lock_outline,
-        color: unlocked ? Colors.amber : Colors.grey,
+        color: unlocked ? _tierColor(tier) : Colors.grey,
       ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontWeight: unlocked ? FontWeight.bold : FontWeight.normal,
-          color: unlocked ? Colors.black : Colors.grey.shade600,
-        ),
+      title: Row(
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontWeight: unlocked ? FontWeight.bold : FontWeight.normal,
+              color: unlocked ? Colors.black : Colors.grey.shade600,
+            ),
+          ),
+          if (unlocked) ...[
+            const SizedBox(width: 8),
+            Text(
+              _tierLabel(tier),
+              style: TextStyle(
+                fontSize: 11,
+                color: _tierColor(tier),
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ],
       ),
       subtitle: Text('Unlocked at $threshold% world exploration'),
     );
+  }
+
+  Color _tierColor(AchievementTier tier) {
+    switch (tier) {
+      case AchievementTier.gold:
+        return const Color(0xFFD4A017); // muted gold
+      case AchievementTier.silver:
+        return const Color(0xFF8E96A1); // muted silver
+      case AchievementTier.bronze:
+        return const Color(0xFFB87333); // muted bronze / copper
+    }
+  }
+
+  String _tierLabel(AchievementTier tier) {
+    switch (tier) {
+      case AchievementTier.gold:
+        return 'GOLD';
+      case AchievementTier.silver:
+        return 'SILVER';
+      case AchievementTier.bronze:
+        return 'BRONZE';
+    }
   }
 }

@@ -13,6 +13,20 @@ List<String> newlyUnlockedBetween(
   return current.where((title) => !prior.contains(title)).toList();
 }
 
+/// Visual tier for an achievement, derived from its world-% threshold.
+/// Pure helper so the mapping is unit-testable and stable.
+enum AchievementTier { bronze, silver, gold }
+
+/// Map a world-% threshold to a visual tier. The cutoffs are tuned to
+/// the project's current 7-step threshold ladder (10/20/30/40/50/80/99)
+/// but the function is monotonic, so adding new thresholds in between
+/// won't break the mapping.
+AchievementTier tierForThreshold(int threshold) {
+  if (threshold >= 80) return AchievementTier.gold;
+  if (threshold >= 50) return AchievementTier.silver;
+  return AchievementTier.bronze;
+}
+
 /// Manages achievement logic, such as calculating
 /// how much of a country/continent/world is explored
 /// and unlocking new achievements.
