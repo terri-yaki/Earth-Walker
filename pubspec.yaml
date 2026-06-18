@@ -4,7 +4,15 @@ description: A Flutter application for exploring maps in real life, unlocking ac
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.18.0 <3.0.0"
+  # Dart 3+ — matches the Flutter 3.24+ toolchain that the
+  # GitHub Actions CI installs. The previous "<3.0.0" cap was
+  # set when the project was on Dart 2.18, but the modern
+  # Flutter that CI ships (3.13+ onwards) has Dart 3.x — and
+  # share_plus 7.2.2 requires Dart >= 3.2.0. Bumping the lower
+  # bound to 3.0.0 keeps the project buildable on the current
+  # CI runner; the upper bound stays open so Dart 4 (when it
+  # ships) doesn't require a pubspec bump.
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:
