@@ -124,16 +124,19 @@ message + embedded snapshot to the OS share sheet via
 Threads, Telegram, etc. in one tap. The "Copy" button stays for
 the raw-snapshot Compare flow. The brag line is automatically
 the streak version once the user has a 2+ day streak going.
-Close follow-up: an auto-prompt the first time the user crosses
-7 days ("Share your streak?") — deferred to FEAT-5 to keep
-this change minimal.
 
-## [ ] FEAT-5 — Auto-prompt "Share your streak?" at 7-day milestones
-Label: `FEAT`. P3. The share entry is in the drawer but the
-highest-leverage prompt is a one-shot snackbar the first time
-the user crosses a streak threshold (3, 7, 14, 30 days), with
-an action button that opens the share dialog pre-loaded with
-the streak brag. ~30 lines on top of FEAT-4.
+## [x] FEAT-5 — Auto-prompt "Share your streak?" at streak milestones
+Label: `FEAT`. P2. Resolved. Map screen now seeds the highest
+seen streak + pre-marks crossed thresholds as prompted in
+`initState` (so a returning 14-day user isn't spammed on every
+app open), then on each subsequent increase checks
+`newStreakShareMilestone()` and shows a one-shot orange
+"Share your streak?" snackbar with an action that opens the
+share dialog pre-loaded with the streak brag. The HUD streak
+chip also gets a small share icon next to it once the streak
+is brag-worthy (>= 3 days), so the user can re-share any time
+without going through the drawer. Thresholds: 3, 7, 14, 30
+days (`kStreakShareMilestones`).
 
 ## [ ] PERF-1 — _visitedCells is O(n) lookups on every new fix
 Label: `PERF`. P3. Set<String> is a hash set, so individual

@@ -13,6 +13,7 @@ import '../widgets/hamburger_menu.dart';
 import '../widgets/text.dart'; // Ensure this points to your custom text widget
 import '../utils/constants.dart';
 import '../utils/l10n.dart';
+import '../utils/streak_milestones.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);
@@ -30,6 +31,20 @@ class _MapScreenState extends State<MapScreen> {
   /// and show a one-shot 'Badge unlocked: X' snackbar.
   List<String> _lastSeenUnlocked = const <String>[];
 
+  /// Highest currentStreakDays we've observed in this session.
+  /// Used to detect a streak *increase* (not just a recompute)
+  /// before we prompt the user to share. Initialised in initState
+  /// from the provider's current value so a returning user with
+  /// a 14-day streak doesn't get re-prompted for thresholds they
+  /// already crossed in a previous session.
+  int _lastSeenStreak = 0;
+
+  /// Thresholds (in days) we've already shown the
+  /// "Share your streak?" prompt for. Pre-seeded in initState
+  /// from [_lastSeenStreak] so a returning user with an existing
+  /// streak isn't re-prompted.
+  final Set<int> _streakThresholdsPrompted = <int>{};
+
   @override
   void initState() {
     super.initState();
@@ -42,6 +57,19 @@ class _MapScreenState extends State<MapScreen> {
           Provider.of<AchievementProvider>(context, listen: false);
       _lastSeenUnlocked = List<String>.from(achievements.unlockedAchievements);
       achievements.addListener(_onAchievementsChanged);
+
+      final location =
+          Provider.of<UserLocationProvider>(context, listen: false);
+      // Seed the streak state from the current value. This both
+      // sets [_lastSeenStreak] and pre-marks every threshold
+      // already crossed as prompted, so a returning user with
+      // a 14-day streak doesn't get hit with three snackbars
+      // the moment they open the app.
+      _lastSeenStreak = location.currentStreakDays;
+      for (final t in kStreakShareMilestones) {
+        if (_lastSeenStreak >= t) _streakThresholdsPrompted.add(t);
+      }
+      location.addListener(_onLocationChanged);
     });
   }
 
@@ -51,6 +79,8 @@ class _MapScreenState extends State<MapScreen> {
     try {
       Provider.of<AchievementProvider>(context, listen: false)
           .removeListener(_onAchievementsChanged);
+      Provider.of<UserLocationProvider>(context, listen: false)
+          .removeListener(_onLocationChanged);
     } catch (_) {
       // Provider may already be gone if the tree is being torn down.
     }
@@ -74,6 +104,77 @@ class _MapScreenState extends State<MapScreen> {
       // one. Now we show all of them in a single snackbar.
       _showCelebrationSnackBar(newOnes);
     }
+  }
+
+  /// Fires on every UserLocationProvider notification. Detects
+  /// the moment the user's current streak *increases* past a
+  /// [kStreakShareMilestones] threshold and shows a one-shot
+  /// "Share your streak?" snackbar with an action that opens
+  /// the share dialog pre-loaded with the streak brag. The
+  /// seed-and-track pattern in initState means a returning
+  /// user with an existing 14-day streak doesn't get spammed
+  /// on every app open.
+  void _onLocationChanged() {
+    if (!mounted) return;
+    final location =
+        Provider.of<UserLocationProvider>(context, listen: false);
+    final newStreak = location.currentStreakDays;
+    // No increase → nothing to do. (Streak decreasing or staying
+    // flat both fall through; only crossings upward trigger a
+    // prompt.)
+    if (newStreak <= _lastSeenStreak) {
+      _lastSeenStreak = newStreak;
+      return;
+    }
+    _lastSeenStreak = newStreak;
+
+    final milestone = newStreakShareMilestone(
+      currentStreak: newStreak,
+      alreadyPrompted: _streakThresholdsPrompted,
+    );
+    if (milestone == null) return;
+    _streakThresholdsPrompted.add(milestone);
+    _showStreakSharePrompt(milestone);
+  }
+
+  /// SnackBar shown when the user crosses a streak-milestone
+  /// threshold. Action button opens the share dialog so the
+  /// user can post their brag without leaving the map.
+  void _showStreakSharePrompt(int days) {
+    final l = L10n.of(context);
+    HapticFeedback.mediumImpact();
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 6),
+          backgroundColor: Colors.orange.shade700,
+          content: Row(
+            children: [
+              const Icon(Icons.local_fire_department,
+                  color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '$days ${l.hudDaysStreak}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          action: SnackBarAction(
+            label: l.shareStreakPrompt,
+            textColor: Colors.white,
+            onPressed: () {
+              if (!mounted) return;
+              HamburgerMenu.showShareDialog(context);
+            },
+          ),
+        ),
+      );
   }
 
   /// Initializes the map by fetching the user's location.
@@ -517,6 +618,34 @@ class _MapScreenState extends State<MapScreen> {
                                         fontSize: 12,
                                       ),
                                     ),
+                                    // Visible share affordance: a
+                                    // small share icon right next
+                                    // to the streak chip, shown
+                                    // once the streak is brag-
+                                    // worthy (>= 3 days). Tapping
+                                    // opens the share dialog
+                                    // pre-loaded with the streak
+                                    // brag. The auto-prompt
+                                    // snackbar (FEAT-5) brings
+                                    // this to the user's
+                                    // attention; this icon keeps
+                                    // it one tap away afterwards.
+                                    if (s >= 3) ...[
+                                      const SizedBox(width: 8),
+                                      InkWell(
+                                        onTap: () =>
+                                            HamburgerMenu.showShareDialog(
+                                                context),
+                                        borderRadius:
+                                            BorderRadius.circular(12),
+                                        child: const Padding(
+                                          padding: EdgeInsets.all(2),
+                                          child: Icon(Icons.ios_share,
+                                              color: Colors.white,
+                                              size: 14),
+                                        ),
+                                      ),
+                                    ],
                                   ],
                                 ),
                               );

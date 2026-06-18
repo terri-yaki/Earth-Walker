@@ -71,7 +71,7 @@ class HamburgerMenu extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.ios_share),
             title: Text(l.menuShare),
-            onTap: () => _showShareDialog(context),
+            onTap: () => showShareDialog(context),
           ),
           ListTile(
             leading: const Icon(Icons.compare_arrows),
@@ -97,7 +97,11 @@ class HamburgerMenu extends StatelessWidget {
   /// can post to Instagram, WhatsApp, X, Threads, Telegram etc.
   /// without leaving the app. The "Copy" action stays for users
   /// who just want the raw snapshot text (e.g. for Compare).
-  Future<void> _showShareDialog(BuildContext context) async {
+  ///
+  /// Public + static so the map screen can invoke it from the
+  /// streak-milestone auto-prompt snackbar action and from the
+  /// HUD share icon without going through the drawer.
+  static Future<void> showShareDialog(BuildContext context) async {
     final l = L10n.of(context);
     final location = context.read<UserLocationProvider>();
     final achievements = context.read<AchievementProvider>();
