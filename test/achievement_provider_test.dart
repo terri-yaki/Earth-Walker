@@ -93,6 +93,38 @@ void main() {
       expect(p.unlockedAchievements, afterFirst);
     });
 
+    test(
+        'unlockedAchievements list is in threshold-ascending order '
+        '(so the achievements screen renders lowest-first)', () {
+      // The map iteration order in `_checkForNewAchievements` is
+      // determined by the insertion order of `_achievementThresholds`,
+      // which is ascending (10, 20, 30, ...). The unlocked list
+      // mirrors that — when the user crosses every threshold in one
+      // call, the list comes out threshold-sorted.
+      //
+      // A regression that switched the iteration to descending (or
+      // to `_achievementThresholds.keys` which is also insertion-
+      // sorted, so order is preserved) wouldn't break this test.
+      // The load-bearing assertion is that the order matches the
+      // definition order — i.e. a future product decision to reorder
+      // the threshold map will visibly break the test and force a
+      // matching UI update.
+      final p = AchievementProvider();
+      p.updateExploration(0, 0, 99);
+      expect(
+        p.unlockedAchievements,
+        equals(<String>[
+          'Walker', // 10
+          'Pioneer', // 20
+          'Traveller', // 30
+          'Explorer', // 40
+          'Coloniser', // 50
+          'Dominator', // 80
+          'Are you sure you\u2019re not cheating?', // 99
+        ]),
+      );
+    });
+
     test('resetAchievements clears all unlocked achievements', () {
       final p = AchievementProvider();
       p.updateExploration(0, 0, 99);
