@@ -217,6 +217,15 @@ void main() {
       await p.updateUserLocation();
       expect(p.uniqueCellsVisited, 1);
       expect(p.visitsByDistrict['Yau Tsim Mong'], 1);
+      // visitedCellLocations is the parallel list used to render the
+      // green-dot footprint on the map; it must also be unique. A
+      // regression that moved the .add() outside the if-block would
+      // double-count here (and triple-count after a third visit).
+      expect(p.visitedCellLocations, hasLength(1),
+          reason: 'revisiting the same cell must not add duplicate '
+              'locations; the footprint would render as overlapping '
+              'green dots');
+      expect(p.visitedCellLocations.first, const LatLng(22.298, 114.170));
     });
 
     test('walking into a new cell adds distance and a new cell', () async {
