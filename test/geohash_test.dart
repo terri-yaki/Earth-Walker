@@ -44,6 +44,37 @@ void main() {
       expect(() => encodeGeohash(0, 181, 5), throwsArgumentError);
       expect(() => encodeGeohash(double.nan, 0, 5), throwsArgumentError);
     });
+
+    test(
+        'NaN on either coordinate is rejected with a message pointing '
+        'at the bad parameter (regression for the misleading '
+        '"lat must be in -90..90" error when lng was NaN)', () {
+      // Before the fix, encodeGeohash(0, double.nan, 5) would
+      // throw ArgumentError.value(lat, 'lat', 'must be in -90..90')
+      // because the original check `lat.isNaN || lng.isNaN || ...`
+      // bundled both NaN checks into one branch with a hardcoded
+      // 'lat' message. A NaN lng looked like a bad lat.
+      try {
+        encodeGeohash(0, double.nan, 5);
+        fail('expected ArgumentError to be thrown');
+      } on ArgumentError catch (e) {
+        expect(e.name, equals('lng'),
+            reason: 'error should name the bad parameter (lng), '
+                'not the unrelated lat');
+        expect(e.message?.toString(), contains('NaN'),
+            reason: 'error message should mention NaN so the user knows '
+                'what kind of bad input it was');
+      }
+      // Symmetric case: NaN lat with valid lng should still name
+      // lat in the error.
+      try {
+        encodeGeohash(double.nan, 0, 5);
+        fail('expected ArgumentError to be thrown');
+      } on ArgumentError catch (e) {
+        expect(e.name, equals('lat'));
+        expect(e.message?.toString(), contains('NaN'));
+      }
+    });
   });
 
   group('geohash cell dimensions', () {

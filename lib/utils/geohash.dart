@@ -43,7 +43,16 @@ String encodeGeohash(double lat, double lng, int precision) {
   if (precision < 1 || precision > 12) {
     throw ArgumentError.value(precision, 'precision', 'must be 1..12');
   }
-  if (lat.isNaN || lng.isNaN || lat < -90 || lat > 90) {
+  // NaN checks first so the error message points at the
+  // bad parameter rather than the misleading "must be in -90..90"
+  // we'd get from `NaN < -90` / `NaN > 90` (both false).
+  if (lat.isNaN) {
+    throw ArgumentError.value(lat, 'lat', 'must not be NaN');
+  }
+  if (lng.isNaN) {
+    throw ArgumentError.value(lng, 'lng', 'must not be NaN');
+  }
+  if (lat < -90 || lat > 90) {
     throw ArgumentError.value(lat, 'lat', 'must be in -90..90');
   }
   if (lng < -180 || lng > 180) {
