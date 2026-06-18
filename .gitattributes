@@ -16,29 +16,29 @@
 *.ps1           text eol=crlf
 *.sh            text eol=lf
 
-# Dart source — LF (Dart formatter emits LF; the analyzer is
+# Dart source ??LF (Dart formatter emits LF; the analyzer is
 # CRLF-tolerant but the linter and CI formatters assume LF).
 *.dart          text eol=lf
 
-# YAML — must be LF for GitHub Actions; mixed line endings
+# YAML ??must be LF for GitHub Actions; mixed line endings
 # silently break the Actions YAML parser (see b8d8bba).
 *.yml           text eol=lf
 *.yaml          text eol=lf
 
-# JSON — LF; the L10n JSON files in assets/l10n/ are committed
+# JSON ??LF; the L10n JSON files in assets/l10n/ are committed
 # as LF and any CRLF injection would break json.load().
 *.json          text eol=lf
 
-# Markdown — LF.
+# Markdown ??LF.
 *.md            text eol=lf
 
-# Plain text — LF.
+# Plain text ??LF.
 *.txt           text eol=lf
 
-# Lockfiles — must be LF for `pub get` to parse.
+# Lockfiles ??must be LF for `pub get` to parse.
 pubspec.lock    text eol=lf
 
-# Images, fonts, and other binary assets — never re-encode.
+# Images, fonts, and other binary assets ??never re-encode.
 *.png           binary
 *.jpg           binary
 *.jpeg          binary
@@ -47,5 +47,5 @@ pubspec.lock    text eol=lf
 *.ico           binary
 *.ttf           binary
 *.otf           binary
-*.woff          binary
-*.woff2         binary
+*.woff           binary
+*.woff2          binary
