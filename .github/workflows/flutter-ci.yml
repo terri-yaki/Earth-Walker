@@ -55,15 +55,15 @@ jobs:
       - name: Verify formatting
         # Format check. Run dart format with --set-exit-if-changed
         # which exits 1 if anything would change. The
-        # --show=set output lists which files would change so the
-        # log is self-explanatory.
+        # --output=show on the failure path dumps the actual
+        # diff so the log is self-explanatory.
         run: |
           set -e
           echo "==> Running dart format --set-exit-if-changed"
-          if dart format --set-exit-if-changed --show=set . ; then
+          if dart format --set-exit-if-changed . ; then
             echo "==> format check: PASS"
           else
-            echo "==> format check: FAIL"
+            echo "==> format check: FAIL; diff follows"
             dart format --output=show . || true
             exit 1
           fi
