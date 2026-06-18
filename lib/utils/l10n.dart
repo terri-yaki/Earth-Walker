@@ -77,6 +77,7 @@ class L10n {
   String get menuDistricts => _lookup('menu_districts');
   String get menuReset => _lookup('menu_reset');
   String get menuShare => _lookup('menu_share');
+  String get menuCompare => _lookup('menu_compare');
   String get resetDialogTitle => _lookup('reset_dialog_title');
   String get resetDialogBody => _lookup('reset_dialog_body');
   String get resetDialogConfirm => _lookup('reset_dialog_confirm');
@@ -85,6 +86,18 @@ class L10n {
   String get shareDialogTitle => _lookup('share_dialog_title');
   String get shareDialogCopy => _lookup('share_dialog_copy');
   String get shareDialogCopied => _lookup('share_dialog_copied');
+  String get compareDialogTitle => _lookup('compare_dialog_title');
+  String get compareDialogPasteHint => _lookup('compare_dialog_paste_hint');
+  String get compareDialogCompare => _lookup('compare_dialog_compare');
+  String get compareDialogYou => _lookup('compare_dialog_you');
+  String get compareDialogThem => _lookup('compare_dialog_them');
+  String get compareDialogClose => _lookup('compare_dialog_close');
+  String get compareDialogYouWin => _lookup('compare_dialog_you_win');
+  String get compareDialogTheyWin => _lookup('compare_dialog_they_win');
+  String get compareDialogYouTie => _lookup('compare_dialog_you_tie');
+  String get compareDialogParseFailed =>
+      _lookup('compare_dialog_parse_failed');
+  String get compareDialogTied => _lookup('compare_dialog_tied');
   String get progressCopied => _lookup('progress_copied');
   String get progressResetDone => _lookup('progress_reset_done');
   String get findingLocation => _lookup('finding_location');

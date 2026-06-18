@@ -72,6 +72,11 @@ class HamburgerMenu extends StatelessWidget {
             onTap: () => _showShareDialog(context),
           ),
           ListTile(
+            leading: const Icon(Icons.compare_arrows),
+            title: Text(l.menuCompare),
+            onTap: () => _showCompareDialog(context),
+          ),
+          ListTile(
             leading: const Icon(Icons.restart_alt, color: Colors.red),
             title: Text(
               l.menuReset,
@@ -150,6 +155,151 @@ class HamburgerMenu extends StatelessWidget {
               Navigator.of(dialogContext).pop();
             },
             child: Text(l.shareDialogCopy),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show a dialog where the user can paste a friend's snapshot
+  /// string (copied from another Urbix HK user). On Compare, parse
+  /// the input, build the local user's snapshot, run
+  /// [ProgressSnapshot.compare], and show a result dialog with
+  /// the per-field deltas. Parse failure surfaces a SnackBar.
+  Future<void> _showCompareDialog(BuildContext context) async {
+    final l = L10n.of(context);
+    final controller = TextEditingController();
+
+    // Show the input dialog. We use a stateful local widget so
+    // the dialog can keep its own TextEditingController for the
+    // pasted text.
+    final pasted = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l.compareDialogTitle),
+        content: TextField(
+          controller: controller,
+          maxLines: 5,
+          minLines: 3,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: l.compareDialogPasteHint,
+            border: const OutlineInputBorder(),
+            isDense: true,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l.compareDialogClose),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext)
+                .pop(controller.text.trim()),
+            child: Text(l.compareDialogCompare),
+          ),
+        ],
+      ),
+    );
+    // The user closed without comparing.
+    if (pasted == null) return;
+
+    // Build the local snapshot for the compare side.
+    final location = context.read<UserLocationProvider>();
+    final achievements = context.read<AchievementProvider>();
+    final medals = context.read<MedalProvider>();
+    final mine = ProgressSnapshot.fromValues(
+      cellsVisited: location.uniqueCellsVisited,
+      badgesUnlocked: achievements.unlockedAchievements.length,
+      medalsEarned: medals.awardedMedals.length,
+      metersWalked: location.totalDistanceMeters,
+      daysExplored: location.daysExplored,
+      currentStreakDays: location.currentStreakDays,
+    );
+
+    final theirs = parseProgressSnapshot(pasted);
+    if (theirs == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l.compareDialogParseFailed)),
+        );
+      }
+      return;
+    }
+
+    if (!context.mounted) return;
+    await _showCompareResultDialog(context, mine, theirs);
+  }
+
+  /// Show the per-field deltas produced by
+  /// [ProgressSnapshot.compare]. If every field is tied, show the
+  /// "tied on every metric" message instead of a list.
+  Future<void> _showCompareResultDialog(
+    BuildContext context,
+    ProgressSnapshot mine,
+    ProgressSnapshot theirs,
+  ) async {
+    final l = L10n.of(context);
+    final deltas = ProgressSnapshot.compare(
+      other: theirs,
+      yours: mine,
+      // Field labels are plain English — the badges/medals
+      // themselves aren't localised, and the comparison strings
+      // read most naturally as the same nouns the user sees on
+      // the achievement / medal screens.
+      cellsLabel: 'cells',
+      distanceLabel: 'km',
+      badgesLabel: 'badges',
+      medalsLabel: 'medals',
+      daysLabel: 'days',
+      streakLabel: 'day streak',
+      youWinLabel: l.compareDialogYouWin,
+      theyWinLabel: l.compareDialogTheyWin,
+    );
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l.compareDialogTitle),
+        content: SizedBox(
+          width: 320,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l.compareDialogYou,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    l.compareDialogThem,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              if (deltas.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    l.compareDialogTied,
+                    style: const TextStyle(fontStyle: FontStyle.italic),
+                  ),
+                )
+              else
+                ...deltas.map((line) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2.0),
+                      child: Text(line),
+                    )),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l.compareDialogClose),
           ),
         ],
       ),
