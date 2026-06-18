@@ -96,6 +96,112 @@ void main() {
     });
   });
 
+  group('UserLocationProvider updateUserLocation with injected position source',
+      () {
+    // The point of refactoring _positionSource out of the Geolocator
+    // hard dependency is to be able to drive the full update cycle
+    // (distance accumulation, geohash cell, district bump, day key)
+    // from a unit test, with no GPS hardware or permission mocks.
+
+    Position _pos(double lat, double lng) => Position(
+          latitude: lat,
+          longitude: lng,
+          timestamp: DateTime.now(),
+          accuracy: 5.0,
+          altitude: 0.0,
+          altitudeAccuracy: 0.0,
+          heading: 0.0,
+          headingAccuracy: 0.0,
+          speed: 0.0,
+          speedAccuracy: 0.0,
+        );
+
+    test('first fix records one cell, bumps the district, sets today', () async {
+      var calls = 0;
+      final p = UserLocationProvider(
+        positionSource: () async {
+          calls++;
+          return _pos(22.298, 114.170); // Yau Tsim Mong
+        },
+      );
+      await p.updateUserLocation();
+      expect(calls, 1);
+      expect(p.uniqueCellsVisited, 1);
+      expect(p.countryPercentage, 1);
+      expect(p.visitsByDistrict['Yau Tsim Mong'], 1);
+      expect(p.currentDistrictName, 'Yau Tsim Mong');
+      expect(p.daysExplored, 1);
+      expect(p.totalDistanceMeters, 0.0,
+          reason: 'first fix has no previous reference, so no distance');
+    });
+
+    test('revisiting the same cell does not double-count', () async {
+      final fixes = [
+        _pos(22.298, 114.170),
+        _pos(22.299, 114.171), // same geohash-5 cell
+        _pos(22.298, 114.170), // same cell again
+      ];
+      var i = 0;
+      final p = UserLocationProvider(
+        positionSource: () async => fixes[i++],
+      );
+      await p.updateUserLocation();
+      await p.updateUserLocation();
+      await p.updateUserLocation();
+      expect(p.uniqueCellsVisited, 1);
+      expect(p.visitsByDistrict['Yau Tsim Mong'], 1);
+    });
+
+    test('walking into a new cell adds distance and a new cell', () async {
+      // ~1.1 km apart — same geohash-5 cell? No: geohash-5 cells
+      // are ~2.4 km wide, so two points 1.1 km apart could land in
+      // either the same or different cells. To be safe, use points
+      // ~5 km apart, which guarantees different cells.
+      final fixes = [
+        _pos(22.298, 114.170), // Yau Tsim Mong
+        _pos(22.330, 114.170), // ~3.5 km north, different cell
+      ];
+      var i = 0;
+      final p = UserLocationProvider(
+        positionSource: () async => fixes[i++],
+      );
+      await p.updateUserLocation();
+      await p.updateUserLocation();
+      expect(p.uniqueCellsVisited, 2);
+      expect(p.totalDistanceMeters, greaterThan(3000.0));
+      expect(p.totalDistanceMeters, lessThan(4000.0));
+    });
+
+    test('an absurdly large step is dropped as GPS noise', () async {
+      // First fix in HK, second fix 100 km away — should NOT
+      // contribute to totalDistanceMeters (and should still
+      // record the new cell, since cell recording is independent
+      // of distance accounting).
+      final fixes = [
+        _pos(22.298, 114.170), // Tsim Sha Tsui
+        _pos(22.500, 114.000), // ~30 km west, also past the 1.5 km cap
+      ];
+      var i = 0;
+      final p = UserLocationProvider(
+        positionSource: () async => fixes[i++],
+      );
+      await p.updateUserLocation();
+      await p.updateUserLocation();
+      expect(p.uniqueCellsVisited, 2);
+      expect(p.totalDistanceMeters, 0.0,
+          reason: '30 km jump exceeds kMaxPlausibleStepMeters and is dropped');
+    });
+
+    test('position source exception is rethrown, no state change', () async {
+      final p = UserLocationProvider(
+        positionSource: () async => throw Exception('GPS off'),
+      );
+      expect(() => p.updateUserLocation(), throwsException);
+      expect(p.uniqueCellsVisited, 0);
+      expect(p.totalDistanceMeters, 0.0);
+    });
+  });
+
   group('UserLocationProvider geohash precision', () {
     // A regression in the precision constant would silently change the
     // cell size used for the unique-cell counter and break every

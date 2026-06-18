@@ -12,6 +12,25 @@ import '../utils/geohash.dart';
 import '../utils/hk_districts.dart';
 import '../utils/visited_cells_store.dart';
 
+/// Default [UserLocationProvider] position source: the Geolocator
+/// permission check + getCurrentPosition flow. Pulled out as a
+/// top-level function so the production behaviour is unchanged
+/// after the position-source refactor, and so tests can inject
+/// a stub via the constructor without touching Geolocator.
+Future<Position> _geolocatorPositionSource() async {
+  // Check location permissions
+  LocationPermission permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied ||
+      permission == LocationPermission.deniedForever) {
+    permission = await Geolocator.requestPermission();
+    if (permission != LocationPermission.whileInUse &&
+        permission != LocationPermission.always) {
+      throw Exception('Location permissions are denied');
+    }
+  }
+  return Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+}
+
 /// A Provider that manages the user's location, map auto-centering,
 /// zoom level, and exploration percentages.
 class UserLocationProvider with ChangeNotifier {
@@ -48,6 +67,14 @@ class UserLocationProvider with ChangeNotifier {
   /// glitch, not real movement.
   static const double kMaxPlausibleStepMeters = 1500.0;
 
+  /// Function that returns the device's current position. The default
+  /// wraps the Geolocator permission + getCurrentPosition flow; tests
+  /// inject a stub that returns a fixed [Position] so the full
+  /// update cycle (distance accumulation, exploration tracking,
+  /// per-district bump) can be exercised without GPS hardware or
+  /// permission mocks.
+  final Future<Position> Function() _positionSource;
+
   /// Constructor to initialize the provider with default values.
   UserLocationProvider({
     UserLocation? initialLocation,
@@ -58,6 +85,7 @@ class UserLocationProvider with ChangeNotifier {
     int worldPercentage = 0,
     double totalDistanceMeters = 0.0,
     LatLng? lastDistanceReference,
+    Future<Position> Function()? positionSource,
   })  : _userLocation = initialLocation ??
                 UserLocation(coordinates: LatLng(0.0, 0.0)), // Default to (0,0)
         _isRecentered = isRecentered,
@@ -66,7 +94,8 @@ class UserLocationProvider with ChangeNotifier {
         _continentPercentage = continentPercentage,
         _worldPercentage = worldPercentage,
         _totalDistanceMeters = totalDistanceMeters,
-        _lastDistanceReference = lastDistanceReference;
+        _lastDistanceReference = lastDistanceReference,
+        _positionSource = positionSource ?? _geolocatorPositionSource;
 
   /// Getter for the user's current location.
   UserLocation get userLocation => _userLocation;
@@ -102,25 +131,14 @@ class UserLocationProvider with ChangeNotifier {
 
   /// Updates the user's location by fetching the current position.
   ///
-  /// This method fetches the user's current location, updates the
-  /// exploration percentages, and notifies listeners.
+  /// Uses the injected [_positionSource] to obtain a [Position].
+  /// In production this defaults to [_geolocatorPositionSource],
+  /// which checks permission then calls Geolocator.getCurrentPosition.
+  /// Tests inject a stub.
   Future<void> updateUserLocation() async {
     try {
-      // Check location permissions
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        permission = await Geolocator.requestPermission();
-        if (permission != LocationPermission.whileInUse &&
-            permission != LocationPermission.always) {
-          // Permissions are denied, handle appropriately
-          throw Exception('Location permissions are denied');
-        }
-      }
-
-      // Get the current position
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+      // Get the current position via the (possibly injected) source.
+      final Position position = await _positionSource();
 
       // Update the user's location
       _userLocation =
