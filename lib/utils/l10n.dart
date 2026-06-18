@@ -63,6 +63,8 @@ class L10n {
       'menu_districts': 'Districts',
       'menu_reset': 'Reset Progress',
       'reset_dialog_title': 'Reset progress?',
+      'reset_dialog_body':
+          'This will permanently clear your exploration history.',
       'reset_dialog_confirm': 'Reset',
       'reset_dialog_cancel': 'Cancel',
       'reset_dialog_copy': 'Copy',
@@ -110,6 +112,7 @@ class L10n {
       'menu_districts': '地區',
       'menu_reset': '重設進度',
       'reset_dialog_title': '確定要重設進度？',
+      'reset_dialog_body': '將會永久清除你所有探索記錄。',
       'reset_dialog_confirm': '重設',
       'reset_dialog_cancel': '取消',
       'reset_dialog_copy': '複製',
@@ -165,6 +168,7 @@ class L10n {
   String get menuDistricts => _lookup('menu_districts');
   String get menuReset => _lookup('menu_reset');
   String get resetDialogTitle => _lookup('reset_dialog_title');
+  String get resetDialogBody => _lookup('reset_dialog_body');
   String get resetDialogConfirm => _lookup('reset_dialog_confirm');
   String get resetDialogCancel => _lookup('reset_dialog_cancel');
   String get resetDialogCopy => _lookup('reset_dialog_copy');

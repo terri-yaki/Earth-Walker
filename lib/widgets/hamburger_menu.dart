@@ -100,7 +100,7 @@ class HamburgerMenu extends StatelessWidget {
       builder: (dialogContext) => AlertDialog(
         title: Text(l.resetDialogTitle),
         content: Text(
-          'This will permanently clear your exploration history.\n\n$summary',
+          '${l.resetDialogBody}\n\n$summary',
         ),
         actions: [
           TextButton(

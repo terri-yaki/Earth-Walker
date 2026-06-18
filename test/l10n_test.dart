@@ -91,6 +91,14 @@ void main() {
       }
     });
 
+    test('reset dialog body is localised', () {
+      final en = L10n(const Locale('en'));
+      final zh = L10n(const Locale('zh', 'HK'));
+      expect(en.resetDialogBody, contains('permanently'));
+      expect(en.resetDialogBody, contains('exploration'));
+      expect(zh.resetDialogBody, matches(RegExp(r'[\u4E00-\u9FFF]')));
+    });
+
     test('missing key falls back to English', () {
       // Construct an empty-locale L10n so the table lookup misses
       // for every key. The fallback to 'en' should kick in.
