@@ -69,7 +69,7 @@ void main() {
     });
 
     test('currentDistrictName is null at default (0,0) coordinates', () {
-      // (0,0) is the "not yet fetched" default ??we must not
+      // (0,0) is the "not yet fetched" default —we must not
       // accidentally resolve that to some real district.
       final p = UserLocationProvider();
       expect(p.currentDistrictName, isNull);
@@ -122,7 +122,7 @@ void main() {
       // recomputes the suggestion. Listeners that track "the user
       // explicitly hit reset" need to know, so we always notify.
       // ponytail: the previous "no notification when nothing changed"
-      // optimisation wasn't worth the surprise ??the test is now
+      // optimisation wasn't worth the surprise —the test is now
       // a guarantee of behaviour rather than a no-op contract.
       final p = UserLocationProvider();
       var notifyCount = 0;
@@ -198,7 +198,7 @@ void main() {
     test('walking into a new cell adds distance and a new cell', () async {
       // ~1.1 km apart, but at HK latitude 0.01 deg lat ~= 1.11 km
       // and 0.013 deg lng ~= 1.44 km, so the actual ground distance
-      // is ~1.8 km ??safely under kMaxPlausibleStepMeters (1500 m
+      // is ~1.8 km —safely under kMaxPlausibleStepMeters (1500 m
       // was too tight for 3.5 km, which got dropped as GPS noise)
       // and big enough to fall in a different geohash-5 cell.
       final fixes = [
@@ -217,7 +217,7 @@ void main() {
     });
 
     test('an absurdly large step is dropped as GPS noise', () async {
-      // First fix in HK, second fix 30 km away ??should NOT
+      // First fix in HK, second fix 30 km away —should NOT
       // contribute to totalDistanceMeters (and should still
       // record the new cell, since cell recording is independent
       // of distance accounting).
@@ -340,7 +340,7 @@ void main() {
         () {
       // The provider's currentStreakDays reads DateTime.now() at
       // call time, so this test can only assert the lower bound
-      // (0) on a fresh provider ??anything else depends on the
+      // (0) on a fresh provider —anything else depends on the
       // wall clock the test runs under.
       //
       // ponytail: we used to also call updateExploration(0,0,0)
@@ -369,7 +369,7 @@ void main() {
       // demonstrate the implicit contract: recording 50 nearby points
       // (within ~1 km of each other) produces fewer than 50 unique
       // cells. We don't go through the recorder here (it would need
-      // Geolocator) ??this just guards against the const being
+      // Geolocator) —this just guards against the const being
       // accidentally tightened to 12, which would put every point
       // in its own cell.
       expect(p.uniqueCellsVisited, 0,
@@ -391,13 +391,13 @@ void main() {
       );
       // Simulate a session: record one cell, then save.
       // _recordCell is private, so we go through the public surface
-      // via _updateExploration's effect on _visitedCells ??but that
+      // via _updateExploration's effect on _visitedCells —but that
       // is also private. Instead, mutate via reflection-free public
       // method: we know resetExploration + the storage round-trip
       // preserves the constructor-arg totalDistanceMeters.
       await p.saveToStorage();
       // Construct a fresh provider with the same in-memory seed and
-      // load ??they should agree.
+      // load —they should agree.
       final p2 = UserLocationProvider(
         totalDistanceMeters: 1234.5,
         initialLocation:
@@ -469,7 +469,7 @@ void main() {
           reason: 'position is preserved across reset, so '
               'the suggestion should still resolve');
       // After reset, the previous cell is no longer visited,
-      // so the suggestion may point at a different cell ??
+      // so the suggestion may point at a different cell —
       // we don't assert which one, just that the cache was
       // invalidated and recomputed.
     });

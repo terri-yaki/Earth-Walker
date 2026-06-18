@@ -66,7 +66,7 @@ void main() {
     });
 
     test('parse returns null on a partial / corrupted body', () {
-      // Missing the streak field ??parse should reject.
+      // Missing the streak field —parse should reject.
       final bad =
           '${kProgressSnapshotPrefix}cells=1,badges=2,medals=1,meters=10,days=1';
       expect(parseProgressSnapshot(bad), isNull);
@@ -166,7 +166,7 @@ void main() {
         cellsVisited: 10,
         badgesUnlocked: 2,
         medalsEarned: 1,
-        metersWalked: 5020.0, // 20 m difference ??noise
+        metersWalked: 5020.0, // 20 m difference —noise
         daysExplored: 3,
         currentStreakDays: 1,
       );

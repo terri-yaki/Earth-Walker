@@ -61,7 +61,7 @@ class L10n {
   /// Look up the [L10n] instance for [context], which must be inside
   /// a [MaterialApp] that has the [L10nDelegate] registered. Falls
   /// back to a stub English L10n if the lookup fails, so a missing
-  /// delegate (e.g. in a unit test) doesn't crash ??it just renders
+  /// delegate (e.g. in a unit test) doesn't crash —it just renders
   /// the raw key string.
   static L10n of(BuildContext context) {
     final l = Localizations.of<L10n>(context, L10n);
@@ -163,7 +163,7 @@ class L10nDelegate extends LocalizationsDelegate<L10n> {
 
   /// Try to load assets/l10n/<tag>.json. Returns an empty map on any
   /// failure (corrupt JSON, missing file, asset not bundled) so the
-  /// app still runs ??the user just sees the key string instead of
+  /// app still runs —the user just sees the key string instead of
   /// the localised copy.
   Future<Map<String, String>> _loadTag(String tag) async {
     try {

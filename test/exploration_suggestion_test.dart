@@ -131,7 +131,7 @@ void main() {
     test('cells outside all district boxes are returned with districtName=null',
         () {
       // A cell in the middle of the South China Sea (south
-      // of HK) ??well outside every bounding box.
+      // of HK) —well outside every bounding box.
       final ocean = GeohashCell(
         geohash: 'ocean',
         center: const LatLng(21.500, 114.000),

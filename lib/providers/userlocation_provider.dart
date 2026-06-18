@@ -84,7 +84,7 @@ class UserLocationProvider with ChangeNotifier {
 
   /// Monotonic counter bumped by [resetExploration]. An in-flight
   /// [updateUserLocation] captures the value at entry and bails out
-  /// at the post-await checkpoints if the counter has advanced ??
+  /// at the post-await checkpoints if the counter has advanced —
   /// so a reset that lands mid-update doesn't get clobbered by a
   /// late-arriving location fix. Closes AUDIT.md A2.
   int _mutationEpoch = 0;
@@ -137,7 +137,7 @@ class UserLocationProvider with ChangeNotifier {
   /// (e.g. they're at sea, or their location hasn't been fetched).
   String? get currentDistrictName {
     final coords = _userLocation.coordinates;
-    // Skip the (0,0) default ??that's "location not set yet", not
+    // Skip the (0,0) default —that's "location not set yet", not
     // a real reading from the South Atlantic.
     if (coords.latitude == 0.0 && coords.longitude == 0.0) return null;
     return districtFor(coords)?.name;
@@ -168,7 +168,7 @@ class UserLocationProvider with ChangeNotifier {
       // Accumulate walking distance since the previous fix. We skip
       // absurdly large jumps (single-update distances above
       // [kMaxPlausibleStepMeters]) to filter out GPS noise / cold-start
-      // swings. ponytail: this is a coarse filter ??a future
+      // swings. ponytail: this is a coarse filter —a future
       // implementation should use a Kalman filter or velocity-scaled
       // outlier rejection.
       _accumulateDistance(_userLocation.coordinates);
@@ -205,7 +205,7 @@ class UserLocationProvider with ChangeNotifier {
   }
 
   /// Geohash precision used for visited-cell tracking. Precision 5 is about
-  /// a 2.4 km ? 2.4 km cell at the equator ??a good size for "you walked
+  /// a 2.4 km ? 2.4 km cell at the equator —a good size for "you walked
   /// somewhere new" without inflating the count from GPS noise.
   static const int _geohashPrecision = 5;
 
@@ -414,7 +414,7 @@ class UserLocationProvider with ChangeNotifier {
   ///
   /// ponytail: the "1 cell = 1% world" scaling is intentionally generous so
   /// the prototype feels responsive. A real implementation would divide by
-  /// a more honest denominator (e.g. total cells covering land) ??easy
+  /// a more honest denominator (e.g. total cells covering land) —easy
   /// upgrade later, no architectural change required.
   void _updateExploration(LatLng location) {
     final cell =
@@ -424,7 +424,7 @@ class UserLocationProvider with ChangeNotifier {
       _explorationDays.add(dayKey(DateTime.now()));
       // Per-district bump: a cell inside a known HK district box
       // increments that district's count. Cells outside HK stay out
-      // of the map, which is correct ??we only have district boxes
+      // of the map, which is correct —we only have district boxes
       // for Hong Kong.
       // The visited set may have just changed; recompute the
       // suggestion so the HUD's "Next" chip points at the best

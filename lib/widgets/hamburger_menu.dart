@@ -185,7 +185,7 @@ class HamburgerMenu extends StatelessWidget {
               // where the dialog is a separate window).
               Navigator.of(dialogContext).pop();
               // share_plus: Rect is required on iPad (popover
-              // anchor). Pass a zero Rect on phones ??the OS
+              // anchor). Pass a zero Rect on phones —the OS
               // ignores it. ponytail: a future iPad-only
               // pass-through of the share button's RenderBox
               // would tighten the popover arrow to the actual
@@ -289,7 +289,7 @@ class HamburgerMenu extends StatelessWidget {
     final deltas = ProgressSnapshot.compare(
       other: theirs,
       yours: mine,
-      // Field labels are plain English ??the badges/medals
+      // Field labels are plain English —the badges/medals
       // themselves aren't localised, and the comparison strings
       // read most naturally as the same nouns the user sees on
       // the achievement / medal screens.

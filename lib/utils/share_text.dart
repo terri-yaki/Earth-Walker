@@ -18,7 +18,7 @@ const String kShareHashtag = '#UrbixHK';
 /// into the Compare dialog and the parser will still see the
 /// `URBIX:SNAP:1:` prefix.
 ///
-/// [bragLine] is whatever the share dialog chose ??the default
+/// [bragLine] is whatever the share dialog chose —the default
 /// "I've walked X km" line, a streak brag, or a badge brag.
 /// Templates are passed in (rather than looked up here) so this
 /// function stays pure and testable; the caller owns L10n.

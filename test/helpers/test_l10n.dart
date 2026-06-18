@@ -41,7 +41,7 @@ class TestL10nDelegate extends LocalizationsDelegate<L10n> {
   /// Read assets/l10n/<tag>.json from disk and return the parsed
   /// string map. Returns an empty map if the file is missing or
   /// malformed so a stray missing-file doesn't crash the whole
-  /// test suite ??it just renders raw keys.
+  /// test suite —it just renders raw keys.
   Map<String, String> _loadTagSync(String tag) {
     // Walk up from the test working directory until we find the
     // assets folder. `flutter test` sets the cwd to the project

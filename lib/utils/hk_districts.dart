@@ -1,7 +1,7 @@
 // lib/utils/hk_districts.dart
 //
 // Rough bounding-box detector for the 18 Hong Kong districts. The
-// boundaries are approximations ??good enough for a "which district
+// boundaries are approximations —good enough for a "which district
 // am I in right now?" HUD readout, not a legal boundary. The
 // districtFor() function is pure and unit-testable.
 //
@@ -39,7 +39,7 @@ class HkDistrict {
 /// (small, central) to least-specific (the huge 'Islands' entry
 /// last, so it only matches when nothing else did).
 const List<HkDistrict> _DISTRICTS = <HkDistrict>[
-  // Hong Kong Island ??the four districts are close-packed, so
+  // Hong Kong Island —the four districts are close-packed, so
   // narrower boxes first.
   HkDistrict(
       name: 'Central and Western',
@@ -156,7 +156,7 @@ const List<HkDistrict> _DISTRICTS = <HkDistrict>[
 
 /// Return the district the given [location] falls in, or null if
 /// the point is outside all 18 boxes. Order matters: see
-/// [_DISTRICTS] ??most-specific match wins.
+/// [_DISTRICTS] —most-specific match wins.
 HkDistrict? districtFor(LatLng location) {
   for (final d in _DISTRICTS) {
     if (d.contains(location)) return d;
@@ -166,7 +166,7 @@ HkDistrict? districtFor(LatLng location) {
 
 /// All 18 HK district names, in the canonical [districtFor] order
 /// (most-specific first). Useful for iterating the full list when
-/// rendering a breakdown screen ??avoids hard-coding the list in
+/// rendering a breakdown screen —avoids hard-coding the list in
 /// a second place.
 List<String> get allDistrictNames =>
     _DISTRICTS.map((d) => d.name).toList(growable: false);

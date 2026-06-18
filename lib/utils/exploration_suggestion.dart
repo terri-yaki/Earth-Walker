@@ -81,7 +81,7 @@ const double kHKMaxLng = 114.43;
 /// The static candidate grid: every geohash-5 cell covering HK,
 /// deduplicated by hash. ~300 cells, computed once at module
 /// load. The list is intentionally an unmodifiable view of a
-/// pre-computed list ??callers should never mutate it.
+/// pre-computed list —callers should never mutate it.
 final List<GeohashCell> kHKCellGrid = _computeHKCellGrid();
 
 List<GeohashCell> _computeHKCellGrid() {
@@ -111,7 +111,7 @@ List<GeohashCell> _computeHKCellGrid() {
 /// or null if every cell in [candidateCells] is in [visitedCells]
 /// (i.e. the user has explored everything we know about).
 ///
-/// Pure function ??no Provider / SharedPreferences coupling, so
+/// Pure function —no Provider / SharedPreferences coupling, so
 /// the unit test can drive it with hand-built cells without any
 /// platform mocking.
 ExplorationSuggestion? pickNextExploration({

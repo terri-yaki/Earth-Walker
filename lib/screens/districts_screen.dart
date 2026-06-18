@@ -2,10 +2,10 @@
 //
 // Per-district breakdown of visited-cell counts. All 18 HK
 // districts, sorted by visit count (descending). Districts with
-// zero visits show a muted "?? rather than a misleading 0, and
+// zero visits show a muted "— rather than a misleading 0, and
 // sit at the bottom of the list.
 //
-// ponytail: deliberately no "X% explored" per district ??we don't
+// ponytail: deliberately no "X% explored" per district —we don't
 // have an honest denominator (different districts have different
 // total cell counts at geohash-5), so a percentage would be a
 // lie. Absolute counts are honest.

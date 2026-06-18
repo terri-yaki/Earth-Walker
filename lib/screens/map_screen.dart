@@ -119,7 +119,7 @@ class _MapScreenState extends State<MapScreen> {
     if (!mounted) return;
     final location = Provider.of<UserLocationProvider>(context, listen: false);
     final newStreak = location.currentStreakDays;
-    // No increase ??nothing to do. (Streak decreasing or staying
+    // No increase —nothing to do. (Streak decreasing or staying
     // flat both fall through; only crossings upward trigger a
     // prompt.)
     if (newStreak <= _lastSeenStreak) {
@@ -178,7 +178,7 @@ class _MapScreenState extends State<MapScreen> {
 
   /// Recenter the map on the suggestion's target cell. We also
   /// disable auto-recentering so the map doesn't yank itself
-  /// back to the user's current location on the next GPS fix ??
+  /// back to the user's current location on the next GPS fix —
   /// the user explicitly asked to look at the target, so we
   /// respect that. The bottom-right RecenterButton restores
   /// follow-mode when they're done walking.
