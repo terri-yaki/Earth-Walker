@@ -139,4 +139,54 @@ void main() {
       expect(next.cellsToGo, greaterThanOrEqualTo(0));
     });
   });
+
+  // A regression in the bar-fraction math would make the next-
+  // milestone bar look wrong (full, empty, or jumping). Lock it
+  // down with an explicit test.
+  group('next-milestone bar progress', () {
+    double progressFor(AchievementProvider p, int worldValue) {
+      p.updateExploration(0, 0, worldValue);
+      final next = p.nextAchievement();
+      if (next == null) return 1.0;
+      int prev = 0;
+      for (final e in p.achievementThresholds.entries) {
+        if (e.value < next.threshold && p.isUnlocked(e.key)) {
+          prev = e.value;
+        }
+      }
+      final span = (next.threshold - prev).clamp(1, 100);
+      final filled = (worldValue - prev).clamp(0, span);
+      return filled / span;
+    }
+
+    test('bar is 0% at world=0 (no progress toward Walker yet)', () {
+      final p = AchievementProvider();
+      // Without a recorded fix, worldExplored is the constructor
+      // default (0). We assert against the explicit zero path so
+      // a future regression that re-derives progress from an
+      // uninitialised field is caught.
+      p.updateExploration(0, 0, 0);
+      expect(progressFor(p, 0), 0.0);
+    });
+
+    test('bar is 100% right at the next threshold', () {
+      final p = AchievementProvider();
+      // worldValue == nextThreshold (10, the first). The bar
+      // should be full but the next milestone should be Pioneer
+      // (the following threshold).
+      p.updateExploration(0, 0, 10);
+      final next = p.nextAchievement()!;
+      expect(next.threshold, 20);
+      expect(progressFor(p, 10), 1.0);
+    });
+
+    test('bar is 50% at the midpoint between the last unlock and the next',
+        () {
+      final p = AchievementProvider();
+      // Walker is unlocked at 10. Next is Pioneer at 20. Midpoint
+      // is world=15; the bar should sit at 0.5.
+      p.updateExploration(0, 0, 10);
+      expect(progressFor(p, 15), 0.5);
+    });
+  });
 }

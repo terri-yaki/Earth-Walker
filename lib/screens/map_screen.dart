@@ -377,25 +377,63 @@ class _MapScreenState extends State<MapScreen> {
                               ],
                             ],
                           ),
-                          // Next-milestone chip: shown only when
-                          // there is at least one un-unlocked
-                          // achievement. Gives the user a goal:
-                          // "Next: Pioneer at 20% (5 to go)".
+                          // Next-milestone progress: shown only
+                          // when there is at least one un-unlocked
+                          // achievement. Gives the user a goal with
+                          // a visible bar showing how close they are
+                          // (filled to the tier color so harder
+                          // milestones read differently at a glance).
                           Builder(builder: (context) {
                             final l = L10n.of(context);
                             final next = context
                                 .watch<AchievementProvider>()
                                 .nextAchievement();
                             if (next == null) return const SizedBox.shrink();
+                            // Anchor the bar at the previously-unlocked
+                            // threshold (or 0) so the visible fill
+                            // matches "how much of the way to next".
+                            final previousThreshold =
+                                _previousUnlockedThreshold(
+                                    context.read<AchievementProvider>(),
+                                    next.threshold);
+                            final span =
+                                (next.threshold - previousThreshold)
+                                    .clamp(1, 100);
+                            final filledSoFar =
+                                (context.read<UserLocationProvider>().worldPercentage -
+                                        previousThreshold)
+                                    .clamp(0, span);
+                            final progress = filledSoFar / span;
+                            final tierColor = _tierColorForThreshold(
+                                tierForThreshold(next.threshold));
                             return Padding(
-                              padding: const EdgeInsets.only(top: 6),
-                              child: Text(
-                                '${l.hudNextMilestone}: ${next.title} @ ${next.threshold}% · ${next.cellsToGo} ${l.hudCellsToGo}',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.85),
-                                  fontSize: 12,
-                                  fontStyle: FontStyle.italic,
-                                ),
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${l.hudNextMilestone}: ${next.title} @ ${next.threshold}% · ${next.cellsToGo} ${l.hudCellsToGo}',
+                                    style: TextStyle(
+                                      color:
+                                          Colors.white.withOpacity(0.85),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  ClipRRect(
+                                    borderRadius:
+                                        BorderRadius.circular(4),
+                                    child: LinearProgressIndicator(
+                                      value: progress,
+                                      minHeight: 6,
+                                      backgroundColor: Colors.white24,
+                                      valueColor:
+                                          AlwaysStoppedAnimation<Color>(
+                                              tierColor),
+                                    ),
+                                  ),
+                                ],
                               ),
                             );
                           }),
@@ -491,4 +529,33 @@ Widget _hudStat({required IconData icon, required String label}) {
       ),
     ],
   );
+}
+
+/// The highest threshold the user has already passed, or 0 if none.
+/// Used to anchor the next-milestone progress bar at the right
+/// start point (so the fill really represents progress toward the
+/// next goal, not progress since world=0).
+int _previousUnlockedThreshold(
+    AchievementProvider provider, int nextThreshold) {
+  int prev = 0;
+  for (final e in provider.achievementThresholds.entries) {
+    if (e.value < nextThreshold && provider.isUnlocked(e.key)) {
+      prev = e.value;
+    }
+  }
+  return prev;
+}
+
+/// Map a world-% threshold to the muted tier color used by the
+/// achievement/medal screens. Kept local to the map screen so the
+/// bar reads as part of the HUD's visual language.
+Color _tierColorForThreshold(AchievementTier tier) {
+  switch (tier) {
+    case AchievementTier.gold:
+      return const Color(0xFFD4A017);
+    case AchievementTier.silver:
+      return const Color(0xFF8E96A1);
+    case AchievementTier.bronze:
+      return const Color(0xFFB87333);
+  }
 }
