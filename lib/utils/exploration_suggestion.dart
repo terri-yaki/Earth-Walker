@@ -62,13 +62,22 @@ class ExplorationSuggestion {
   });
 }
 
-/// Approximate step size of a geohash-5 cell at Hong Kong's
-/// latitude (~22蝪?N). Used to walk a lat/lng grid when building
-/// the candidate set. ponytail: a real geohash decoder would
-/// give us the exact cell bounds; the 0.025蝪?step is close
-/// enough to the real cell size that the grid covers HK without
-/// missing cells or creating duplicates.
-const double kGeohash5StepDegrees = 0.025;
+/// Step size used to walk the lat/lng grid when building the
+/// candidate set. Must be <= the SHORT dimension of a geohash-5
+/// cell (the lng width of 0.011°) or we will SKIP cells between
+/// sample points and the suggestion grid will not cover HK fully.
+///
+/// At 0.011° the bbox walk produces ~3000 anchor points, deduped
+/// by hash to ~165 unique cells (the actual count of geohash-5
+/// cells covering HK). At 0.025° (the previous value) we only
+/// captured 72 of those 165 cells — a real coverage gap that
+/// meant the suggestion engine had a 56% chance of failing to
+/// suggest any cell in HK's eastern or western edges.
+///
+/// ponytail: a real geohash decoder would give us the exact cell
+/// bounds without this scan; the inline encoder can't, so we
+/// over-sample and let the hash dedup handle the duplicates.
+const double kGeohash5StepDegrees = 0.011;
 
 /// HK bounding box (rough). Covers the 18 districts with a small
 /// margin so the suggestion can point at cells just outside the
@@ -79,18 +88,22 @@ const double kHKMinLng = 113.83;
 const double kHKMaxLng = 114.43;
 
 /// The static candidate grid: every geohash-5 cell covering HK,
-/// deduplicated by hash. ~300 cells, computed once at module
-/// load. The list is intentionally an unmodifiable view of a
-/// pre-computed list —callers should never mutate it.
+/// deduplicated by hash. Empirically ~165 cells at the time of
+/// writing; computed once at module load. The list is an
+/// unmodifiable view of a pre-computed list —callers should
+/// never mutate it.
 final List<GeohashCell> kHKCellGrid = _computeHKCellGrid();
 
 List<GeohashCell> _computeHKCellGrid() {
   final byHash = <String, GeohashCell>{};
-  // Walk the bbox in geohash-5-sized steps. The first lat/lng
-  // we encounter for a given hash becomes the cell's "center"
-  // for suggestion purposes. The offset from true-center is
-  // at most half a step (~1.2 km), which is invisible on a
-  // city-zoom map.
+  // Walk the bbox in geohash-5-cell-sized steps. The first
+  // lat/lng we encounter for a given hash becomes the cell's
+  // "center" for suggestion purposes. The offset from
+  // true-center is at most half a step (~600 m), which is
+  // invisible on a city-zoom map.
+  //
+  // The step MUST be no larger than 0.011° (= the lng width of
+  // a geohash-5 cell). See kGeohash5StepDegrees above for why.
   for (var lat = kHKMinLat; lat <= kHKMaxLat; lat += kGeohash5StepDegrees) {
     for (var lng = kHKMinLng; lng <= kHKMaxLng; lng += kGeohash5StepDegrees) {
       final hash = encodeGeohash(lat, lng, 5);

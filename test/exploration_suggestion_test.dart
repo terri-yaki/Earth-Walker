@@ -25,9 +25,38 @@ void main() {
     test('covers a sensible number of cells (not 5, not 5000)', () {
       // Lower bound: must cover the 18 districts, so > 50 is
       // safe. Upper bound: bbox area / cell size
-      // is well under 1000 for the HK box at 0.025蝪?step.
+      // is well under 1000 for the HK box at 0.011° step.
       expect(kHKCellGrid.length, greaterThan(50));
       expect(kHKCellGrid.length, lessThan(1000));
+    });
+
+    test(
+        'covers every geohash-5 cell in the HK bbox (regression for the '
+        '0.025° step bug)', () {
+      // Build the ground-truth set: walk the bbox at 0.005° step
+      // (well under the geohash-5 lng width of 0.011° so every
+      // cell is sampled at least once) and collect the distinct
+      // hashes. The grid MUST contain all of them.
+      //
+      // This test would have FAILED at the old 0.025° step
+      // (grid covered only 72 of 165 cells). The fix is in
+      // lib/utils/exploration_suggestion.dart — see
+      // kGeohash5StepDegrees for why.
+      final groundTruth = <String>{};
+      for (var lat = 22.18; lat <= 22.56; lat += 0.005) {
+        for (var lng = 113.83; lng <= 114.43; lng += 0.005) {
+          groundTruth.add(encodeGeohash(lat, lng, 5));
+        }
+      }
+      final gridHashes = kHKCellGrid.map((c) => c.geohash).toSet();
+      final missed = groundTruth.difference(gridHashes);
+      expect(missed, isEmpty,
+          reason: 'grid missed ${missed.length} of ${groundTruth.length} '
+              'cells; sample missed: ${missed.take(5).toList()}');
+      // Sanity: there should be a non-trivial number of cells,
+      // confirming both that the bbox is real and that the
+      // grid actually walks it.
+      expect(groundTruth.length, greaterThan(100));
     });
 
     test('candidate cells are real geohash-5 cells in HK', () {
