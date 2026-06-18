@@ -489,6 +489,39 @@ class _MapScreenState extends State<MapScreen> {
                               );
                             }),
                           ],
+                          // Streak chip: shown only when the user
+                          // has a current streak of 2+ days. A
+                          // single-day streak is just 'today', which
+                          // is already implicit in the data; we
+                          // reserve the chip for the more
+                          // interesting case of an actual streak.
+                          if (userLocationProvider.currentStreakDays >=
+                              2) ...[
+                            Builder(builder: (context) {
+                              final l = L10n.of(context);
+                              final s =
+                                  userLocationProvider.currentStreakDays;
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.local_fire_department,
+                                        color: Colors.orange, size: 14),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${l.hudStreak}: $s ${s == 1 ? l.hudDayStreak : l.hudDaysStreak}',
+                                      style: TextStyle(
+                                        color: Colors.white
+                                            .withOpacity(0.85),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
+                          ],
                         ],
                       ],
                     ),

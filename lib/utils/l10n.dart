@@ -99,6 +99,9 @@ class L10n {
       'hud_next_milestone': 'Next',
       'hud_cells_to_go': 'to go',
       'hud_today': 'Today',
+      'hud_streak': 'Streak',
+      'hud_day_streak': 'day streak',
+      'hud_days_streak': 'day streak',
     },
     'zh-HK': {
       'app_title': 'Urbix 香港',
@@ -141,6 +144,9 @@ class L10n {
       'hud_next_milestone': '下一個',
       'hud_cells_to_go': '仲差',
       'hud_today': '今日',
+      'hud_streak': '連續',
+      'hud_day_streak': '日',
+      'hud_days_streak': '日',
     },
   };
 
@@ -192,6 +198,9 @@ class L10n {
   String get hudNextMilestone => _lookup('hud_next_milestone');
   String get hudCellsToGo => _lookup('hud_cells_to_go');
   String get hudToday => _lookup('hud_today');
+  String get hudStreak => _lookup('hud_streak');
+  String get hudDayStreak => _lookup('hud_day_streak');
+  String get hudDaysStreak => _lookup('hud_days_streak');
 
   /// Lookup for any key not covered by a typed getter. Useful in
   /// tests; production code should prefer the typed getters.

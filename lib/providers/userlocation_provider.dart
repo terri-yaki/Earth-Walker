@@ -265,6 +265,28 @@ class UserLocationProvider with ChangeNotifier {
   /// Number of distinct calendar days the user has explored on.
   int get daysExplored => _explorationDays.length;
 
+  /// Number of consecutive days, ending today (or yesterday if the
+  /// user hasn't moved yet today), on which the user has recorded at
+  /// least one new cell. 0 if the most recent exploration day is
+  /// older than yesterday. Used by the HUD's streak chip.
+  int get currentStreakDays {
+    DateTime cursor = DateTime.now();
+    int streak = 0;
+    // Allow up to one day of grace: if the user walked yesterday but
+    // not yet today, the streak is still alive.
+    if (!_explorationDays.contains(dayKey(cursor))) {
+      cursor = cursor.subtract(const Duration(days: 1));
+      if (!_explorationDays.contains(dayKey(cursor))) {
+        return 0;
+      }
+    }
+    while (_explorationDays.contains(dayKey(cursor))) {
+      streak++;
+      cursor = cursor.subtract(const Duration(days: 1));
+    }
+    return streak;
+  }
+
   /// Per-district unique-cell counts. Returns an unmodifiable view.
   Map<String, int> get visitsByDistrict =>
       Map.unmodifiable(_visitsByDistrict);
