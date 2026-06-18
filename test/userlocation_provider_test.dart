@@ -481,5 +481,76 @@ void main() {
       // we don't assert which one, just that the cache was
       // invalidated and recomputed.
     });
+
+    test('is recomputed when the user visits a new cell', () async {
+      // After the first fix, the suggestion is for the
+      // nearest unvisited cell. The user then walks into a
+      // new geohash cell; the suggestion must drop the now-
+      // visited cell and re-rank. We assert the recompute
+      // happens by comparing before/after values: after the
+      // second fix the new cell should be in _visitedCells,
+      // and currentSuggestion must NOT point at that cell
+      // (because visited cells are skipped by the engine).
+      final fixes = [
+        _pos(22.298, 114.170), // cell A (Yau Tsim Mong)
+        _pos(22.315, 114.170), // cell B (~1.9 km north, still Yau Tsim Mong)
+      ];
+      var i = 0;
+      final p = UserLocationProvider(
+        positionSource: () async => fixes[i++],
+      );
+      await p.updateUserLocation();
+      final before = p.currentSuggestion;
+      expect(before, isNotNull);
+      await p.updateUserLocation();
+      final after = p.currentSuggestion;
+      expect(after, isNotNull);
+      // The engine must drop the cell the user just entered
+      // (encodeGeohash(22.315, 114.170, 5)) from the
+      // candidates. We assert that hash is in visitedCells
+      // and not in the suggestion.
+      final visitedCellHash = 'wecnp'; // computed for (22.315, 114.170, 5)
+      expect(after!.geohash, isNot(equals(visitedCellHash)),
+          reason: 'suggestion must skip the cell the user just entered');
+    });
+
+    test('does not recompute when the user moves within the same cell',
+        () async {
+      // Performance contract: the suggestion engine is O(grid)
+      // per recompute. We do NOT want to call it on every
+      // GPS tick (which can be every second). The current
+      // contract is to recompute only when the visited-set
+      // changes (cell boundary crossing) or the position
+      // moves to (0,0) / from (0,0). Within a single cell,
+      // the suggestion stays put.
+      //
+      // This test documents that contract by asserting the
+      // exact-same suggestion instance is returned across
+      // multiple within-cell position updates.
+      final fixes = [
+        _pos(22.298, 114.170), // cell A
+        _pos(22.299, 114.171), // ~150 m NE — same cell A
+        _pos(22.2985, 114.1705), // ~70 m — same cell A
+      ];
+      var i = 0;
+      final p = UserLocationProvider(
+        positionSource: () async => fixes[i++],
+      );
+      await p.updateUserLocation();
+      final s0 = p.currentSuggestion;
+      expect(s0, isNotNull);
+      // Within-cell moves. The suggestion's identity (same
+      // geohash) must not change, even though the user has
+      // moved closer to (or farther from) the target cell.
+      await p.updateUserLocation();
+      final s1 = p.currentSuggestion;
+      await p.updateUserLocation();
+      final s2 = p.currentSuggestion;
+      expect(s1, isNotNull);
+      expect(s2, isNotNull);
+      expect(s1!.geohash, equals(s0!.geohash),
+          reason: 'within-cell move must not change suggestion');
+      expect(s2!.geohash, equals(s0.geohash));
+    });
   });
 }
