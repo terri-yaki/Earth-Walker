@@ -12,7 +12,7 @@ class MedalProvider with ChangeNotifier {
     Medal(id: 4, name: 'Explorer Medal', condition: 40),
     Medal(id: 5, name: 'Coloniser Medal', condition: 50),
     Medal(id: 6, name: 'Dominator Medal', condition: 80),
-    Medal(id: 7, name: 'Are you sure you?™re not cheating?', condition: 99),
+    Medal(id: 7, name: 'Are you sure you\u2019re not cheating?', condition: 99),
   ];
 
   // Holds the IDs of medals already awarded
@@ -22,8 +22,8 @@ class MedalProvider with ChangeNotifier {
   List<Medal> get medals => List.unmodifiable(_medals);
   List<int> get awardedMedals => List.unmodifiable(_awardedMedals);
 
-  /// Check if the user?™s progress meets the condition for awarding a medal.
-  /// For example, if `progress` is the user?™s overall world exploration percentage,
+  /// Check if the user?'s progress meets the condition for awarding a medal.
+  /// For example, if `progress` is the user?'s overall world exploration percentage,
   /// this method checks which medals are unlocked.
   void checkAndAwardMedals(int progress) {
     for (final medal in _medals) {
@@ -60,4 +60,3 @@ class Medal {
     required this.condition,
   });
 }
-

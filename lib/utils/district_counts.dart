@@ -25,4 +25,3 @@ Map<String, int> districtCountMapFromJson(String? json) {
     return <String, int>{};
   }
 }
-

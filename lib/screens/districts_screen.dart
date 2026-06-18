@@ -75,7 +75,9 @@ class DistrictsScreen extends StatelessWidget {
         ),
       ),
       trailing: Text(
-        visited ? '$count ${count == 1 ? l.cellSingular : l.cellPlural}' : '??,
+        visited
+            ? '$count ${count == 1 ? l.cellSingular : l.cellPlural}'
+            : '0 ${l.cellPlural}',
         style: TextStyle(
           color: visited ? Colors.black : Colors.grey,
           fontWeight: visited ? FontWeight.w600 : FontWeight.normal,
@@ -84,4 +86,3 @@ class DistrictsScreen extends StatelessWidget {
     );
   }
 }
-

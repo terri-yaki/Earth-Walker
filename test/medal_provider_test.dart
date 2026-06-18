@@ -35,4 +35,3 @@ void main() {
     expect(notifyCount, 0);
   });
 }
-

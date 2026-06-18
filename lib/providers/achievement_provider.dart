@@ -47,7 +47,7 @@ class AchievementProvider with ChangeNotifier {
     'Explorer': 40,
     'Coloniser': 50,
     'Dominator': 80,
-    'Are you sure you?™re not cheating?': 99, // 99%+
+    'Are you sure you\u2019re not cheating?': 99, // 99%+
   };
 
   // Getters
@@ -93,7 +93,7 @@ class AchievementProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Update the user?™s exploration progress.
+  /// Update the user?'s exploration progress.
   /// In a real scenario, these would be derived from GPS / location history.
   void updateExploration(int countryValue, int continentValue, int worldValue) {
     _countryExplored = countryValue.clamp(0, 100);
@@ -105,9 +105,9 @@ class AchievementProvider with ChangeNotifier {
   }
 
   /// Check if any new achievements are unlocked
-  /// based on the user?™s updated exploration progress.
+  /// based on the user?'s updated exploration progress.
   void _checkForNewAchievements() {
-    // For demonstration, let?™s track just worldExplored
+    // For demonstration, let?'s track just worldExplored
     final currentProgress = _worldExplored;
     _achievementThresholds.forEach((title, threshold) {
       if (currentProgress >= threshold &&
@@ -117,4 +117,3 @@ class AchievementProvider with ChangeNotifier {
     });
   }
 }
-

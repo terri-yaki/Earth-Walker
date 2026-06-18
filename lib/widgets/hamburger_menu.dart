@@ -409,4 +409,3 @@ class HamburgerMenu extends StatelessWidget {
     );
   }
 }
-

@@ -156,4 +156,3 @@ ExplorationSuggestion? pickNextExploration({
         bestDistrict != null && !visitedDistricts.contains(bestDistrict),
   );
 }
-

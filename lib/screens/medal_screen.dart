@@ -101,4 +101,3 @@ class MedalScreen extends StatelessWidget {
     }
   }
 }
-

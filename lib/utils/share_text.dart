@@ -42,4 +42,3 @@ String formatShareText({
     ..write(encodeProgressSnapshot(snapshot));
   return buf.toString();
 }
-

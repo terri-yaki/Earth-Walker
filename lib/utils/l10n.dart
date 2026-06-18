@@ -179,4 +179,3 @@ class L10nDelegate extends LocalizationsDelegate<L10n> {
   @override
   bool shouldReload(L10nDelegate old) => false;
 }
-

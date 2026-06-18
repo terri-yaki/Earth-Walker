@@ -817,4 +817,3 @@ Color _tierColorForThreshold(AchievementTier tier) {
       return const Color(0xFFB87333);
   }
 }
-

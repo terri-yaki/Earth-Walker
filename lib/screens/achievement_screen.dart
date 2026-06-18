@@ -135,4 +135,3 @@ class AchievementScreen extends StatelessWidget {
     }
   }
 }
-

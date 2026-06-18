@@ -55,4 +55,3 @@ class AppTextStyles {
 
   // Add more styles as needed
 }
-
