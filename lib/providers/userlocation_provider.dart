@@ -15,6 +15,15 @@ import '../utils/hk_districts.dart';
 import '../utils/lat_lng_list.dart';
 import '../utils/visited_cells_store.dart';
 
+/// Typed exception thrown by [_geolocatorPositionSource] when the
+/// user has not granted location permission. Distinguished from
+/// a generic [Exception] so the onboarding screen can map it to
+/// a localised user-facing message instead of leaking the
+/// hardcoded English string into the zh-HK UI.
+class LocationPermissionDeniedException implements Exception {
+  const LocationPermissionDeniedException();
+}
+
 /// Default [UserLocationProvider] position source: the Geolocator
 /// permission check + getCurrentPosition flow. Pulled out as a
 /// top-level function so the production behaviour is unchanged
@@ -28,7 +37,7 @@ Future<Position> _geolocatorPositionSource() async {
     permission = await Geolocator.requestPermission();
     if (permission != LocationPermission.whileInUse &&
         permission != LocationPermission.always) {
-      throw Exception('Location permissions are denied');
+      throw const LocationPermissionDeniedException();
     }
   }
   return Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);

@@ -383,6 +383,42 @@ void main() {
       expect(p.totalDistanceMeters, 0.0);
     });
 
+    test(
+        'LocationPermissionDeniedException is a distinct type so callers can '
+        'branch on it (regression for the hardcoded-English exception '
+        'message leaking into the zh-HK UI)', () async {
+      // The onboarding screen maps this typed exception to the
+      // localised permission-denied string instead of the
+      // generic '${onboardingLocErrorPrefix} $e' formatter (which
+      // would otherwise dump 'Location permissions are denied'
+      // into a half-English / half-Chinese UI).
+      final p = UserLocationProvider(
+        positionSource: () async =>
+            throw const LocationPermissionDeniedException(),
+      );
+      expect(
+        () => p.updateUserLocation(),
+        throwsA(isA<LocationPermissionDeniedException>()),
+      );
+      // Type identity is preserved: the exception is NOT a
+      // generic Exception —it must be the typed one.
+      try {
+        await p.updateUserLocation();
+      } catch (e) {
+        // Type identity: it's the typed exception, not a
+        // ad-hoc Exception with a hardcoded English string.
+        expect(e, isA<LocationPermissionDeniedException>());
+        // Note: LocationPermissionDeniedException implements
+        // Exception (so try/catch still catches it as Exception
+        // for backward compatibility), but its default toString
+        // is the empty class name, not the old hardcoded
+        // 'Location permissions are denied' message.
+        expect(e.toString(), isNot(contains('Location permissions')),
+            reason: 'the typed exception should not embed the old '
+                'hardcoded English message in its toString output');
+      }
+    });
+
     test('a reset that lands mid-update clobbers neither side', () async {
       // Simulate the race: the position source takes long enough that
       // a reset fires while the update is awaiting. The update should

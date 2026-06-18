@@ -11,6 +11,8 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../providers/userlocation_provider.dart'
+    show LocationPermissionDeniedException;
 import '../utils/l10n.dart';
 import 'map_screen.dart';
 
@@ -93,7 +95,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     } catch (e) {
       setState(() {
         _busy = false;
-        _errorMessage = '${l.onboardingLocErrorPrefix} $e';
+        // Map the typed permission-denied exception to the
+        // localised "permission denied" copy. Everything else
+        // falls through to the generic "could not request
+        // location" prefix, which is itself localised.
+        _errorMessage = e is LocationPermissionDeniedException
+            ? l.onboardingPermDenied
+            : '${l.onboardingLocErrorPrefix} $e';
       });
     }
   }
