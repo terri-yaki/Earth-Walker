@@ -377,6 +377,28 @@ class _MapScreenState extends State<MapScreen> {
                               ],
                             ],
                           ),
+                          // Next-milestone chip: shown only when
+                          // there is at least one un-unlocked
+                          // achievement. Gives the user a goal:
+                          // "Next: Pioneer at 20% (5 to go)".
+                          Builder(builder: (context) {
+                            final l = L10n.of(context);
+                            final next = context
+                                .watch<AchievementProvider>()
+                                .nextAchievement();
+                            if (next == null) return const SizedBox.shrink();
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Text(
+                                '${l.hudNextMilestone}: ${next.title} @ ${next.threshold}% · ${next.cellsToGo} ${l.hudCellsToGo}',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.85),
+                                  fontSize: 12,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            );
+                          }),
                         ],
                       ],
                     ),

@@ -96,6 +96,8 @@ class L10n {
       'cell_plural': 'cells',
       'districts_explored': 'districts explored',
       'badge_unlock_header': 'Badge unlocked!',
+      'hud_next_milestone': 'Next',
+      'hud_cells_to_go': 'to go',
     },
     'zh-HK': {
       'app_title': 'Urbix 香港',
@@ -135,6 +137,8 @@ class L10n {
       'cell_plural': '格',
       'districts_explored': '個地區已探索',
       'badge_unlock_header': '勳章解鎖！',
+      'hud_next_milestone': '下一個',
+      'hud_cells_to_go': '仲差',
     },
   };
 
@@ -183,6 +187,8 @@ class L10n {
   String get cellPlural => _lookup('cell_plural');
   String get districtsExplored => _lookup('districts_explored');
   String get badgeUnlockHeader => _lookup('badge_unlock_header');
+  String get hudNextMilestone => _lookup('hud_next_milestone');
+  String get hudCellsToGo => _lookup('hud_cells_to_go');
 
   /// Lookup for any key not covered by a typed getter. Useful in
   /// tests; production code should prefer the typed getters.

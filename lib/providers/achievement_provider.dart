@@ -64,6 +64,25 @@ class AchievementProvider with ChangeNotifier {
   /// True if the given title is already in the unlocked list.
   bool isUnlocked(String title) => _unlockedAchievements.contains(title);
 
+  /// The next achievement the user has not yet unlocked, sorted by
+  /// threshold ascending (the closest milestone). Returns null only
+  /// if every threshold has been met (i.e. worldExplored >= the
+  /// largest threshold). Used by the HUD's 'next milestone' chip.
+  ({String title, int threshold, int cellsToGo})? nextAchievement() {
+    final entries = _achievementThresholds.entries.toList()
+      ..sort((a, b) => a.value.compareTo(b.value));
+    for (final e in entries) {
+      if (!_unlockedAchievements.contains(e.key)) {
+        return (
+          title: e.key,
+          threshold: e.value,
+          cellsToGo: (e.value - _worldExplored).clamp(0, 100),
+        );
+      }
+    }
+    return null;
+  }
+
   /// Clear all unlocked achievements and notify listeners. Used by the
   /// drawer's Reset Progress action. The thresholds map is left intact;
   /// the user can re-earn the same badges by re-exploring.

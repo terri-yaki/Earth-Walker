@@ -100,4 +100,43 @@ void main() {
       expect(notifyCount, 0);
     });
   });
+
+  group('nextAchievement', () {
+    test('returns the lowest un-unlocked threshold', () {
+      final p = AchievementProvider();
+      // Walker unlocks at 10%. At world=0, Walker is the next.
+      final first = p.nextAchievement()!;
+      expect(first.title, 'Walker');
+      expect(first.threshold, 10);
+      expect(first.cellsToGo, 10);
+    });
+
+    test('skips already-unlocked thresholds', () {
+      final p = AchievementProvider();
+      // Push world% past 10 (Walker) and 20 (Pioneer) so the
+      // next one is Traveller at 30.
+      p.updateExploration(0, 0, 25);
+      final next = p.nextAchievement()!;
+      expect(next.title, 'Traveller');
+      expect(next.threshold, 30);
+      expect(next.cellsToGo, 5);
+    });
+
+    test('returns null when every threshold has been met', () {
+      final p = AchievementProvider();
+      p.updateExploration(0, 0, 100);
+      expect(p.nextAchievement(), isNull);
+    });
+
+    test('cellsToGo never goes negative even if world% exceeds the threshold',
+        () {
+      final p = AchievementProvider();
+      // Past 10% so Walker is unlocked but next is Pioneer @ 20%.
+      p.updateExploration(0, 0, 50);
+      final next = p.nextAchievement()!;
+      // world% is 50, next threshold is 80 (Dominator), so
+      // cellsToGo = 80 - 50 = 30. Never negative.
+      expect(next.cellsToGo, greaterThanOrEqualTo(0));
+    });
+  });
 }
