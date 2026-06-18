@@ -503,6 +503,13 @@ void main() {
       // cell recompute path; it would have passed even if
       // _recomputeSuggestion were never called on cell
       // change.
+      //
+      // Stronger assertion: the suggestion must CHANGE,
+      // not just exclude the new cell. Before the second
+      // fix the user is at wkfft — closest unvisited is
+      // wkffx (~0.5 km east). After the second fix the user
+      // is at wkfg8 — closest unvisited is wkffx again,
+      // but only after the recompute picks it fresh.
       final fixes = [
         _pos(22.270, 114.140), // cell A: wkfft (Central and Western)
         _pos(22.270,
@@ -524,6 +531,10 @@ void main() {
       // suggestion.
       expect(after!.geohash, isNot(equals('wkfg8')),
           reason: 'suggestion must skip the cell the user just entered');
+      // Sanity: wkfft should also not be suggested (it's in
+      // visitedCells from the first fix).
+      expect(after.geohash, isNot(equals('wkfft')),
+          reason: 'suggestion must also skip the first fix cell');
     });
 
     test('does not recompute when the user moves within the same cell',
