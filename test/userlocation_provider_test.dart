@@ -507,6 +507,26 @@ void main() {
       expect(p.currentSuggestion!.target, isNotNull);
     });
 
+    test(
+        'resetExploration before any position update is a no-op on the '
+        'suggestion (the (0,0) guard still applies)', () {
+      // A defensive call: the drawer Reset button is reachable
+      // even when the user has never granted location permission,
+      // so resetExploration can fire before the first fix. The
+      // suggestion must stay null — _recomputeSuggestion hits the
+      // (0,0) guard and returns null —and the call must not
+      // throw (it walks over an empty visited-cells set without
+      // touching the suggestion).
+      final p = UserLocationProvider();
+      expect(p.currentSuggestion, isNull);
+      p.resetExploration(); // must not throw
+      expect(p.currentSuggestion, isNull,
+          reason: '(0,0) guard still applies after a pre-first-fix reset');
+      // Other state: still all zeroed / empty.
+      expect(p.uniqueCellsVisited, 0);
+      expect(p.totalDistanceMeters, 0.0);
+    });
+
     test('is recomputed after resetExploration (position is preserved)',
         () async {
       // After reset, the visited set is empty but the
