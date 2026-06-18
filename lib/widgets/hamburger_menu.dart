@@ -67,12 +67,89 @@ class HamburgerMenu extends StatelessWidget {
           ),
           const Divider(),
           ListTile(
+            leading: const Icon(Icons.ios_share),
+            title: Text(l.menuShare),
+            onTap: () => _showShareDialog(context),
+          ),
+          ListTile(
             leading: const Icon(Icons.restart_alt, color: Colors.red),
             title: Text(
               l.menuReset,
               style: const TextStyle(color: Colors.red),
             ),
             onTap: () => _confirmReset(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show a dialog with a copy-paste-able snapshot of the user's
+  /// current progress. Another Urbix HK user can paste it into the
+  /// "Compare" entry (FEAT-4 in ISSUES.md) to see a side-by-side
+  /// comparison. Falls back to the plain text summary if the
+  /// snapshot fails to build (it never should, but defensive).
+  Future<void> _showShareDialog(BuildContext context) async {
+    final l = L10n.of(context);
+    final location = context.read<UserLocationProvider>();
+    final achievements = context.read<AchievementProvider>();
+    final medals = context.read<MedalProvider>();
+
+    final snapshot = ProgressSnapshot.fromValues(
+      cellsVisited: location.uniqueCellsVisited,
+      badgesUnlocked: achievements.unlockedAchievements.length,
+      medalsEarned: medals.awardedMedals.length,
+      metersWalked: location.totalDistanceMeters,
+      daysExplored: location.daysExplored,
+      currentStreakDays: location.currentStreakDays,
+    );
+    final snapshotText = encodeProgressSnapshot(snapshot);
+    final summary = formatProgressSummary(
+      cellsVisited: snapshot.cellsVisited,
+      badgesUnlocked: snapshot.badgesUnlocked,
+      medalsEarned: snapshot.medalsEarned,
+      metersWalked: snapshot.metersWalked,
+    );
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l.shareDialogTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              summary,
+              style: AppTextStyles.bodyText1,
+            ),
+            const SizedBox(height: 12),
+            SelectableText(
+              snapshotText,
+              style: const TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 11,
+                color: Colors.black54,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l.resetDialogCancel),
+          ),
+          TextButton(
+            onPressed: () {
+              // Copy the SNAPSHOT (not the summary) so the
+              // receiver can parse it and compare.
+              Clipboard.setData(ClipboardData(text: snapshotText));
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                SnackBar(content: Text(l.shareDialogCopied)),
+              );
+              Navigator.of(dialogContext).pop();
+            },
+            child: Text(l.shareDialogCopy),
           ),
         ],
       ),

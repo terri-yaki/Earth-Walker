@@ -76,11 +76,15 @@ class L10n {
   String get menuMedals => _lookup('menu_medals');
   String get menuDistricts => _lookup('menu_districts');
   String get menuReset => _lookup('menu_reset');
+  String get menuShare => _lookup('menu_share');
   String get resetDialogTitle => _lookup('reset_dialog_title');
   String get resetDialogBody => _lookup('reset_dialog_body');
   String get resetDialogConfirm => _lookup('reset_dialog_confirm');
   String get resetDialogCancel => _lookup('reset_dialog_cancel');
   String get resetDialogCopy => _lookup('reset_dialog_copy');
+  String get shareDialogTitle => _lookup('share_dialog_title');
+  String get shareDialogCopy => _lookup('share_dialog_copy');
+  String get shareDialogCopied => _lookup('share_dialog_copied');
   String get progressCopied => _lookup('progress_copied');
   String get progressResetDone => _lookup('progress_reset_done');
   String get findingLocation => _lookup('finding_location');
