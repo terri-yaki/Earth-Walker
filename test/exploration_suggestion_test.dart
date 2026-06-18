@@ -259,5 +259,43 @@ void main() {
       expect(out!.geohash, 'only1');
       expect(out.distanceFromUserMeters, 0.0);
     });
+
+    test('user far from any candidate still gets the nearest one', () {
+      // User is at sea, ~76 km south of HK. The HK grid is
+      // the only candidate set; the engine should still
+      // return the closest cell (which is on the south side
+      // of HK) rather than null. Documents that "out of
+      // bbox" is not the same as "no candidates".
+      final out = pickNextExploration(
+        userLocation: const LatLng(21.500, 114.000),
+        visitedCells: const <String>{},
+        candidateCells: kHKCellGrid,
+      );
+      expect(out, isNotNull,
+          reason: 'a user 76 km south of HK should still get a suggestion '
+              'for the nearest cell, not null');
+      // Actual measured distance ~76 km (south of HK bbox).
+      expect(out!.distanceFromUserMeters, greaterThan(70000.0));
+      expect(out.distanceFromUserMeters, lessThan(80000.0));
+      // The closest cells at this latitude are in the
+      // southern part of the bbox (~22.18). Verify the
+      // target latitude is at the south end of the bbox.
+      expect(out.target.latitude, lessThan(22.30));
+    });
+
+    test('all cells visited returns null even with bbox-wide grid', () {
+      // Every cell in the HK grid marked visited. The
+      // engine must return null rather than some
+      // arbitrary cell, because every candidate is in
+      // the visited set.
+      final allVisited = kHKCellGrid.map((c) => c.geohash).toSet();
+      final out = pickNextExploration(
+        userLocation: const LatLng(22.30, 114.18),
+        visitedCells: allVisited,
+        candidateCells: kHKCellGrid,
+      );
+      expect(out, isNull,
+          reason: 'no unexplored cells left in the candidate set');
+    });
   });
 }
