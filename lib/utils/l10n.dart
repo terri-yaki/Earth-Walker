@@ -87,6 +87,15 @@ class L10n {
       'onboarding_perm_denied_forever':
           'Location permission is permanently denied. Enable it in Settings to use Urbix HK.',
       'onboarding_loc_error_prefix': 'Could not request location:',
+      'badges_header': 'Badges',
+      'badges_empty': 'No badges yet. Keep exploring to unlock your first one!',
+      'badge_unlocked_at': 'Unlocked at',
+      'medals_earned': 'earned',
+      'medals_awarded_at': 'Awarded at',
+      'cell_singular': 'cell',
+      'cell_plural': 'cells',
+      'districts_explored': 'districts explored',
+      'badge_unlock_header': 'Badge unlocked!',
     },
     'zh-HK': {
       'app_title': 'Urbix 香港',
@@ -117,6 +126,15 @@ class L10n {
       'onboarding_perm_denied_forever':
           '定位權限已被永久拒絕。請到「設定」開啟，先可以用 Urbix 香港。',
       'onboarding_loc_error_prefix': '無法取得位置：',
+      'badges_header': '勳章',
+      'badges_empty': '你仲未拎到任何勳章。继续探索，等你解鎖第一個！',
+      'badge_unlocked_at': '解鎖門檻',
+      'medals_earned': '已獲得',
+      'medals_awarded_at': '頒發門檻',
+      'cell_singular': '格',
+      'cell_plural': '格',
+      'districts_explored': '個地區已探索',
+      'badge_unlock_header': '勳章解鎖！',
     },
   };
 
@@ -156,6 +174,15 @@ class L10n {
       _lookup('onboarding_perm_denied_forever');
   String get onboardingLocErrorPrefix =>
       _lookup('onboarding_loc_error_prefix');
+  String get badgesHeader => _lookup('badges_header');
+  String get badgesEmpty => _lookup('badges_empty');
+  String get badgeUnlockedAt => _lookup('badge_unlocked_at');
+  String get medalsEarned => _lookup('medals_earned');
+  String get medalsAwardedAt => _lookup('medals_awarded_at');
+  String get cellSingular => _lookup('cell_singular');
+  String get cellPlural => _lookup('cell_plural');
+  String get districtsExplored => _lookup('districts_explored');
+  String get badgeUnlockHeader => _lookup('badge_unlock_header');
 
   /// Lookup for any key not covered by a typed getter. Useful in
   /// tests; production code should prefer the typed getters.

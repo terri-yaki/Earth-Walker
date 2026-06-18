@@ -4,19 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/achievement_provider.dart' show tierForThreshold, AchievementTier;
 import '../providers/medal_provider.dart';
+import '../utils/l10n.dart';
 
 class MedalScreen extends StatelessWidget {
   const MedalScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final l = L10n.of(context);
     final provider = context.watch<MedalProvider>();
     final medals = provider.medals;
     final awardedCount = provider.awardedMedals.length;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Medals'),
+        title: Text(l.screenMedals),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
@@ -24,7 +26,7 @@ class MedalScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 16.0),
             child: Text(
-              '$awardedCount of ${medals.length} earned',
+              '$awardedCount of ${medals.length} ${l.medalsEarned}',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -68,7 +70,7 @@ class MedalScreen extends StatelessWidget {
                 ],
               ),
               subtitle: Text(
-                'Awarded at ${medal.condition}% world exploration',
+                '${l.medalsAwardedAt} ${medal.condition}% world exploration',
               ),
             );
           }),

@@ -68,6 +68,29 @@ void main() {
           matches(RegExp(r'[\u4E00-\u9FFF]')));
     });
 
+    test('badge / medal / district copy is localised', () {
+      final en = L10n(const Locale('en'));
+      final zh = L10n(const Locale('zh', 'HK'));
+      expect(en.badgesHeader, 'Badges');
+      expect(en.medalsEarned, 'earned');
+      expect(en.cellSingular, 'cell');
+      expect(en.cellPlural, 'cells');
+      expect(en.districtsExplored, 'districts explored');
+      expect(en.badgeUnlockHeader, 'Badge unlocked!');
+      expect(en.medalsAwardedAt, 'Awarded at');
+      // zh-HK: every value should carry at least one CJK ideograph.
+      for (final s in <String>[
+        zh.badgesHeader,
+        zh.medalsEarned,
+        zh.cellSingular,
+        zh.districtsExplored,
+        zh.badgeUnlockHeader,
+      ]) {
+        expect(s, matches(RegExp(r'[\u4E00-\u9FFF]')),
+            reason: '$s should contain CJK ideographs');
+      }
+    });
+
     test('missing key falls back to English', () {
       // Construct an empty-locale L10n so the table lookup misses
       // for every key. The fallback to 'en' should kick in.

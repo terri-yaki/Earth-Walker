@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/achievement_provider.dart';
 import '../utils/constants.dart';
+import '../utils/l10n.dart';
 
 class AchievementScreen extends StatelessWidget {
   const AchievementScreen({Key? key}) : super(key: key);
@@ -12,10 +13,11 @@ class AchievementScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final achievementProvider = context.watch<AchievementProvider>();
 
+    final l = L10n.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Achievements',
+        title: Text(
+          l.screenAchievements,
           style: AppTextStyles.appBarTitle,
         ),
       ),
@@ -31,15 +33,15 @@ class AchievementScreen extends StatelessWidget {
           _buildPercentageRow('World', achievementProvider.worldExplored),
           const SizedBox(height: 24),
           Text(
-            'Badges',
+            l.badgesHeader,
             style: AppTextStyles.achievementTitle,
           ),
           const SizedBox(height: 8),
           if (achievementProvider.unlockedAchievements.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
-                'No badges yet. Keep exploring to unlock your first one!',
+                l.badgesEmpty,
                 style: AppTextStyles.bodyText1,
               ),
             )
@@ -49,6 +51,7 @@ class AchievementScreen extends StatelessWidget {
                       title: entry.key,
                       threshold: entry.value,
                       unlocked: achievementProvider.isUnlocked(entry.key),
+                      unlockedAtLabel: l.badgeUnlockedAt,
                     )),
         ],
       ),
@@ -75,6 +78,7 @@ class AchievementScreen extends StatelessWidget {
     required String title,
     required int threshold,
     required bool unlocked,
+    required String unlockedAtLabel,
   }) {
     final tier = tierForThreshold(threshold);
     return ListTile(
@@ -106,7 +110,7 @@ class AchievementScreen extends StatelessWidget {
           ],
         ],
       ),
-      subtitle: Text('Unlocked at $threshold% world exploration'),
+      subtitle: Text('$unlockedAtLabel $threshold% world exploration'),
     );
   }
 

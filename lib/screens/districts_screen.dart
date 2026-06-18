@@ -14,12 +14,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/userlocation_provider.dart';
 import '../utils/hk_districts.dart';
+import '../utils/l10n.dart';
 
 class DistrictsScreen extends StatelessWidget {
   const DistrictsScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final l = L10n.of(context);
     final visits = context.watch<UserLocationProvider>().visitsByDistrict;
     final names = allDistrictNames;
     final explored = names.where((n) => (visits[n] ?? 0) > 0).length;
@@ -37,13 +39,13 @@ class DistrictsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Districts'),
+        title: Text(l.screenDistricts),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
           Text(
-            '$explored of ${names.length} districts explored',
+            '$explored of ${names.length} ${l.districtsExplored}',
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -57,6 +59,7 @@ class DistrictsScreen extends StatelessWidget {
   }
 
   Widget _buildRow(String name, int count) {
+    final l = L10n.of(context);
     final visited = count > 0;
     return ListTile(
       contentPadding: EdgeInsets.zero,
@@ -72,7 +75,9 @@ class DistrictsScreen extends StatelessWidget {
         ),
       ),
       trailing: Text(
-        visited ? '$count cell${count == 1 ? '' : 's'}' : '—',
+        visited
+            ? '$count ${count == 1 ? l.cellSingular : l.cellPlural}'
+            : '—',
         style: TextStyle(
           color: visited ? Colors.black : Colors.grey,
           fontWeight: visited ? FontWeight.w600 : FontWeight.normal,
