@@ -482,17 +482,6 @@ class UserLocationProvider with ChangeNotifier {
   }
 
   /// Resets all exploration percentages to zero, clears visited cells,
-  /// Public wrapper around the private [_updateExploration] so
-  /// tests can drive the recorder without spinning up Geolocator.
-  /// The third arg is a vestigial accuracy placeholder kept for
-  /// signature symmetry with the test fixtures.
-  ///
-  /// Returns nothing: the recorder is fire-and-forget. To get the
-  /// new suggestion afterwards, read [currentSuggestion].
-  void updateExploration(double lat, double lng, double /*unused*/) {
-    _updateExploration(LatLng(lat, lng));
-  }
-
   /// Resets all exploration percentages to zero, clears visited cells,
   /// and zeros the cumulative distance, days-explored, and
   /// per-district counters. Bumps [_mutationEpoch] so any in-flight
