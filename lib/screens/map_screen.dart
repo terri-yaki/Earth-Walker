@@ -206,48 +206,68 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                   ],
                 ),
-                // Positioned UI Elements
+                // Positioned UI Elements: a single compact HUD card
+                // (replaces the old 5-row wall of text). One headline
+                // percent + a secondary row of small-icon stats.
                 Positioned(
                   top: 20,
                   left: 20,
                   child: Container(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(8.0),
+                      color: Colors.black.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          'Country Explored: ${userLocationProvider.countryPercentage}%',
-                          style: AppTextStyles.bodyText1.copyWith(
-                            color: Colors.white,
-                          ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              '${userLocationProvider.worldPercentage}%',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'PixelFont',
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'explored',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.75),
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          'Continent Explored: ${userLocationProvider.continentPercentage}%',
-                          style: AppTextStyles.bodyText1.copyWith(
-                            color: Colors.white,
-                          ),
-                        ),
-                        Text(
-                          'World Explored: ${userLocationProvider.worldPercentage}%',
-                          style: AppTextStyles.bodyText1.copyWith(
-                            color: Colors.white,
-                          ),
-                        ),
-                        Text(
-                          'Distance: ${formatDistance(userLocationProvider.totalDistanceMeters)}',
-                          style: AppTextStyles.bodyText1.copyWith(
-                            color: Colors.white,
-                          ),
-                        ),
-                        Text(
-                          'Days explored: ${userLocationProvider.daysExplored}',
-                          style: AppTextStyles.bodyText1.copyWith(
-                            color: Colors.white,
-                          ),
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _hudStat(
+                              icon: Icons.straighten,
+                              label:
+                                  formatDistance(userLocationProvider.totalDistanceMeters),
+                            ),
+                            const SizedBox(width: 14),
+                            _hudStat(
+                              icon: Icons.calendar_today,
+                              label:
+                                  '${userLocationProvider.daysExplored}d',
+                            ),
+                            const SizedBox(width: 14),
+                            _hudStat(
+                              icon: Icons.grid_on,
+                              label:
+                                  '${userLocationProvider.uniqueCellsVisited}',
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -274,4 +294,23 @@ String formatDistance(double meters) {
   if (meters < 1000) return '${meters.toStringAsFixed(0)} m';
   final km = meters / 1000;
   return '${km.toStringAsFixed(1)} km';
+}
+
+/// Compact icon + label pair used in the map HUD's secondary row.
+Widget _hudStat({required IconData icon, required String label}) {
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(icon, color: Colors.white70, size: 14),
+      const SizedBox(width: 4),
+      Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    ],
+  );
 }
