@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
@@ -734,6 +736,62 @@ void main() {
           reason: 'first real fix must populate the suggestion even '
               'when the cell is already visited — the user is at a '
               'real location and the engine has unvisited candidates');
+    });
+  });
+  group('UserLocationProvider reset-vs-update race', () {
+    // The _mutationEpoch mechanism lets resetExploration() win the
+    // race against an in-flight updateUserLocation(). Locks down:
+    // a reset that lands AFTER the position source returns but
+    // BEFORE the in-flight call has finished processing must NOT
+    // cause the in-flight call to clobber the cleared state.
+    //
+    // Without the epoch check, a late-arriving fix would re-add
+    // the cell the user just reset, recompute the suggestion
+    // against the wrong visited set, and notify listeners with
+    // a state that the user just wiped.
+
+    test(
+        'in-flight update does NOT notify after reset (regression for the '
+        '"late fix re-adds wiped state and re-notifies" race)', () async {
+      // Schedule reset to run INSIDE the position source's
+      // async callback — between the await on the position
+      // future returning and the next line of updateUserLocation.
+      // This is the tightest interleaving possible: the in-flight
+      // call has just been resumed from `await _positionSource()`
+      // and is about to run its post-await epoch check.
+      UserLocationProvider? providerRef;
+      final p = UserLocationProvider(
+        positionSource: () async {
+          // Run reset INSIDE the position source's async body —
+          // synchronously, between when the in-flight call awaits
+          // this future and when the await resolves. This is the
+          // tightest interleaving possible: the in-flight call has
+          // just been resumed from `await _positionSource()` and
+          // is about to run its post-await epoch check.
+          providerRef!.resetExploration();
+          return _pos(22.298, 114.170);
+        },
+      );
+      providerRef = p;
+      var notifyCount = 0;
+      p.addListener(() => notifyCount++);
+      // The position source itself bumps the epoch via reset,
+      // then returns the position. The in-flight call's
+      // post-await checkpoint should see the bumped epoch and
+      // bail out.
+      await p.updateUserLocation();
+      // The inflight call must NOT have added the cell.
+      expect(p.uniqueCellsVisited, 0,
+          reason: 'reset wiped the visited set; the late fix must '
+              'not re-add the cell');
+      // The inflight call must NOT have notified AFTER reset.
+      // resetExploration contributes exactly one notify. With
+      // the bug, the inflight call also notifies (giving 2 or
+      // more). With the fix, it bails out at the epoch check
+      // and never notifies (giving exactly 1).
+      expect(notifyCount, 1,
+          reason: 'exactly one notify (from reset). The inflight fix '
+              'must bail at the epoch check, not call notifyListeners');
     });
   });
 }
