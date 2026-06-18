@@ -53,5 +53,42 @@ void main() {
             const LatLng(22.3, 114.3),
           ]));
     });
+
+    test(
+        'a single bad entry does not discard the rest (regression for the '
+        '"one TypeError nukes the whole list" bug)', () {
+      // The previous implementation had `try { ... return out; }
+      // catch (_) { return []; }` around the whole loop. Any
+      // per-entry TypeError (e.g. a string coerced via
+      // `entry[0] as num`) would short-circuit the entire
+      // decoder and return [], silently dropping every earlier
+      // valid point.
+      //
+      // After the fix: each entry is decoded independently.
+      // The string-lng entry is skipped, and the trailing valid
+      // entry survives.
+      final decoded = latLngListFromJson(
+          '[[22.1, 114.1], [22.2, "114.2"], [22.3, 114.3]]');
+      expect(
+          decoded,
+          equals(<LatLng>[
+            const LatLng(22.1, 114.1),
+            const LatLng(22.3, 114.3),
+          ]));
+    });
+
+    test('rejects out-of-range lat/lng (corrupted prefs safety)', () {
+      // A corrupted prefs file with [[999, 999]] would
+      // previously produce a LatLng(999, 999) that the map
+      // renderer would happily try to plot at (999°N, 999°E)
+      // —a coordinate that doesn't exist on Earth. Range-check
+      // both fields.
+      expect(latLngListFromJson('[[999, 999]]'), isEmpty);
+      expect(latLngListFromJson('[[22.5, 999]]'), isEmpty);
+      expect(latLngListFromJson('[[999, 114.1]]'), isEmpty);
+      // Boundary values are still valid.
+      expect(latLngListFromJson('[[90, 180], [-90, -180]]'),
+          equals(<LatLng>[const LatLng(90, 180), const LatLng(-90, -180)]));
+    });
   });
 }
