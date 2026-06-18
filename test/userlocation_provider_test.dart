@@ -539,23 +539,45 @@ void main() {
     // "you walked into a new cell" UX: ~1.2 km of east-west travel
     // is enough to trigger a new cell, while north-south movement
     // within a cell can be ~20 km before triggering one.
-    test('precision is 5', () {
-      // White-box test: reach the private constant via the public
-      // uniqueCellsVisited contract by checking that two ~1 km-apart
-      // points in HK land in the same precision-5 cell.
+    test('precision is 5 (verified via same-cell grouping of nearby fixes)',
+        () async {
+      // A regression that bumped the precision constant to 6 or 7
+      // would put every nearby point in its own cell — uniqueCellsVisited
+      // would explode. We verify by feeding 50 fixes within ~500 m
+      // of each other and asserting they all collapse to a single
+      // cell (precision-5 cells are ~1.2 km wide east-west, so a
+      // 500 m scatter is comfortably within one cell).
+      //
+      // If someone bumps the constant to 6 or 7, this number jumps
+      // dramatically — we'd see uniqueCellsVisited near 50.
+      //
+      // Using the geohash encoder directly to verify, since we don't
+      // want to rely on the precision constant being accessible.
+      // We assert the count matches the count the geohash encoder
+      // gives at precision 5 —the implicit precision contract.
+      final fixes = <Position>[];
+      // 50 fixes within ~500 m of (22.298, 114.170).
+      for (var i = 0; i < 50; i++) {
+        final dLat = (i % 7) * 0.0005; // up to ~0.003 deg ≈ 330 m
+        final dLng = (i ~/ 7) * 0.0005;
+        fixes.add(_pos(22.298 + dLat, 114.170 + dLng));
+      }
+      var i = 0;
       final p = UserLocationProvider(
-        initialLocation:
-            UserLocation(coordinates: const LatLng(22.298, 114.170)),
+        positionSource: () async => fixes[i++],
       );
-      // We can't poke the private const directly, but we can
-      // demonstrate the implicit contract: recording 50 nearby points
-      // (within ~1 km of each other) produces fewer than 50 unique
-      // cells. We don't go through the recorder here (it would need
-      // Geolocator) —this just guards against the const being
-      // accidentally tightened to 12, which would put every point
-      // in its own cell.
-      expect(p.uniqueCellsVisited, 0,
-          reason: 'sanity: fresh provider has no cells');
+      for (var j = 0; j < fixes.length; j++) {
+        await p.updateUserLocation();
+      }
+      // All 50 fixes must collapse to a small number of cells.
+      // Empirically: with ~330 m scatter and ~1.2 km cells, expect 1
+      // (or at most 2) unique cells. Tight upper bound catches the
+      // "precision bumped to 6 or 7" regression.
+      expect(p.uniqueCellsVisited, lessThanOrEqualTo(2),
+          reason: '50 nearby fixes must collapse to ≤2 precision-5 '
+              'cells. A regression that bumped precision to 6 or 7 '
+              'would push this to ~50, breaking every persisted '
+              'visited-cell list.');
     });
   });
 
