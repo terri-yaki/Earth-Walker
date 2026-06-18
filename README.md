@@ -1,5 +1,7 @@
 # Urbix HK
 
+[![Flutter CI](https://github.com/terri-yaki/Earth-Walker/actions/workflows/flutter-ci.yml/badge.svg?branch=main)](https://github.com/terri-yaki/Earth-Walker/actions/workflows/flutter-ci.yml)
+
 **Urbix HK** is a Flutter application that turns Hong Kong into your playground. Whether you're weaving through Mong Kok, hiking the Dragon's Back, or just stepping out for milk tea, Urbix HK tracks where you've been and rewards you for getting out the door. Explore districts, earn medals, and watch your map of the city fill in.
 
 ---
