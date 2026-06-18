@@ -180,6 +180,12 @@ String encodeProgressSnapshot(ProgressSnapshot s) {
 /// null if [text] doesn't start with [kProgressSnapshotPrefix] or
 /// any field is missing / unparseable. The caller should
 /// surface "couldn't parse" to the user when null is returned.
+///
+/// Duplicate keys are rejected: a snapshot like
+/// 'URBIX:SNAP:1:cells=1,...,cells=99,...' is treated as
+/// malformed (the spec is one value per field). Without this
+/// check, a corrupted or malicious paste could silently
+/// override a field with the second occurrence.
 ProgressSnapshot? parseProgressSnapshot(String text) {
   if (!text.startsWith(kProgressSnapshotPrefix)) return null;
   final body = text.substring(kProgressSnapshotPrefix.length);
@@ -187,7 +193,10 @@ ProgressSnapshot? parseProgressSnapshot(String text) {
   for (final part in body.split(',')) {
     final eq = part.indexOf('=');
     if (eq <= 0) continue;
-    fields[part.substring(0, eq)] = part.substring(eq + 1);
+    final key = part.substring(0, eq);
+    // Reject duplicates — see the docstring for why.
+    if (fields.containsKey(key)) return null;
+    fields[key] = part.substring(eq + 1);
   }
   num? n(String k) => num.tryParse(fields[k] ?? '');
   final cells = n('cells')?.toInt();

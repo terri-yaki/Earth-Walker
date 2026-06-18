@@ -101,6 +101,21 @@ void main() {
     });
 
     test(
+        'parse rejects duplicate keys (regression for the "last value wins" '
+        'silent override bug)', () {
+      // A snapshot where the same key appears twice would
+      // previously overwrite the first occurrence silently,
+      // letting a corrupted or malicious paste redefine any field.
+      // The spec is one value per field, so duplicates are
+      // rejected.
+      final dup =
+          '${kProgressSnapshotPrefix}cells=1,badges=2,cells=99,medals=1,meters=10,days=1,streak=0';
+      expect(parseProgressSnapshot(dup), isNull,
+          reason: 'duplicate "cells" key should be rejected, not '
+              'silently overridden');
+    });
+
+    test(
         'meters round-trips to one-decimal precision (encoded as integer meters)',
         () {
       // 1500.7 m encodes as '1501' (toStringAsFixed(0)); on parse,
