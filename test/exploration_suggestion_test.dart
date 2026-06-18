@@ -163,6 +163,79 @@ void main() {
       expect(out.districtName, isNotNull);
     });
 
+    test(
+        'visitedDistricts actually suppresses the new-district bonus '
+        '(regression for the parameter being silently ignored)', () {
+      // User sits at (22.280, 114.180). This falls in the
+      // overlap of "Central and Western" (114.140-114.180) and
+      // "Wan Chai" (114.165-114.200); since Central and Western
+      // is the more-specific box and is listed first in
+      // hk_districts.dart, the user is "in Central and Western".
+      // The pre-existing Wan Chai fixture cell is misnamed —
+      // districtFor() reports it as "Central and Western".
+      //
+      // Case 1: empty visitedDistricts. The "Central and
+      // Western" cell is new (gets +20% bonus) but it's at
+      // 0m, so proximity=1.0 dominates the formula. It wins
+      // regardless of the bonus. isInNewDistrict is true.
+      final outFresh = pickNextExploration(
+        userLocation: const LatLng(22.280, 114.180),
+        visitedCells: const <String>{},
+        candidateCells: candidates,
+        visitedDistricts: const <String>{},
+      );
+      expect(outFresh!.geohash, 'wanchai',
+          reason: 'closer cell wins on raw proximity');
+      expect(outFresh.isInNewDistrict, isTrue);
+      expect(outFresh.districtName, 'Central and Western',
+          reason: 'fixture cell sits in the Central and Western box, '
+              'not Wan Chai —districtFor() picks the more-specific '
+              'box on overlap');
+
+      // Case 2: "Central and Western" is marked as visited.
+      // The "wanchai" cell is in visitedCells so we get Sha
+      // Tin. Sha Tin is a new district (NOT in
+      // visitedDistricts), so the +20% bonus applies. The
+      // isInNewDistrict field on the returned suggestion
+      // reflects the WINNER's district — it must be true.
+      //
+      // This is the contract: visitedDistricts and
+      // isInNewDistrict are linked by name. A future refactor
+      // that decoupled them would let the UI show "new
+      // district!" badges for places the user has already
+      // covered.
+      final outMarked = pickNextExploration(
+        userLocation: const LatLng(22.280, 114.180),
+        visitedCells: const <String>{'wanchai'},
+        candidateCells: candidates,
+        visitedDistricts: const <String>{'Central and Western'},
+      );
+      expect(outMarked!.geohash, 'shatin');
+      expect(outMarked.isInNewDistrict, isTrue);
+      expect(outMarked.districtName, 'Sha Tin');
+
+      // Case 3: BOTH districts visited. The +20% bonus is
+      // suppressed for every candidate. isInNewDistrict must
+      // be false on the returned suggestion, even though the
+      // user has never stood in that exact cell. This locks
+      // down the negation: the bonus is suppressed when the
+      // district is in the set, not just absent.
+      final outBothVisited = pickNextExploration(
+        userLocation: const LatLng(22.280, 114.180),
+        visitedCells: const <String>{'wanchai'},
+        candidateCells: candidates,
+        visitedDistricts: const <String>{
+          'Central and Western',
+          'Sha Tin',
+        },
+      );
+      expect(outBothVisited!.geohash, 'shatin');
+      expect(outBothVisited.isInNewDistrict, isFalse,
+          reason: 'Sha Tin district is in visitedDistricts; the +20% '
+              'bonus must be suppressed and the field reflects that');
+      expect(outBothVisited.districtName, 'Sha Tin');
+    });
+
     test('cells outside all district boxes are returned with districtName=null',
         () {
       // A cell in the middle of the South China Sea (south
