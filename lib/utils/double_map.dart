@@ -16,13 +16,24 @@ String doubleMapToJson(Map<String, double>? values) {
 
 /// Decode a JSON object string back into a Map<String, double>.
 /// Returns an empty map for null, empty, or malformed input.
+///
+/// Per-entry decoding failures are isolated: a single
+/// non-numeric value is skipped without discarding the rest.
+/// See district_counts.dart for the rationale.
 Map<String, double> doubleMapFromJson(String? json) {
   if (json == null || json.isEmpty) return <String, double>{};
+  final dynamic decoded;
   try {
-    final decoded = jsonDecode(json);
-    if (decoded is! Map) return <String, double>{};
-    return decoded.map((k, v) => MapEntry(k.toString(), (v as num).toDouble()));
+    decoded = jsonDecode(json);
   } catch (_) {
     return <String, double>{};
   }
+  if (decoded is! Map) return <String, double>{};
+  final out = <String, double>{};
+  decoded.forEach((k, v) {
+    if (v is num) {
+      out[k.toString()] = v.toDouble();
+    }
+  });
+  return out;
 }

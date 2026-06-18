@@ -42,5 +42,22 @@ void main() {
       final decoded = doubleMapFromJson('{"a":3,"b":5.0}');
       expect(decoded, equals(<String, double>{'a': 3.0, 'b': 5.0}));
     });
+
+    test(
+        'a single non-numeric value does not discard the rest '
+        '(regression for the "one bad value nukes every day" bug)', () {
+      // Mirrors the same fix as districtCountMapFromJson. One
+      // string value (or null) shouldn't take down every day's
+      // meters count.
+      final decoded = doubleMapFromJson(
+          '{"2026-06-17":1234.5,"2026-06-16":"678.9","2026-06-15":100}');
+      expect(
+          decoded,
+          equals(<String, double>{
+            '2026-06-17': 1234.5,
+            '2026-06-15': 100.0,
+            // '2026-06-16' skipped because "678.9" is a string.
+          }));
+    });
   });
 }
