@@ -333,6 +333,54 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                   ),
                 ),
+                // First-run hint: only shown until the user has visited
+                // at least one new cell. Explains the green-circle
+                // mechanic without burying the rest of the UI under a
+                // permanent legend.
+                if (userLocationProvider.uniqueCellsVisited == 0)
+                  Positioned(
+                    top: 24,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 280),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.directions_walk,
+                                color: Colors.green, size: 20),
+                            SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                'Walk around to discover new places. '
+                                'Visited areas appear as green circles.',
+                                style: TextStyle(
+                                  fontFamily: 'PixelFont',
+                                  fontSize: 12,
+                                  color: Colors.black87,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 // Recenter Button
                 Positioned(
                   bottom: 20,
