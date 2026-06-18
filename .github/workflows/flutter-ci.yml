@@ -65,6 +65,7 @@ jobs:
           echo "==> Verifying dart format"
           if dart format --set-exit-if-changed . ; then
             echo "==> format check: PASS"
+            echo "no diff" > format_diff.txt
           else
             echo "::warning::dart format reported changes. Run 'dart format .' locally to see the diff."
             dart format --output=show . > format_diff.txt 2>&1 || true
