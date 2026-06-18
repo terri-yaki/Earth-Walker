@@ -456,6 +456,17 @@ class UserLocationProvider with ChangeNotifier {
   /// [updateUserLocation] bails out at its next checkpoint instead
   /// of clobbering the reset.
   void resetExploration() {
+    _countryPercentage = 0;
+    _continentPercentage = 0;
+    _worldPercentage = 0;
+    _visitedCells.clear();
+    _visitedCellLocations.clear();
+    _totalDistanceMeters = 0.0;
+    _lastDistanceReference = null;
+    _explorationDays.clear();
+    _visitsByDistrict.clear();
+    _distanceByDay.clear();
+    _mutationEpoch++;
     // Reset re-opens the entire HK cell grid to "unvisited",
     // so the suggestion must be recomputed; otherwise the chip
     // would keep pointing at a cell the user has now reset.
@@ -483,17 +494,6 @@ class UserLocationProvider with ChangeNotifier {
       visitedCells: _visitedCells,
       candidateCells: kHKCellGrid,
       visitedDistricts: _visitsByDistrict.keys.toSet(),
-    tage = 0;
-    _worldPercentage = 0;
-    _visitedCells.clear();
-    _visitedCellLocations.clear();
-    _totalDistanceMeters = 0.0;
-    _lastDistanceReference = null;
-    _explorationDays.clear();
-    _visitsByDistrict.clear();
-    _distanceByDay.clear();
-    _mutationEpoch++;
-    saveToStorage();
-    notifyListeners();
+    );
   }
 }
