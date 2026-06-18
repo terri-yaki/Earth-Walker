@@ -515,7 +515,7 @@ class _MapScreenState extends State<MapScreen> {
                                   final n = userLocationProvider
                                       .cellsInCurrentDistrict;
                                   return Text(
-                                    '繚 $n ${n == 1 ? l.hudVisit : l.hudVisits}',
+                                    '蝜?$n ${n == 1 ? l.hudVisit : l.hudVisits}',
                                     style: TextStyle(
                                       color: Colors.white.withOpacity(0.75),
                                       fontSize: 12,
@@ -560,7 +560,7 @@ class _MapScreenState extends State<MapScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '${l.hudNextMilestone}: ${next.title} @ ${next.threshold}% 繚 ${next.cellsToGo} ${l.hudCellsToGo}',
+                                    '${l.hudNextMilestone}: ${next.title} @ ${next.threshold}% 蝜?${next.cellsToGo} ${l.hudCellsToGo}',
                                     style: TextStyle(
                                       color: Colors.white.withOpacity(0.85),
                                       fontSize: 12,
@@ -683,7 +683,7 @@ class _MapScreenState extends State<MapScreen> {
                                     Text(
                                       '${l.suggestionChip}: '
                                       '${s.districtName ?? l.suggestionExploreOther}'
-                                      ' 繚 ${formatDistance(s.distanceFromUserMeters)}',
+                                      ' 蝜?${formatDistance(s.distanceFromUserMeters)}',
                                       style: TextStyle(
                                         color: Colors.white.withOpacity(0.85),
                                         fontSize: 12,

@@ -37,8 +37,8 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Urbix 擐葛'), findsOneWidget);
-    expect(find.text('??雿輻'), findsOneWidget);
+    expect(find.text('Urbix ???'), findsOneWidget);
+    expect(find.text('????輯撒?'), findsOneWidget);
   });
 
   testWidgets('onboarding-complete flag is exposed as a stable constant',

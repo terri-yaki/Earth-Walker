@@ -48,7 +48,7 @@ void main() {
     await tester.pumpWidget(_app(p));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    // English: 'Next: Walker @ 10% 繚 10 to go'
+    // English: 'Next: Walker @ 10% 蝜?10 to go'
     expect(find.textContaining('Next:'), findsOneWidget);
     expect(find.textContaining('to go'), findsOneWidget);
   });
@@ -60,9 +60,9 @@ void main() {
     await tester.pumpWidget(_app(p, locale: const Locale('zh', 'HK')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    // zh-HK: '銝??? Walker @ 10% 繚 隞脣榆 10'
-    expect(find.textContaining('銝??'), findsOneWidget);
-    expect(find.textContaining('隞脣榆'), findsOneWidget);
+    // zh-HK: '????? Walker @ 10% 蝜??璁?10'
+    expect(find.textContaining('????'), findsOneWidget);
+    expect(find.textContaining('?璁?'), findsOneWidget);
   });
 
   testWidgets('progress bar is present when a next milestone exists',
@@ -128,10 +128,10 @@ void main() {
     await tester.pumpWidget(_app(p, locale: const Locale('zh', 'HK')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    // The next-milestone chip uses "銝??? (next) but the
-    // suggestion chip uses "銝?甇? (next-step), so this
+    // The next-milestone chip uses "????? (next) but the
+    // suggestion chip uses "????? (next-step), so this
     // text is unique to the suggestion chip.
-    expect(find.textContaining('銝?甇?'), findsOneWidget);
+    expect(find.textContaining('?????'), findsOneWidget);
   });
 
   testWidgets('hides the chip when the user has no real location (default)',
