@@ -233,6 +233,7 @@ class _MapScreenState extends State<MapScreen> {
   /// single-title version used clearSnackBars() per call, so only
   /// the last title ever showed.
   void _showCelebrationSnackBar(List<String> titles) {
+    final l = L10n.of(context);
     HapticFeedback.mediumImpact();
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
@@ -242,8 +243,8 @@ class _MapScreenState extends State<MapScreen> {
           duration: const Duration(seconds: 3),
           content: Row(
             children: [
-              const Icon(Icons.emoji_events,
-                  color: Colors.white, semanticLabel: 'Badge'),
+              Icon(Icons.emoji_events,
+                  color: Colors.white, semanticLabel: l.badgeSemanticLabel),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

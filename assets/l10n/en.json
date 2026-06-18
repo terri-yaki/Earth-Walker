@@ -73,5 +73,6 @@
   "exploration_world_percent": "world exploration",
   "you_are_here": "You are here",
   "map_recentered_snack": "Map recentered to your current location.",
-  "recenter_map_tooltip": "Recenter Map"
+  "recenter_map_tooltip": "Recenter Map",
+  "badge_semantic_label": "Badge"
 }

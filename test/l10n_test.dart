@@ -88,6 +88,7 @@ const Map<String, String> _enStrings = <String, String>{
   'you_are_here': 'You are here',
   'map_recentered_snack': 'Map recentered to your current location.',
   'recenter_map_tooltip': 'Recenter Map',
+  'badge_semantic_label': 'Badge',
 };
 
 const Map<String, String> _zhStrings = <String, String>{
@@ -179,6 +180,7 @@ const Map<String, String> _zhStrings = <String, String>{
   'you_are_here': '\u4f60\u54a9\u5b9a\u8aaa',
   'map_recentered_snack': '\u5730\u5716\u5df2\u91cd\u65b0\u5b9a\u4f4d\u5230\u4f60\u7684\u4f4d\u7f6e\u3002',
   'recenter_map_tooltip': '\u91cd\u65b0\u5b9a\u4f4d',
+  'badge_semantic_label': '\u52f3\u7ae0',
 };
 
 void main() {
@@ -332,6 +334,17 @@ void main() {
         expect(s, matches(RegExp(r'[\u4E00-\u9FFF]')),
             reason: '$s should contain CJK ideographs');
       }
+    });
+
+    test('badge semantic label is localised', () {
+      // The badge-unlock snackbar uses Icons.emoji_events with a
+      // semanticLabel so TalkBack reads 'Badge' instead of the
+      // bare icon name. Was hardcoded English before.
+      final en = L10n(const Locale('en'), _enStrings, _enStrings);
+      final zh = L10n(const Locale('zh', 'HK'), _zhStrings, _enStrings);
+      expect(en.badgeSemanticLabel, 'Badge');
+      expect(zh.badgeSemanticLabel, matches(RegExp(r'[\u4E00-\u9FFF]')));
+      expect(zh.badgeSemanticLabel, isNot(en.badgeSemanticLabel));
     });
 
     test('exploration percentage labels are localised', () {

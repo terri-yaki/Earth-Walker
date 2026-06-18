@@ -168,6 +168,10 @@ class L10n {
   /// aloud by TalkBack as the button's semantics label.
   String get recenterMapTooltip => _lookup('recenter_map_tooltip');
 
+  /// Semantic label for the badge / achievement icon. Read aloud
+  /// by TalkBack instead of the bare emoji_events announcement.
+  String get badgeSemanticLabel => _lookup('badge_semantic_label');
+
   /// Lookup for any key not covered by a typed getter. Useful in
   /// tests; production code should prefer the typed getters.
   @visibleForTesting

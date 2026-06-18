@@ -54,7 +54,12 @@ class UrbixApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false, // Optional: Removes the debug banner
-        title: 'Urbix HK',
+        // onGenerateTitle runs inside the Localizations widget, so
+        // it has access to the resolved L10n instance for the
+        // current locale. The OS task-switcher name will then
+        // show 'Urbix 香港' for zh-HK users instead of the static
+        // English 'Urbix HK'.
+        onGenerateTitle: (context) => L10n.of(context).appTitle,
         theme: ThemeData(
           primarySwatch: Colors.green,
           fontFamily: 'PixelFont', // Ensure this matches your pubspec.yaml
