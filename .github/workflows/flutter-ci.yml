@@ -63,13 +63,25 @@ jobs:
         # The diff is uploaded as an artifact for review.
         run: |
           echo "==> Verifying dart format"
-          if dart format --set-exit-if-changed . ; then
+          echo "    dart version: $(dart --version 2>&1)"
+          echo "    platform:     $(uname -a)"
+          # Run --set-exit-if-changed first to get a clean rc.
+          set +e
+          dart format --set-exit-if-changed . > format_summary.txt 2>&1
+          rc=$?
+          set -e
+          cat format_summary.txt
+          if [ "$rc" -eq 0 ]; then
             echo "==> format check: PASS"
             echo "no diff" > format_diff.txt
           else
-            echo "::warning::dart format reported changes. Run 'dart format .' locally to see the diff."
+            echo "::warning::dart format reported changes on Linux CI (rc=$rc). See format_diff.txt artifact for the proposed output."
+            # Re-run with --output=show so the artifact contains the
+            # full proposed file content (set-exit-if-changed only
+            # prints changed/unchanged lines, not the diff itself).
             dart format --output=show . > format_diff.txt 2>&1 || true
           fi
+          rm -f format_summary.txt
       - name: Upload format diff artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -97,9 +109,15 @@ jobs:
       - run: flutter pub get
       - run: |
           echo "==> Running flutter analyze"
-          flutter analyze --no-fatal-infos > analyze_output.txt 2>&1 || {
-            echo "::warning::flutter analyze reported issues. See analyze_output.txt artifact."
-          }
+          echo "    flutter version: $(flutter --version 2>&1 | head -1)"
+          set +e
+          flutter analyze --no-fatal-infos > analyze_output.txt 2>&1
+          rc=$?
+          set -e
+          cat analyze_output.txt
+          if [ "$rc" -ne 0 ]; then
+            echo "::warning::flutter analyze reported issues (rc=$rc). See analyze_output.txt artifact."
+          fi
       - name: Upload analyze output artifact
         if: always()
         uses: actions/upload-artifact@v4
