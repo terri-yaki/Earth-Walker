@@ -11,6 +11,7 @@ import '../utils/double_map.dart';
 import '../utils/exploration_days.dart';
 import '../utils/geohash.dart';
 import '../utils/hk_districts.dart';
+import '../utils/lat_lng_list.dart';
 import '../utils/visited_cells_store.dart';
 
 /// Default [UserLocationProvider] position source: the Geolocator
@@ -220,15 +221,21 @@ class UserLocationProvider with ChangeNotifier {
   /// (yyyy-mm-dd -> meters walked that day).
   static const String _prefsKeyDistanceByDay = 'urbix.distance_by_day';
 
+  /// SharedPreferences key for the visited-cell locations (parallel
+  /// to the visited-cell set; needed so the green-dot footprint
+  /// overlay survives an app restart, not just the cell count).
+  static const String _prefsKeyVisitedCellLocations =
+      'urbix.visited_cell_locations';
+
   /// Set of geohash cells the user has already visited.
   /// Tracked so revisiting the same cell doesn't inflate the count.
   /// Backed by SharedPreferences on disk; see [loadFromStorage] / [saveToStorage].
   final Set<String> _visitedCells = <String>{};
 
   /// Representative LatLng for each visited cell, used to render the
-  /// "footprint" overlay on the map. In-memory only — on app restart we
-  /// only have the geohash cells back, so the footprint will repopulate
-  /// as the user re-enters previously-visited cells. Cheap to keep.
+  /// "footprint" overlay on the map. Persisted to SharedPreferences
+  /// under [_prefsKeyVisitedCellLocations] so the green dots
+  /// survive an app restart.
   final List<LatLng> _visitedCellLocations = <LatLng>[];
 
   /// Set of yyyy-mm-dd day keys on which the user has recorded at
@@ -297,6 +304,10 @@ class UserLocationProvider with ChangeNotifier {
         ..clear()
         ..addAll(doubleMapFromJson(
             prefs.getString(_prefsKeyDistanceByDay)));
+      _visitedCellLocations
+        ..clear()
+        ..addAll(latLngListFromJson(
+            prefs.getString(_prefsKeyVisitedCellLocations)));
       _lastDistanceReference = null; // first new fix will set it
       _recalculatePercentages();
       notifyListeners();
@@ -321,6 +332,8 @@ class UserLocationProvider with ChangeNotifier {
           districtCountMapToJson(_visitsByDistrict));
       await prefs.setString(
           _prefsKeyDistanceByDay, doubleMapToJson(_distanceByDay));
+      await prefs.setString(_prefsKeyVisitedCellLocations,
+          latLngListToJson(_visitedCellLocations));
     } catch (e) {
       debugPrint('Failed to save visited cells: $e');
     }
