@@ -466,6 +466,14 @@ void main() {
       // position is unchanged. The suggestion should still
       // be set (the user is at Wan Chai; the closest
       // unvisited cell is the cell they just stood in).
+      //
+      // We lock down two contracts:
+      // 1. The suggestion is non-null after reset (the
+      //    engine still has unvisited candidates).
+      // 2. The suggestion is RECOMPUTED — not the cached
+      //    pre-reset instance. After reset the visited set
+      //    is empty, so the ranking will pick a different
+      //    cell than the pre-reset ranking did.
       final p = UserLocationProvider(
         positionSource: () async => _pos(22.280, 114.180),
       );
@@ -473,13 +481,20 @@ void main() {
       final first = p.currentSuggestion;
       expect(first, isNotNull);
       p.resetExploration();
-      expect(p.currentSuggestion, isNotNull,
+      final afterReset = p.currentSuggestion;
+      expect(afterReset, isNotNull,
           reason: 'position is preserved across reset, so '
               'the suggestion should still resolve');
-      // After reset, the previous cell is no longer visited,
-      // so the suggestion may point at a different cell —
-      // we don't assert which one, just that the cache was
-      // invalidated and recomputed.
+      // Identity check: resetExploration must call
+      // _recomputeSuggestion (which assigns a fresh
+      // ExplorationSuggestion). Without it, the cached
+      // pre-reset suggestion would be returned — but its
+      // ranking was computed with the user's cell marked
+      // as visited, so it would point at a DIFFERENT cell
+      // than what the engine would pick now.
+      expect(identical(afterReset, first), isFalse,
+          reason: 'resetExploration must trigger _recomputeSuggestion, '
+              'which assigns a new ExplorationSuggestion instance');
     });
 
     test('is recomputed when the user visits a new cell', () async {
