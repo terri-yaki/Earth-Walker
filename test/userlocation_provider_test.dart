@@ -414,6 +414,53 @@ void main() {
       await p2.loadFromStorage();
       expect(p2.totalDistanceMeters, 1234.5);
     });
+
+    test(
+        'updateUserLocation that visits a new cell persists the cell '
+        'across reload (regression for the "save is fire-and-forget '
+        'and never finishes" risk)', () async {
+      // The pre-existing round-trip test only seeded state via
+      // the constructor and called saveToStorage explicitly. It
+      // never exercised the real code path that records a cell:
+      // updateUserLocation -> _updateExploration -> saveToStorage.
+      // That means a regression in which the save was lost or
+      // skipped (e.g. someone deleted saveToStorage from
+      // _updateExploration thinking "it'll be saved elsewhere")
+      // would slip through.
+      //
+      // This test exercises the full path:
+      //   1. Fresh provider, position source at wkfft.
+      //   2. updateUserLocation() —visits the cell.
+      //   3. Construct a second provider with the same position
+      //      source and loadFromStorage() —it should see the
+      //      cell from step 2.
+      //
+      // Also waits for any pending save to flush via a tiny
+      // microtask drain, since saveToStorage is fire-and-forget
+      // inside _updateExploration.
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final fixes = [_pos(22.270, 114.140)]; // wkfft
+      var i = 0;
+      final p = UserLocationProvider(
+        positionSource: () async => fixes[i++],
+      );
+      await p.updateUserLocation();
+      expect(p.uniqueCellsVisited, 1);
+      // Drain microtasks so the fire-and-forget saveToStorage
+      // inside _updateExploration has a chance to complete
+      // before we construct the second provider.
+      await Future<void>.delayed(Duration.zero);
+      // Second provider, fresh in-memory state, load from
+      // SharedPreferences. The cell from step 2 must be
+      // restored.
+      final p2 = UserLocationProvider(
+        positionSource: () async => _pos(22.270, 114.140),
+      );
+      await p2.loadFromStorage();
+      expect(p2.uniqueCellsVisited, 1,
+          reason: 'cell visited in session 1 must be persisted to '
+              'SharedPreferences and re-loaded in session 2');
+    });
   });
 
   group('UserLocationProvider currentSuggestion (exploration engine wiring)',
