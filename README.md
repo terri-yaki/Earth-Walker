@@ -12,7 +12,7 @@
   Your current location is shown on an interactive map. The recenter FAB snaps the view back to you if you pan away. Screen-reader users hear "You are here" at the marker.
 
 - **Geohash-based visited-cell tracking**  
-  Each new geohash-5 cell (~2.4 km squares) you enter is recorded once. Revisiting the same cell is a no-op. Visited cells render as translucent green circles on the map; the count, total distance, and days-explored appear in the HUD.
+  Each new geohash-5 cell (~20 km tall × 1.2 km wide at HK latitude) you enter is recorded once. Revisiting the same cell is a no-op. Visited cells render as translucent green circles on the map; the count, total distance, and days-explored appear in the HUD.
 
 - **Per-district breakdown**  
   All 18 Hong Kong districts are recognised via bounding-box detection. The HUD shows your current district, and the Districts screen lists every district with the number of cells you've recorded there, sorted by visit count.
@@ -76,12 +76,12 @@ ISSUES.md                      # Local issue tracker (FEAT-* / BUG / A11Y / I18N
 
 ### Design choices worth knowing
 
-- **Geohash-5 cells** as the unit of "place visited" — small enough that walking a few hundred metres registers a new cell, large enough that GPS jitter doesn't double-count.
+- **Geohash-5 cells** as the unit of "place visited" — east-west movement of ~600 m crosses a cell boundary (cells are 1.2 km wide at HK latitude), large enough that GPS jitter doesn't double-count, tall enough (20 km north-south) that a harbour-side stroll stays in one cell.
 - **No real "X% explored" per district** — different HK districts have wildly different total cell counts, and a per-district percentage would be a lie. The screen shows absolute counts.
 - **The share-snapshot format (`URBIX:SNAP:1:key=value,…`)** is intentionally not JSON — JSON inside a share-sheet text gets quote-escaped in some chat apps, and the comma-separated `k=v` form is human-readable enough that a curious recipient can decode it by eye. The version byte (`1:`) lets us evolve the format later without breaking old snapshots.
 - **The exploration-suggestion engine returns the top candidate, not a list** — matches the "only pick one for them" UX ask. The full ranking is internal; tests exercise it indirectly by checking the picked winner in two-cell scenarios.
 - **`share_plus` for the OS share sheet, not per-platform SDKs** — Instagram / X / Threads / Telegram all have developer-unfriendly terms around automated posting. The share-sheet approach is TOS-compliant for every major social app, with no API keys, no OAuth, no per-platform plugin.
-- **The Reset Progress dialog is the only screen that builds its own content** with hard-coded English copy. Intentional — it's pure data, not UI copy, and the user copies it out so language doesn't matter.
+- **The Reset Progress dialog builds its own content** with hard-coded English copy. Intentional — it's pure data, not UI copy, and the user copies it out so language doesn't matter. The Compare dialog also uses English field labels ("cells", "km", "badges") for the same reason: they're data, not UI copy, and they read most naturally as the same nouns the user sees on the achievement / medal screens.
 - **Hand-rolled L10n, no `flutter gen-l10n`** — keeps the project free of generated files and an extra build step. Add a key, write a translation, done. Translations live in `assets/l10n/{en,zh-HK}.json`; the `L10n` class loads them via `rootBundle`.
 
 ---
@@ -92,7 +92,7 @@ Distributed under the CC BY-NC 4.0 License. See `LICENSE` for more information.
 
 ---
 
-## # Acknowledgements
+## 🙏 Acknowledgements
 
 - [OpenStreetMap](https://www.openstreetmap.org/) for providing free map data.
 - [Flutter Community](https://flutter.dev/community) for amazing resources and support.
