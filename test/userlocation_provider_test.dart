@@ -491,9 +491,22 @@ void main() {
       // second fix the new cell should be in _visitedCells,
       // and currentSuggestion must NOT point at that cell
       // (because visited cells are skipped by the engine).
+      //
+      // The two coords are in the SAME district (Central
+      // and Western) but in DIFFERENT geohash-5 cells
+      // (wkfft vs wkfg8). Earlier revisions of this test
+      // used Yau Tsim Mong coords (22.298, 114.170) and
+      // (22.315, 114.170) which actually hash to the SAME
+      // cell (wkfg8) — geohash-5 cells are ~20 km tall, so
+      // a 1.9 km shift stays within the same cell. That
+      // meant the test wasn't actually exercising the cross-
+      // cell recompute path; it would have passed even if
+      // _recomputeSuggestion were never called on cell
+      // change.
       final fixes = [
-        _pos(22.298, 114.170), // cell A (Yau Tsim Mong)
-        _pos(22.315, 114.170), // cell B (~1.9 km north, still Yau Tsim Mong)
+        _pos(22.270, 114.140), // cell A: wkfft (Central and Western)
+        _pos(22.270,
+            114.170), // cell B: wkfg8 (Central and Western, ~3.3 km east)
       ];
       var i = 0;
       final p = UserLocationProvider(
@@ -506,11 +519,10 @@ void main() {
       final after = p.currentSuggestion;
       expect(after, isNotNull);
       // The engine must drop the cell the user just entered
-      // (encodeGeohash(22.315, 114.170, 5)) from the
-      // candidates. We assert that hash is in visitedCells
-      // and not in the suggestion.
-      final visitedCellHash = 'wecnp'; // computed for (22.315, 114.170, 5)
-      expect(after!.geohash, isNot(equals(visitedCellHash)),
+      // (encodeGeohash(22.270, 114.170, 5) = wkfg8) from the
+      // candidates. We assert that hash is not the
+      // suggestion.
+      expect(after!.geohash, isNot(equals('wkfg8')),
           reason: 'suggestion must skip the cell the user just entered');
     });
 
