@@ -657,6 +657,45 @@ void main() {
           reason: 'cell visited in session 1 must be persisted to '
               'SharedPreferences and re-loaded in session 2');
     });
+
+    test(
+        'percentages plateau at 100 once _visitedCells exceeds 100 '
+        '(regression for the "no upper bound, percentage grows past '
+        '100" bug)', () async {
+      // The percentages are computed as
+      // `_visitedCells.length.clamp(0, 100)` in
+      // _recalculatePercentages. The clamp at 100 means the
+      // achievement ladder's top tier (99%) is reachable but the
+      // HUD never shows "101% explored" or anything silly.
+      //
+      // A regression that removed the upper clamp would let the
+      // percentages grow past 100 — the achievement tier math
+      // would break (e.g. tierForThreshold would misbehave
+      // because the threshold ranges only go up to 99).
+      //
+      // We seed _visitedCells with 150 synthetic cells via
+      // SharedPreferences to bypass the real updateUserLocation
+      // path (which would require 150 actual GPS fixes).
+      final syntheticCells = <String>[
+        for (var i = 0; i < 150; i++) 'cell${i.toString().padLeft(3, "0")}',
+      ];
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'urbix.visited_cells':
+            '[${syntheticCells.map((c) => '"$c"').join(',')}]',
+      });
+      final p = UserLocationProvider();
+      await p.loadFromStorage();
+      // The clamp should have kicked in on loadFromStorage via
+      // _recalculatePercentages.
+      expect(p.uniqueCellsVisited, 150, reason: 'sanity: all 150 cells loaded');
+      expect(p.countryPercentage, 100,
+          reason: 'countryPercentage must plateau at 100 even with '
+              '150 cells visited');
+      expect(p.continentPercentage, 100,
+          reason: 'continentPercentage must plateau at 100');
+      expect(p.worldPercentage, 100,
+          reason: 'worldPercentage must plateau at 100');
+    });
   });
 
   group('UserLocationProvider currentSuggestion (exploration engine wiring)',
