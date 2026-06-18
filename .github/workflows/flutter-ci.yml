@@ -18,10 +18,16 @@ concurrency:
 # action-version mismatch we can't debug without a working CI),
 # so we install Flutter the same way Flutter's own CI does:
 # clone flutter/flutter at a pinned tag and add it to PATH.
+#
+# FLUTTER_VERSION and FLUTTER_HOME are workflow-level so every
+# job's "Install Flutter" step can use them. The PATH prepend
+# (flutter/bin in front of the system PATH) is added at the
+# *job* level instead, because referencing ${{ env.PATH }}
+# inside a workflow-level env block is the kind of thing that
+# silently breaks under some Actions parser versions.
 env:
   FLUTTER_VERSION: '3.24.5'
   FLUTTER_HOME: ${{ github.workspace }}/flutter
-  PATH: ${{ github.workspace }}/flutter/bin:${{ env.PATH }}
 
 jobs:
   # ------------------------------------------------------------
@@ -33,6 +39,8 @@ jobs:
   format:
     name: Format check
     runs-on: ubuntu-latest
+    env:
+      PATH: ${{ env.FLUTTER_HOME }}/bin:${{ env.PATH }}
     steps:
       - uses: actions/checkout@v4
       - name: Install Flutter
@@ -50,6 +58,8 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    env:
+      PATH: ${{ env.FLUTTER_HOME }}/bin:${{ env.PATH }}
     steps:
       - uses: actions/checkout@v4
       - name: Install Flutter
@@ -72,6 +82,8 @@ jobs:
   test:
     name: Test + coverage
     runs-on: ubuntu-latest
+    env:
+      PATH: ${{ env.FLUTTER_HOME }}/bin:${{ env.PATH }}
     steps:
       - uses: actions/checkout@v4
       - name: Install Flutter
@@ -110,6 +122,8 @@ jobs:
     name: Build debug APK
     runs-on: ubuntu-latest
     if: github.event_name != 'tag'
+    env:
+      PATH: ${{ env.FLUTTER_HOME }}/bin:${{ env.PATH }}
     steps:
       - uses: actions/checkout@v4
       - name: Install Flutter
@@ -143,6 +157,8 @@ jobs:
       secrets.ANDROID_KEYSTORE_BASE64 != ''
     permissions:
       contents: write
+    env:
+      PATH: ${{ env.FLUTTER_HOME }}/bin:${{ env.PATH }}
     steps:
       - uses: actions/checkout@v4
       - name: Install Flutter
