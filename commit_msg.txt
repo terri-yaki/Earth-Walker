@@ -1,0 +1,18 @@
+test: lock down grid-center / cell-hash consistency for every cell
+
+The grid-internals test previously only sampled the first 20 cells
+and asserted the re-encoded hash was "valid" (right length and
+alphabet) without actually comparing it to the cell's claimed
+geohash. The comment explicitly said "we don't assert reencoded ==
+c.geohash because the grid stores the cell identity, not the exact
+center".
+
+Now that the bbox-walk step is 0.011° (= the lng cell width), the
+centers DO hash to the same value as the cell's claimed hash (this
+is a precondition for the suggestion engine to correctly mark
+cells as visited when the user walks into them). The test now
+asserts this property for every cell in the grid (not just the
+first 20), so a future step-size regression can't silently break
+it.
+
+Tests: 145 -> 145 (modified one existing test, no count change).
