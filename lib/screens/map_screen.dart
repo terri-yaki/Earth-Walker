@@ -297,11 +297,12 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     final userLocationProvider = Provider.of<UserLocationProvider>(context);
+    final l = L10n.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Urbix HK',
+        title: Text(
+          l.appTitle,
           style: AppTextStyles.appBarTitle,
         ),
         leading: Builder(
@@ -408,7 +409,7 @@ class _MapScreenState extends State<MapScreen> {
                     // in Semantics so a screen-reader user hears "You
                     // are here" rather than a bare image announcement.
                     Semantics(
-                      label: 'You are here',
+                      label: l.youAreHere,
                       child: MarkerLayer(
                         markers: [
                           Marker(

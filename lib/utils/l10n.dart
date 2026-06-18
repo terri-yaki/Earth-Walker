@@ -156,6 +156,18 @@ class L10n {
   String get explorationWorldPercent =>
       _lookup('exploration_world_percent');
 
+  /// Accessibility label on the user-location marker. Read aloud
+  /// by TalkBack / VoiceOver instead of the bare image announcement.
+  String get youAreHere => _lookup('you_are_here');
+
+  /// SnackBar message shown after the user taps the Recenter FAB
+  /// and the map successfully recenters on their location.
+  String get mapRecenteredSnack => _lookup('map_recentered_snack');
+
+  /// Tooltip on the Recenter FAB. Shown on long-press; also read
+  /// aloud by TalkBack as the button's semantics label.
+  String get recenterMapTooltip => _lookup('recenter_map_tooltip');
+
   /// Lookup for any key not covered by a typed getter. Useful in
   /// tests; production code should prefer the typed getters.
   @visibleForTesting

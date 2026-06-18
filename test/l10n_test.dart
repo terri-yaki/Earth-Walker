@@ -85,6 +85,9 @@ const Map<String, String> _enStrings = <String, String>{
   'exploration_world': 'World',
   'exploration_suffix': 'Exploration:',
   'exploration_world_percent': 'world exploration',
+  'you_are_here': 'You are here',
+  'map_recentered_snack': 'Map recentered to your current location.',
+  'recenter_map_tooltip': 'Recenter Map',
 };
 
 const Map<String, String> _zhStrings = <String, String>{
@@ -173,6 +176,9 @@ const Map<String, String> _zhStrings = <String, String>{
   'exploration_world': '\u4e16\u754c',
   'exploration_suffix': '\u63a2\u7d22\uff1a',
   'exploration_world_percent': '\u4e16\u754c\u63a2\u7d22',
+  'you_are_here': '\u4f60\u54a9\u5b9a\u8aaa',
+  'map_recentered_snack': '\u5730\u5716\u5df2\u91cd\u65b0\u5b9a\u4f4d\u5230\u4f60\u7684\u4f4d\u7f6e\u3002',
+  'recenter_map_tooltip': '\u91cd\u65b0\u5b9a\u4f4d',
 };
 
 void main() {
@@ -295,6 +301,37 @@ void main() {
       expect(zh.tierGold, matches(RegExp(r'[\u4E00-\u9FFF]')));
       expect(zh.tierSilver, matches(RegExp(r'[\u4E00-\u9FFF]')));
       expect(zh.tierBronze, matches(RegExp(r'[\u4E00-\u9FFF]')));
+    });
+
+    test('user-location / recenter copy is localised', () {
+      // The Map screen had three hardcoded English strings visible
+      // to zh-HK users: the AppBar title 'Urbix HK', the user-
+      // location semantics label 'You are here', and the Recenter
+      // FAB tooltip 'Recenter Map'. The Recenter snackbar message
+      // 'Map recentered to your current location.' was also
+      // hardcoded English. Lock them down.
+      final en = L10n(const Locale('en'), _enStrings, _enStrings);
+      final zh = L10n(const Locale('zh', 'HK'), _zhStrings, _enStrings);
+      expect(en.appTitle, 'Urbix HK');
+      expect(en.youAreHere, 'You are here');
+      expect(en.mapRecenteredSnack,
+          'Map recentered to your current location.');
+      expect(en.recenterMapTooltip, 'Recenter Map');
+      // Chinese versions should NOT be the English fallbacks.
+      expect(zh.appTitle, isNot(en.appTitle));
+      expect(zh.youAreHere, isNot(en.youAreHere));
+      expect(zh.mapRecenteredSnack, isNot(en.mapRecenteredSnack));
+      expect(zh.recenterMapTooltip, isNot(en.recenterMapTooltip));
+      // Chinese versions should contain CJK ideographs.
+      for (final s in <String>[
+        zh.appTitle,
+        zh.youAreHere,
+        zh.mapRecenteredSnack,
+        zh.recenterMapTooltip,
+      ]) {
+        expect(s, matches(RegExp(r'[\u4E00-\u9FFF]')),
+            reason: '$s should contain CJK ideographs');
+      }
     });
 
     test('exploration percentage labels are localised', () {

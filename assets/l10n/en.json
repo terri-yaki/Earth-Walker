@@ -70,5 +70,8 @@
   "exploration_continent": "Continent",
   "exploration_world": "World",
   "exploration_suffix": "Exploration:",
-  "exploration_world_percent": "world exploration"
+  "exploration_world_percent": "world exploration",
+  "you_are_here": "You are here",
+  "map_recentered_snack": "Map recentered to your current location.",
+  "recenter_map_tooltip": "Recenter Map"
 }
