@@ -48,6 +48,26 @@ void main() {
       expect(l.appTitle, matches(RegExp(r'[\u4E00-\u9FFF]')));
     });
 
+    test('onboarding pitch and CTA are localised', () {
+      final en = L10n(const Locale('en'));
+      final zh = L10n(const Locale('zh', 'HK'));
+      expect(en.onboardingPitch, contains('neighbourhoods'));
+      expect(en.onboardingGetStarted, 'Get Started');
+      expect(zh.onboardingPitch, matches(RegExp(r'[\u4E00-\u9FFF]')));
+      expect(zh.onboardingGetStarted, matches(RegExp(r'[\u4E00-\u9FFF]')));
+    });
+
+    test('permission error messages are localised', () {
+      final en = L10n(const Locale('en'));
+      final zh = L10n(const Locale('zh', 'HK'));
+      expect(en.onboardingPermDenied, contains('location'));
+      expect(en.onboardingPermDeniedForever, contains('permanently'));
+      expect(en.onboardingLocOff, contains('off'));
+      expect(zh.onboardingPermDenied, matches(RegExp(r'[\u4E00-\u9FFF]')));
+      expect(zh.onboardingPermDeniedForever,
+          matches(RegExp(r'[\u4E00-\u9FFF]')));
+    });
+
     test('missing key falls back to English', () {
       // Construct an empty-locale L10n so the table lookup misses
       // for every key. The fallback to 'en' should kick in.

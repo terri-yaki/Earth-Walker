@@ -74,6 +74,19 @@ class L10n {
       'hud_explored': 'explored',
       'hud_visit': 'visit',
       'hud_visits': 'visits',
+      'screen_achievements': 'Achievements',
+      'screen_medals': 'Medals',
+      'screen_districts': 'Districts',
+      'onboarding_pitch':
+          'Walk your city. Unlock badges as you explore new neighbourhoods.',
+      'onboarding_get_started': 'Get Started',
+      'onboarding_loc_off':
+          'Location services are off. Please turn them on in Settings, then come back.',
+      'onboarding_perm_denied':
+          'Urbix HK needs your location to track where you explore. Please allow it and try again.',
+      'onboarding_perm_denied_forever':
+          'Location permission is permanently denied. Enable it in Settings to use Urbix HK.',
+      'onboarding_loc_error_prefix': 'Could not request location:',
     },
     'zh-HK': {
       'app_title': 'Urbix 香港',
@@ -93,6 +106,17 @@ class L10n {
       'hud_explored': '已探索',
       'hud_visit': '次到訪',
       'hud_visits': '次到訪',
+      'screen_achievements': '成就',
+      'screen_medals': '獎牌',
+      'screen_districts': '地區',
+      'onboarding_pitch': '行勻全城，探索新地區，賺取勳章。',
+      'onboarding_get_started': '開始使用',
+      'onboarding_loc_off': '定位服務未開啟。請到「設定」開啟後再試。',
+      'onboarding_perm_denied':
+          'Urbix 香港需要存取你嘅位置先可以記錄到訪過嘅地方。請允許後再試。',
+      'onboarding_perm_denied_forever':
+          '定位權限已被永久拒絕。請到「設定」開啟，先可以用 Urbix 香港。',
+      'onboarding_loc_error_prefix': '無法取得位置：',
     },
   };
 
@@ -121,6 +145,17 @@ class L10n {
   String get hudExplored => _lookup('hud_explored');
   String get hudVisit => _lookup('hud_visit');
   String get hudVisits => _lookup('hud_visits');
+  String get screenAchievements => _lookup('screen_achievements');
+  String get screenMedals => _lookup('screen_medals');
+  String get screenDistricts => _lookup('screen_districts');
+  String get onboardingPitch => _lookup('onboarding_pitch');
+  String get onboardingGetStarted => _lookup('onboarding_get_started');
+  String get onboardingLocOff => _lookup('onboarding_loc_off');
+  String get onboardingPermDenied => _lookup('onboarding_perm_denied');
+  String get onboardingPermDeniedForever =>
+      _lookup('onboarding_perm_denied_forever');
+  String get onboardingLocErrorPrefix =>
+      _lookup('onboarding_loc_error_prefix');
 
   /// Lookup for any key not covered by a typed getter. Useful in
   /// tests; production code should prefer the typed getters.

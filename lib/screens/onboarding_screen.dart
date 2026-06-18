@@ -11,6 +11,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/l10n.dart';
 import 'map_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -51,14 +52,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _errorMessage = null;
     });
 
+    final l = L10n.of(context);
     try {
       // Ensure location services are enabled at the device level.
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         setState(() {
           _busy = false;
-          _errorMessage =
-              'Location services are off. Please turn them on in Settings, then come back.';
+          _errorMessage = l.onboardingLocOff;
         });
         return;
       }
@@ -73,16 +74,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       if (permission == LocationPermission.deniedForever) {
         setState(() {
           _busy = false;
-          _errorMessage =
-              'Location permission is permanently denied. Enable it in Settings to use Urbix HK.';
+          _errorMessage = l.onboardingPermDeniedForever;
         });
         return;
       }
       if (permission == LocationPermission.denied) {
         setState(() {
           _busy = false;
-          _errorMessage =
-              'Urbix HK needs your location to track where you explore. Please allow it and try again.';
+          _errorMessage = l.onboardingPermDenied;
         });
         return;
       }
@@ -95,7 +94,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     } catch (e) {
       setState(() {
         _busy = false;
-        _errorMessage = 'Could not request location: $e';
+        _errorMessage = '${l.onboardingLocErrorPrefix} $e';
       });
     }
   }
@@ -123,20 +122,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 color: Colors.green,
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Urbix HK',
+              Text(
+                L10n.of(context).appTitle,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontFamily: 'PixelFont',
                   fontSize: 32,
                   color: Colors.black,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Walk your city. Unlock badges as you explore new neighbourhoods.',
+              Text(
+                L10n.of(context).onboardingPitch,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   color: Colors.black87,
                 ),
@@ -166,9 +165,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           color: Colors.white,
                         ),
                       )
-                    : const Text(
-                        'Get Started',
-                        style: TextStyle(
+                    : Text(
+                        L10n.of(context).onboardingGetStarted,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontFamily: 'PixelFont',
                         ),

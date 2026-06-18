@@ -12,6 +12,7 @@ import '../widgets/recenter_button.dart';
 import '../widgets/hamburger_menu.dart';
 import '../widgets/text.dart'; // Ensure this points to your custom text widget
 import '../utils/constants.dart';
+import '../utils/l10n.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);
@@ -169,15 +170,15 @@ class _MapScreenState extends State<MapScreen> {
       ),
       drawer: const HamburgerMenu(),
       body: _isLoading
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: Colors.green),
-                  SizedBox(height: 16),
+                  const CircularProgressIndicator(color: Colors.green),
+                  const SizedBox(height: 16),
                   Text(
-                    'Finding your location…',
-                    style: TextStyle(
+                    L10n.of(context).findingLocation,
+                    style: const TextStyle(
                       fontFamily: 'PixelFont',
                       fontSize: 16,
                       color: Colors.black54,
@@ -298,7 +299,7 @@ class _MapScreenState extends State<MapScreen> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'explored',
+                              L10n.of(context).hudExplored,
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.75),
                                 fontSize: 14,
@@ -350,13 +351,18 @@ class _MapScreenState extends State<MapScreen> {
                               if (userLocationProvider.cellsInCurrentDistrict >
                                   0) ...[
                                 const SizedBox(width: 6),
-                                Text(
-                                  '· ${userLocationProvider.cellsInCurrentDistrict} ${userLocationProvider.cellsInCurrentDistrict == 1 ? "visit" : "visits"}',
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.75),
-                                    fontSize: 12,
-                                  ),
-                                ),
+                                Builder(builder: (context) {
+                                  final l = L10n.of(context);
+                                  final n =
+                                      userLocationProvider.cellsInCurrentDistrict;
+                                  return Text(
+                                    '· $n ${n == 1 ? l.hudVisit : l.hudVisits}',
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.75),
+                                      fontSize: 12,
+                                    ),
+                                  );
+                                }),
                               ],
                             ],
                           ),
@@ -390,17 +396,16 @@ class _MapScreenState extends State<MapScreen> {
                             ),
                           ],
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.directions_walk,
+                            const Icon(Icons.directions_walk,
                                 color: Colors.green, size: 20),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Flexible(
                               child: Text(
-                                'Walk around to discover new places. '
-                                'Visited areas appear as green circles.',
-                                style: TextStyle(
+                                L10n.of(context).firstRunHint,
+                                style: const TextStyle(
                                   fontFamily: 'PixelFont',
                                   fontSize: 12,
                                   color: Colors.black87,
