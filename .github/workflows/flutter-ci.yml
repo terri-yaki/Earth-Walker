@@ -13,6 +13,16 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Manual Flutter install via git clone. The subosito/flutter-action
+# was failing instantly on every run (likely a runner-image /
+# action-version mismatch we can't debug without a working CI),
+# so we install Flutter the same way Flutter's own CI does:
+# clone flutter/flutter at a pinned tag and add it to PATH.
+env:
+  FLUTTER_VERSION: '3.24.5'
+  FLUTTER_HOME: ${{ github.workspace }}/flutter
+  PATH: ${{ github.workspace }}/flutter/bin:${{ env.PATH }}
+
 jobs:
   # ------------------------------------------------------------
   # Cheapest check first. `dart format` is a few seconds; a PR
@@ -25,9 +35,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
+      - name: Install Flutter
+        run: |
+          git clone --depth 1 --branch ${FLUTTER_VERSION} \
+              https://github.com/flutter/flutter.git ${FLUTTER_HOME}
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed .
 
@@ -41,9 +52,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
+      - name: Install Flutter
+        run: |
+          git clone --depth 1 --branch ${FLUTTER_VERSION} \
+              https://github.com/flutter/flutter.git ${FLUTTER_HOME}
       - run: flutter pub get
       - run: flutter analyze --no-fatal-infos
 
@@ -62,9 +74,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
+      - name: Install Flutter
+        run: |
+          git clone --depth 1 --branch ${FLUTTER_VERSION} \
+              https://github.com/flutter/flutter.git ${FLUTTER_HOME}
       - run: flutter pub get
       - name: Run tests with coverage
         run: flutter test --coverage
@@ -99,9 +112,10 @@ jobs:
     if: github.event_name != 'tag'
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
+      - name: Install Flutter
+        run: |
+          git clone --depth 1 --branch ${FLUTTER_VERSION} \
+              https://github.com/flutter/flutter.git ${FLUTTER_HOME}
       - run: flutter pub get
       - name: Build debug APK
         run: flutter build apk --debug
@@ -116,7 +130,7 @@ jobs:
   # Tag-triggered signed release build. Only runs on v* tag
   # pushes, and only if the four Android signing secrets are
   # configured in Settings → Secrets and variables → Actions.
-  # The `if: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}` guard makes
+  # The `if: secrets.ANDROID_KEYSTORE_BASE64 != ''` guard makes
   # the job skip cleanly (not fail) when the secrets aren't
   # configured yet, so the rest of the CI works without the
   # release pipeline being ready.
@@ -131,9 +145,10 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
+      - name: Install Flutter
+        run: |
+          git clone --depth 1 --branch ${FLUTTER_VERSION} \
+              https://github.com/flutter/flutter.git ${FLUTTER_HOME}
       - run: flutter pub get
       - name: Decode Android signing key
         # The keystore is base64'd in the ANDROID_KEYSTORE_BASE64
@@ -153,16 +168,18 @@ jobs:
           keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
           EOF
       - name: Build signed release APK
-        run: cd android && ./gradlew assembleRelease
+        run: flutter build apk --release
       - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: apk-release-${{ github.ref_name }}
+          name: apk-release-${{ github.run_id }}
+          path: build/app/outputs/flutter-apk/app-release.apk
         if-no-files-found: error
-      - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: ${{ github.ref_name }}
-          generate_release_notes: true
-        # To attach the APK to the release page, add
-        # files: build/app/outputs/flutter-apk/app-release.apk above.
+
+# Not in this commit (deliberately):
+#   - Codecov upload: needs CODECOV_TOKEN; easy follow-up.
+#   - iOS release: needs a macos-latest runner + Apple signing
+#     identity; only worth adding when an iOS release is actually
+#     on the roadmap.
+#   - 'flutter pub outdated' as a CI step: scheduled-job material,
+#     not every-push material.
