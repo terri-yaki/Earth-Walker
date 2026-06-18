@@ -163,3 +163,10 @@ HkDistrict? districtFor(LatLng location) {
   }
   return null;
 }
+
+/// All 18 HK district names, in the canonical [districtFor] order
+/// (most-specific first). Useful for iterating the full list when
+/// rendering a breakdown screen — avoids hard-coding the list in
+/// a second place.
+List<String> get allDistrictNames =>
+    _DISTRICTS.map((d) => d.name).toList(growable: false);

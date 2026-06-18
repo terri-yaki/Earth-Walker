@@ -7,6 +7,7 @@ import '../providers/achievement_provider.dart';
 import '../providers/medal_provider.dart';
 import '../providers/userlocation_provider.dart';
 import '../screens/achievement_screen.dart';
+import '../screens/districts_screen.dart';
 import '../screens/medal_screen.dart';
 import '../utils/progress_summary.dart';
 
@@ -49,6 +50,16 @@ class HamburgerMenu extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const MedalScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.location_city),
+            title: const Text('Districts'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DistrictsScreen()),
               );
             },
           ),

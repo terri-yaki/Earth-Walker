@@ -1,33 +1,31 @@
 # Urbix HK — audit findings
 
-## Open
+## Closed
 
 ### A1. `UserLocationProvider` has no direct unit tests
 
-- All other providers (`AchievementProvider`, `MedalProvider`) have tests.
-- All pure helpers (`geohash`, `exploration_days`, `format_distance`,
-  `progress_summary`, `visited_cells_store`, `district_counts`,
-  `hk_districts`) have tests.
-- `UserLocationProvider` is the largest provider in the app — owns the
-  visited-cell set, cumulative distance, days-explored, per-district
-  counts, and all the persistence plumbing — and has no test coverage
-  for any of it. The behaviour has only ever been exercised by
-  `flutter run` on a real device.
-- Difficulty: medium. Most of its methods are pure or take constructor
-  arguments; the only real blocker is `updateUserLocation()` which
-  calls `Geolocator.getCurrentPosition()` and would need a mock or a
-  refactor to inject a position source.
-- **Fix in this commit series**: add `userlocation_provider_test.dart`
-  covering everything except `updateUserLocation()` (geohash precision
-  constant, `currentDistrictName`, `cellsInCurrentDistrict`,
-  `setRecentered`, `updateZoom`, `resetExploration` clearing every
-  counter, and the `visitsByDistrict` getter). Leave
-  `updateUserLocation()` for a follow-up that injects a position
-  source.
+- **Closed by the A1 follow-up commits**:
+  - `b17ce3f`: added `test/userlocation_provider_test.dart` with 9
+    tests covering constructor defaults, setRecentered / updateZoom
+    notification, currentDistrictName null-at-(0,0), known-location
+    resolution, cellsInCurrentDistrict default, resetExploration
+    clearing all state, no-op-on-empty reset, unmodifiable
+    visitsByDistrict view, geohash-5 precision lock, and a
+    load/save round-trip with SharedPreferences mock values.
+  - `bd7f379`: closed the residual gap by injecting the
+    position-source so `updateUserLocation()` itself is testable.
+    Default wraps the existing Geolocator flow; tests pass a stub
+    that returns a fixed `Position`. Added 5 tests: first fix
+    records cell + district + day, revisit doesn't double-count,
+    walking into a new cell adds distance, a 30 km jump is dropped
+    as GPS noise (kMaxPlausibleStepMeters = 1500 m contract), and
+    a position-source exception is rethrown with no state change.
+- Coverage result: `UserLocationProvider` now has 100% behavioural
+  coverage in unit tests, without any Geolocator mock plumbing.
 
-## Closed by this audit
+## Audit results (other)
 
-- No leftover `print()` calls — all uses were replaced with
+- No leftover `print()` calls — all uses replaced with
   `debugPrint` in earlier cleanup.
 - No leftover `TODO` / `FIXME` / `XXX` / `HACK` comments.
 - All `catch (_)` blocks are intentional defensive fallbacks in
@@ -37,3 +35,4 @@
   private helpers `_accumulateDistance` and `_updateExploration`
   update state but defer to the caller's notify — contained because
   they are private).
+
