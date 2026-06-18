@@ -138,6 +138,19 @@ is brag-worthy (>= 3 days), so the user can re-share any time
 without going through the drawer. Thresholds: 3, 7, 14, 30
 days (`kStreakShareMilestones`).
 
+## [x] FEAT-6 — "Next" suggestion chip in the HUD
+Label: `FEAT`. P1. Resolved. New `pickNextExploration` engine
+in `lib/utils/exploration_suggestion.dart` ranks the unvisited
+geohash-5 cells in the HK candidate grid by proximity (dominant)
++ a +20% bonus for being in a district the user hasn't visited
+yet, and exposes only the top winner. The provider caches the
+result, recomputes on every location update + reset, and the
+HUD renders a tap-to-recenter "Next: <district> · <distance>"
+chip. Tapping the chip moves the map to the target and disables
+auto-recenter so the user can examine the destination without
+the map yanking back. The engine is pure (no Provider coupling)
+and unit-tested with 10 cases.
+
 ## [ ] PERF-1 — _visitedCells is O(n) lookups on every new fix
 Label: `PERF`. P3. Set<String> is a hash set, so individual
 lookups are O(1), but the user adds a cell, computes

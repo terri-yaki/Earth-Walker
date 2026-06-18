@@ -12,6 +12,7 @@ import '../widgets/recenter_button.dart';
 import '../widgets/hamburger_menu.dart';
 import '../widgets/text.dart'; // Ensure this points to your custom text widget
 import '../utils/constants.dart';
+import '../utils/exploration_suggestion.dart';
 import '../utils/l10n.dart';
 import '../utils/streak_milestones.dart';
 
@@ -175,6 +176,19 @@ class _MapScreenState extends State<MapScreen> {
           ),
         ),
       );
+  }
+
+  /// Recenter the map on the suggestion's target cell. We also
+  /// disable auto-recentering so the map doesn't yank itself
+  /// back to the user's current location on the next GPS fix —
+  /// the user explicitly asked to look at the target, so we
+  /// respect that. The bottom-right RecenterButton restores
+  /// follow-mode when they're done walking.
+  void _onSuggestionTap(ExplorationSuggestion s) {
+    final provider =
+        Provider.of<UserLocationProvider>(context, listen: false);
+    _mapController.move(s.target, provider.currentZoom);
+    provider.setRecentered(false);
   }
 
   /// Initializes the map by fetching the user's location.
@@ -651,6 +665,49 @@ class _MapScreenState extends State<MapScreen> {
                               );
                             }),
                           ],
+                        ],
+                        // "Next" chip: the top-ranked suggestion
+                        // from the exploration-suggestion engine.
+                        // Lives outside the currentDistrictName
+                        // guard so it still appears for users who
+                        // are at sea or in a part of HK that the
+                        // bounding boxes don't cover (the engine
+                        // ranks candidates by proximity, the
+                        // district name is just the label).
+                        if (userLocationProvider.currentSuggestion !=
+                            null) ...[
+                          Builder(builder: (context) {
+                            final l = L10n.of(context);
+                            final s =
+                                userLocationProvider.currentSuggestion!;
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: InkWell(
+                                onTap: () => _onSuggestionTap(s),
+                                borderRadius: BorderRadius.circular(12),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.explore,
+                                        color: Colors.greenAccent,
+                                        size: 14),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${l.suggestionChip}: '
+                                      '${s.districtName ?? l.suggestionExploreOther}'
+                                      ' · ${formatDistance(s.distanceFromUserMeters)}',
+                                      style: TextStyle(
+                                        color: Colors.white
+                                            .withOpacity(0.85),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
                         ],
                       ],
                     ),

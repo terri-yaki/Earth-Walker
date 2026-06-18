@@ -69,6 +69,8 @@ const Map<String, String> _enStrings = <String, String>{
   'cell_plural': 'cells',
   'districts_explored': 'districts explored',
   'badge_unlock_header': 'Badge unlocked!',
+  'suggestion_chip': 'Next',
+  'suggestion_explore_other': 'a new area',
 };
 
 const Map<String, String> _zhStrings = <String, String>{
@@ -134,6 +136,8 @@ const Map<String, String> _zhStrings = <String, String>{
   'cell_plural': '格',
   'districts_explored': '個地區已探索',
   'badge_unlock_header': '勳章解鎖！',
+  'suggestion_chip': '下一步',
+  'suggestion_explore_other': '新地方',
 };
 
 void main() {

@@ -60,5 +60,7 @@
   "cell_singular": "cell",
   "cell_plural": "cells",
   "districts_explored": "districts explored",
-  "badge_unlock_header": "Badge unlocked!"
+  "badge_unlock_header": "Badge unlocked!",
+  "suggestion_chip": "Next",
+  "suggestion_explore_other": "a new area"
 }

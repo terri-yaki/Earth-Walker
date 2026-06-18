@@ -60,5 +60,7 @@
   "cell_singular": "格",
   "cell_plural": "格",
   "districts_explored": "個地區已探索",
-  "badge_unlock_header": "勳章解鎖！"
+  "badge_unlock_header": "勳章解鎖！",
+  "suggestion_chip": "下一步",
+  "suggestion_explore_other": "新地方"
 }

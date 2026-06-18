@@ -136,6 +136,8 @@ class L10n {
   String get cellPlural => _lookup('cell_plural');
   String get districtsExplored => _lookup('districts_explored');
   String get badgeUnlockHeader => _lookup('badge_unlock_header');
+  String get suggestionChip => _lookup('suggestion_chip');
+  String get suggestionExploreOther => _lookup('suggestion_explore_other');
 
   /// Lookup for any key not covered by a typed getter. Useful in
   /// tests; production code should prefer the typed getters.

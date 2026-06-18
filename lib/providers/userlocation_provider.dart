@@ -9,6 +9,7 @@ import '../models/user_location.dart';
 import '../utils/district_counts.dart';
 import '../utils/double_map.dart';
 import '../utils/exploration_days.dart';
+import '../utils/exploration_suggestion.dart';
 import '../utils/geohash.dart';
 import '../utils/hk_districts.dart';
 import '../utils/lat_lng_list.dart';
@@ -252,6 +253,18 @@ class UserLocationProvider with ChangeNotifier {
   /// Persisted to SharedPreferences.
   final Map<String, double> _distanceByDay = <String, double>{};
 
+  /// The current top-ranked suggestion for where to explore next.
+  /// Recomputed in [_recomputeSuggestion] whenever the user's
+  /// location changes, the visited-cell set changes, or a reset
+  /// clears it. Null if the user has no real location yet (still
+  /// at the (0,0) default) or has explored every cell we know
+  /// about. Read by the map HUD to render the "Next" chip.
+  ExplorationSuggestion? _currentSuggestion;
+
+  /// The top-ranked unexplored cell for the user, or null if
+  /// there's nothing left to suggest. See [_currentSuggestion].
+  ExplorationSuggestion? get currentSuggestion => _currentSuggestion;
+
   /// Number of distinct cells the user has entered (read-only).
   int get uniqueCellsVisited => _visitedCells.length;
 
@@ -332,6 +345,13 @@ class UserLocationProvider with ChangeNotifier {
             prefs.getString(_prefsKeyVisitedCellLocations)));
       _lastDistanceReference = null; // first new fix will set it
       _recalculatePercentages();
+      // Seed the suggestion from the loaded state. The user's
+      // location is still (0,0) at this point, so this will
+      // resolve to null; the real suggestion comes after the
+      // first updateUserLocation fix. Calling it here keeps
+      // the state shape consistent for any listener that
+      // inspects the suggestion before the first GPS fix.
+      _recomputeSuggestion();
       notifyListeners();
     } catch (e) {
       debugPrint('Failed to load visited cells: $e');
@@ -403,6 +423,10 @@ class UserLocationProvider with ChangeNotifier {
       // increments that district's count. Cells outside HK stay out
       // of the map, which is correct — we only have district boxes
       // for Hong Kong.
+    // The visited set may have just changed; recompute the
+    // suggestion so the HUD's "Next" chip points at the best
+    // new target.
+    _recomputeSuggestion();
       final district = districtFor(location);
       if (district != null) {
         _visitsByDistrict.update(
@@ -432,8 +456,34 @@ class UserLocationProvider with ChangeNotifier {
   /// [updateUserLocation] bails out at its next checkpoint instead
   /// of clobbering the reset.
   void resetExploration() {
-    _countryPercentage = 0;
-    _continentPercentage = 0;
+    // Reset re-opens the entire HK cell grid to "unvisited",
+    // so the suggestion must be recomputed; otherwise the chip
+    // would keep pointing at a cell the user has now reset.
+    _recomputeSuggestion();
+    saveToStorage();
+    notifyListeners();
+  }
+
+  /// Recompute [_currentSuggestion] from the current location,
+  /// visited-cell set, and per-district visit counts. Called
+  /// after every state change that affects any of those inputs.
+  /// Cheap (O(grid) where grid ~300 cells), so we don't bother
+  /// memoising.
+  void _recomputeSuggestion() {
+    final coords = _userLocation.coordinates;
+    // Same guard as [currentDistrictName]: (0,0) means "no
+    // real location yet", and suggesting "explore a cell 13,000
+    // km away" is unhelpful.
+    if (coords.latitude == 0.0 && coords.longitude == 0.0) {
+      _currentSuggestion = null;
+      return;
+    }
+    _currentSuggestion = pickNextExploration(
+      userLocation: coords,
+      visitedCells: _visitedCells,
+      candidateCells: kHKCellGrid,
+      visitedDistricts: _visitsByDistrict.keys.toSet(),
+    tage = 0;
     _worldPercentage = 0;
     _visitedCells.clear();
     _visitedCellLocations.clear();
