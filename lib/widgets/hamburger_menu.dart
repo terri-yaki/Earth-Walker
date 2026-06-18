@@ -9,6 +9,7 @@ import '../providers/userlocation_provider.dart';
 import '../screens/achievement_screen.dart';
 import '../screens/districts_screen.dart';
 import '../screens/medal_screen.dart';
+import '../utils/l10n.dart';
 import '../utils/progress_summary.dart';
 
 class HamburgerMenu extends StatelessWidget {
@@ -16,17 +17,18 @@ class HamburgerMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L10n.of(context);
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          const DrawerHeader(
-            decoration: BoxDecoration(
+          DrawerHeader(
+            decoration: const BoxDecoration(
               color: Colors.green,
             ),
             child: Text(
-              'Urbix HK',
-              style: TextStyle(
+              l.appTitle,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 24,
                 fontFamily: 'PixelFont',
@@ -35,7 +37,7 @@ class HamburgerMenu extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.emoji_events),
-            title: const Text('Achievements'),
+            title: Text(l.menuAchievements),
             onTap: () {
               Navigator.push(
                 context,
@@ -45,7 +47,7 @@ class HamburgerMenu extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.star),
-            title: const Text('Medals'),
+            title: Text(l.menuMedals),
             onTap: () {
               Navigator.push(
                 context,
@@ -55,7 +57,7 @@ class HamburgerMenu extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.location_city),
-            title: const Text('Districts'),
+            title: Text(l.menuDistricts),
             onTap: () {
               Navigator.push(
                 context,
@@ -66,9 +68,9 @@ class HamburgerMenu extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.restart_alt, color: Colors.red),
-            title: const Text(
-              'Reset Progress',
-              style: TextStyle(color: Colors.red),
+            title: Text(
+              l.menuReset,
+              style: const TextStyle(color: Colors.red),
             ),
             onTap: () => _confirmReset(context),
           ),
@@ -81,6 +83,7 @@ class HamburgerMenu extends StatelessWidget {
   /// unlocked achievements, and awarded medals. Includes a 'Copy' button
   /// so the user can grab a text summary of their progress first.
   Future<void> _confirmReset(BuildContext context) async {
+    final l = L10n.of(context);
     final location = context.read<UserLocationProvider>();
     final achievements = context.read<AchievementProvider>();
     final medals = context.read<MedalProvider>();
@@ -95,28 +98,28 @@ class HamburgerMenu extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Reset progress?'),
+        title: Text(l.resetDialogTitle),
         content: Text(
           'This will permanently clear your exploration history.\n\n$summary',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l.resetDialogCancel),
           ),
           TextButton(
             onPressed: () {
               Clipboard.setData(ClipboardData(text: summary));
               ScaffoldMessenger.of(dialogContext).showSnackBar(
-                const SnackBar(content: Text('Progress copied to clipboard.')),
+                SnackBar(content: Text(l.progressCopied)),
               );
             },
-            child: const Text('Copy'),
+            child: Text(l.resetDialogCopy),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Reset'),
+            child: Text(l.resetDialogConfirm),
           ),
         ],
       ),
@@ -130,7 +133,7 @@ class HamburgerMenu extends StatelessWidget {
     medals.resetMedals();
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Progress reset.')),
+      SnackBar(content: Text(l.progressResetDone)),
     );
   }
 }

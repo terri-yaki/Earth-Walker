@@ -12,6 +12,7 @@ import 'providers/medal_provider.dart';
 import 'screens/map_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'utils/constants.dart';
+import 'utils/l10n.dart';
 
 void main() {
   runApp(const UrbixApp());
@@ -65,6 +66,11 @@ class UrbixApp extends StatelessWidget {
             // Define other text styles as needed
           ),
         ),
+        // Localisation: en (default) and zh-HK. The L10n instance
+        // is provided via Localizations so screens can read it with
+        // L10n.of(context).
+        localizationsDelegates: const [L10nDelegate()],
+        supportedLocales: kSupportedLocales,
         home: const OnboardingScreen(),
       ),
     );
