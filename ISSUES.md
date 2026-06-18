@@ -117,6 +117,24 @@ walking figure) would be the obvious next step. Needs
 1024x1024 master + per-platform outputs (iOS, Android
 adaptive, web).
 
+## [x] FEAT-4 — System share sheet (real social media)
+Label: `FEAT`. P1. Resolved. Share dialog now hands the brag
+message + embedded snapshot to the OS share sheet via
+`share_plus`, so the user can post to Instagram, WhatsApp, X,
+Threads, Telegram, etc. in one tap. The "Copy" button stays for
+the raw-snapshot Compare flow. The brag line is automatically
+the streak version once the user has a 2+ day streak going.
+Close follow-up: an auto-prompt the first time the user crosses
+7 days ("Share your streak?") — deferred to FEAT-5 to keep
+this change minimal.
+
+## [ ] FEAT-5 — Auto-prompt "Share your streak?" at 7-day milestones
+Label: `FEAT`. P3. The share entry is in the drawer but the
+highest-leverage prompt is a one-shot snackbar the first time
+the user crosses a streak threshold (3, 7, 14, 30 days), with
+an action button that opens the share dialog pre-loaded with
+the streak brag. ~30 lines on top of FEAT-4.
+
 ## [ ] PERF-1 — _visitedCells is O(n) lookups on every new fix
 Label: `PERF`. P3. Set<String> is a hash set, so individual
 lookups are O(1), but the user adds a cell, computes

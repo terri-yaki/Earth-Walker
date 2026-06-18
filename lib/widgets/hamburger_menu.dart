@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../providers/achievement_provider.dart';
 import '../providers/medal_provider.dart';
 import '../providers/userlocation_provider.dart';
@@ -11,6 +12,7 @@ import '../screens/districts_screen.dart';
 import '../screens/medal_screen.dart';
 import '../utils/l10n.dart';
 import '../utils/progress_summary.dart';
+import '../utils/share_text.dart';
 
 class HamburgerMenu extends StatelessWidget {
   const HamburgerMenu({Key? key}) : super(key: key);
@@ -90,10 +92,11 @@ class HamburgerMenu extends StatelessWidget {
   }
 
   /// Show a dialog with a copy-paste-able snapshot of the user's
-  /// current progress. Another Urbix HK user can paste it into the
-  /// "Compare" entry (FEAT-4 in ISSUES.md) to see a side-by-side
-  /// comparison. Falls back to the plain text summary if the
-  /// snapshot fails to build (it never should, but defensive).
+  /// current progress. The "Share" action hands the brag message
+  /// (with snapshot embedded) to the OS share sheet so the user
+  /// can post to Instagram, WhatsApp, X, Threads, Telegram etc.
+  /// without leaving the app. The "Copy" action stays for users
+  /// who just want the raw snapshot text (e.g. for Compare).
   Future<void> _showShareDialog(BuildContext context) async {
     final l = L10n.of(context);
     final location = context.read<UserLocationProvider>();
@@ -114,6 +117,17 @@ class HamburgerMenu extends StatelessWidget {
       badgesUnlocked: snapshot.badgesUnlocked,
       medalsEarned: snapshot.medalsEarned,
       metersWalked: snapshot.metersWalked,
+    );
+    // Smart default brag: if the user has a real streak going
+    // (>= 2 days so "today" doesn't count as a brag), surface the
+    // streak brag. Otherwise the generic "I've been exploring"
+    // line. The user can still edit in the share sheet.
+    final bragLine = snapshot.currentStreakDays >= 2
+        ? l.shareBragStreak
+        : l.shareBragDefault;
+    final shareText = formatShareText(
+      snapshot: snapshot,
+      bragLine: bragLine,
     );
 
     await showDialog<void>(
@@ -152,9 +166,35 @@ class HamburgerMenu extends StatelessWidget {
               ScaffoldMessenger.of(dialogContext).showSnackBar(
                 SnackBar(content: Text(l.shareDialogCopied)),
               );
-              Navigator.of(dialogContext).pop();
             },
             child: Text(l.shareDialogCopy),
+          ),
+          FilledButton.icon(
+            icon: const Icon(Icons.ios_share),
+            label: Text(l.shareDialogShare),
+            onPressed: () async {
+              // Pop the dialog first so the share sheet pops over
+              // the map, not over the dialog (matters on Android
+              // where the dialog is a separate window).
+              Navigator.of(dialogContext).pop();
+              // share_plus: Rect is required on iPad (popover
+              // anchor). Pass a zero Rect on phones — the OS
+              // ignores it. ponytail: a future iPad-only
+              // pass-through of the share button's RenderBox
+              // would tighten the popover arrow to the actual
+              // tap point, but it's invisible on phone.
+              await Share.share(
+                shareText,
+                subject: l.shareDialogTitle,
+                sharePositionOrigin:
+                    const Rect.fromLTWH(0, 0, 0, 0),
+              );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l.shareDialogShared)),
+                );
+              }
+            },
           ),
         ],
       ),

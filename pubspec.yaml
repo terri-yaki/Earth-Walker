@@ -21,6 +21,11 @@ dependencies:
   # Local persistence for visited geohash cells
   shared_preferences: ^2.2.0
 
+  # System share sheet (iOS UIActivityViewController / Android
+  # Intent.ACTION_SEND) so users can post to Instagram, WhatsApp,
+  # X, Threads, Telegram etc. without leaving the app.
+  share_plus: ^7.2.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
