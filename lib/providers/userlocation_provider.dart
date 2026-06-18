@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_location.dart';
 import '../utils/exploration_days.dart';
 import '../utils/geohash.dart';
+import '../utils/hk_districts.dart';
 import '../utils/visited_cells_store.dart';
 
 /// A Provider that manages the user's location, map auto-centering,
@@ -86,6 +87,17 @@ class UserLocationProvider with ChangeNotifier {
 
   /// Cumulative walking distance in meters since the last reset.
   double get totalDistanceMeters => _totalDistanceMeters;
+
+  /// The HK district the user is currently in, or null if their
+  /// current location is outside the 18-district bounding boxes
+  /// (e.g. they're at sea, or their location hasn't been fetched).
+  String? get currentDistrictName {
+    final coords = _userLocation.coordinates;
+    // Skip the (0,0) default — that's "location not set yet", not
+    // a real reading from the South Atlantic.
+    if (coords.latitude == 0.0 && coords.longitude == 0.0) return null;
+    return districtFor(coords)?.name;
+  }
 
   /// Updates the user's location by fetching the current position.
   ///
