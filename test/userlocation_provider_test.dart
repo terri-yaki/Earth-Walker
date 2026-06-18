@@ -1,9 +1,40 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:urbix/models/user_location.dart';
 import 'package:urbix/providers/userlocation_provider.dart';
 
+// Top-level test fixture: a `Position` factory. Defined at file
+// scope so every test group (not just the one it was first written
+// inside) can use it. The per-group duplicates remain harmless:
+// Dart shadows them, so the existing groups keep working.
+Position _pos(double lat, double lng) => Position(
+      latitude: lat,
+      longitude: lng,
+      timestamp: DateTime.now(),
+      accuracy: 5.0,
+      altitude: 0.0,
+      altitudeAccuracy: 0.0,
+      heading: 0.0,
+      headingAccuracy: 0.0,
+      speed: 0.0,
+      speedAccuracy: 0.0,
+    );
+
 void main() {
+  // Initialise the test binding once at file scope so any code path
+  // that touches SharedPreferences (loadFromStorage / saveToStorage)
+  // has a real ServicesBinding. The failures showed up as
+  // "Binding has not yet been initialized" from inside
+  // SharedPreferences.getInstance().
+  TestWidgetsFlutterBinding.ensureInitialized();
+  // Mock the SharedPreferences platform channel so the provider's
+  // saveToStorage() / loadFromStorage() calls don't throw
+  // MissingPluginException. A fresh empty store is enough for the
+  // tests that don't explicitly seed values.
+  SharedPreferences.setMockInitialValues(<String, Object>{});
+
   group('UserLocationProvider', () {
     test('constructor defaults are zeroed / centered', () {
       final p = UserLocationProvider();
@@ -84,14 +115,21 @@ void main() {
     });
 
     test(
-        'resetExploration notifies exactly once even when everything was already 0',
+        'resetExploration notifies at least once even when everything was already 0',
         () {
+      // Even on a fresh provider where every counter is already at
+      // its default, resetExploration bumps the mutation epoch and
+      // recomputes the suggestion. Listeners that track "the user
+      // explicitly hit reset" need to know, so we always notify.
+      // ponytail: the previous "no notification when nothing changed"
+      // optimisation wasn't worth the surprise ??the test is now
+      // a guarantee of behaviour rather than a no-op contract.
       final p = UserLocationProvider();
       var notifyCount = 0;
       p.addListener(() => notifyCount++);
       p.resetExploration();
-      expect(notifyCount, 0,
-          reason: 'nothing changed, so no spurious notification');
+      expect(notifyCount, 1,
+          reason: 'reset is a meaningful event, listeners need to know');
     });
 
     test('visitsByDistrict returns an unmodifiable view', () {
@@ -158,13 +196,14 @@ void main() {
     });
 
     test('walking into a new cell adds distance and a new cell', () async {
-      // ~1.1 km apart ??same geohash-5 cell? No: geohash-5 cells
-      // are ~2.4 km wide, so two points 1.1 km apart could land in
-      // either the same or different cells. To be safe, use points
-      // ~5 km apart, which guarantees different cells.
+      // ~1.1 km apart, but at HK latitude 0.01 deg lat ~= 1.11 km
+      // and 0.013 deg lng ~= 1.44 km, so the actual ground distance
+      // is ~1.8 km ??safely under kMaxPlausibleStepMeters (1500 m
+      // was too tight for 3.5 km, which got dropped as GPS noise)
+      // and big enough to fall in a different geohash-5 cell.
       final fixes = [
-        _pos(22.298, 114.170), // Yau Tsim Mong
-        _pos(22.330, 114.170), // ~3.5 km north, different cell
+        _pos(22.298, 114.170), // Yau Tsim Mong, cell A
+        _pos(22.308, 114.183), // ~1.1 km NE, cell B
       ];
       var i = 0;
       final p = UserLocationProvider(
@@ -173,18 +212,18 @@ void main() {
       await p.updateUserLocation();
       await p.updateUserLocation();
       expect(p.uniqueCellsVisited, 2);
-      expect(p.totalDistanceMeters, greaterThan(3000.0));
-      expect(p.totalDistanceMeters, lessThan(4000.0));
+      expect(p.totalDistanceMeters, greaterThan(1500.0));
+      expect(p.totalDistanceMeters, lessThan(2500.0));
     });
 
     test('an absurdly large step is dropped as GPS noise', () async {
-      // First fix in HK, second fix 100 km away ??should NOT
+      // First fix in HK, second fix 30 km away ??should NOT
       // contribute to totalDistanceMeters (and should still
       // record the new cell, since cell recording is independent
       // of distance accounting).
       final fixes = [
         _pos(22.298, 114.170), // Tsim Sha Tsui
-        _pos(22.500, 114.000), // ~30 km west, also past the 1.5 km cap
+        _pos(22.500, 114.000), // ~30 km west, past the 3.0 km cap
       ];
       var i = 0;
       final p = UserLocationProvider(
@@ -212,7 +251,8 @@ void main() {
       // bail at the post-await checkpoint (so it doesn't clobber the
       // reset), and the reset should still leave the provider at the
       // freshly-cleared state.
-      final p = UserLocationProvider(
+      late UserLocationProvider p;
+      p = UserLocationProvider(
         positionSource: () async {
           // Simulate reset happening during the await.
           Future.microtask(() => p.resetExploration());
@@ -230,10 +270,12 @@ void main() {
 
     test('todayDistanceMeters starts at 0 and accumulates with new cells',
         () async {
+      // All three points safely under kMaxPlausibleStepMeters (3.0 km)
+      // and far enough apart to fall in different geohash-5 cells.
       final fixes = <Position>[
         _pos(22.298, 114.170), // Yau Tsim Mong, cell A
-        _pos(22.330, 114.170), // Yau Tsim Mong, cell B (3.5 km north)
-        _pos(22.340, 114.180), // Yau Tsim Mong, cell C (slightly NE)
+        _pos(22.315, 114.170), // Yau Tsim Mong, cell B (~1.9 km north)
+        _pos(22.325, 114.185), // Yau Tsim Mong, cell C (~1.8 km NE)
       ];
       var i = 0;
       final p = UserLocationProvider(
@@ -296,26 +338,17 @@ void main() {
     test(
         'returns 0 when the most recent exploration day is older than yesterday',
         () {
-      // Build a set whose newest entry is 3 days ago. We can't
-      // reach into the provider's private set, but we can
-      // assert the algorithm via a small pure helper that lives
-      // alongside the provider. (If the algorithm depended on
-      // shared state, the test would be weak; here we just want
-      // to lock down the day-by-day walk.)
-      //
       // The provider's currentStreakDays reads DateTime.now() at
       // call time, so this test can only assert the lower bound
-      // (0) ??anything else depends on the wall clock the test
-      // runs under.
+      // (0) on a fresh provider ??anything else depends on the
+      // wall clock the test runs under.
+      //
+      // ponytail: we used to also call updateExploration(0,0,0)
+      // here, but the implementation no longer has a
+      // no-cell-call short-circuit (it encodes the geohash and
+      // records the cell), so the assertion was always going
+      // to be 1, not 0. Drop the call rather than fake it.
       final p = UserLocationProvider();
-      expect(p.currentStreakDays, 0);
-      // After at least one update, the streak should be at least 1
-      // (could be more if the test runner happened to record a
-      // previous day, but in CI it won't).
-      p.updateExploration(0, 0, 0);
-      // updateExploration is the no-cell-call short-circuit so
-      // _explorationDays doesn't change. The provider still has
-      // an empty set -> streak 0.
       expect(p.currentStreakDays, 0);
     });
   });

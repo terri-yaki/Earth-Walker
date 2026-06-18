@@ -65,10 +65,14 @@ class UserLocationProvider with ChangeNotifier {
   LatLng? _lastDistanceReference;
 
   /// Single-update step beyond this is treated as GPS noise and ignored.
-  /// 1.5 km covers fast cycling / driving between two slow updates;
-  /// anything bigger is almost certainly a cold-start fix or a sensor
-  /// glitch, not real movement.
-  static const double kMaxPlausibleStepMeters = 1500.0;
+  /// 3.0 km covers fast cycling / driving between two slow updates and
+  /// also covers a single hop across an adjacent geohash-5 cell (~2.4 km
+  /// wide at the equator); anything bigger is almost certainly a
+  /// cold-start fix or a sensor glitch, not real movement.
+  /// ponytail: was 1500 m, but that rejected legitimate cross-cell
+  /// walks (geohash-5 is 2.4 km wide) and made the unique-cell
+  /// counter look broken to users.
+  static const double kMaxPlausibleStepMeters = 3000.0;
 
   /// Function that returns the device's current position. The default
   /// wraps the Geolocator permission + getCurrentPosition flow; tests
@@ -454,6 +458,15 @@ class UserLocationProvider with ChangeNotifier {
   /// per-district counters. Bumps [_mutationEpoch] so any in-flight
   /// [updateUserLocation] bails out at its next checkpoint instead
   /// of clobbering the reset.
+  void updateExploration(double lat, double lng, double /*unused*/) {
+    // Public wrapper around the private [_updateExploration] so
+    // tests can drive the recorder without spinning up Geolocator.
+    // The third arg is a vestigial accuracy placeholder kept for
+    // signature symmetry with the test fixtures.
+    _updateExploration(LatLng(lat, lng));
+  }
+
+  /// Resets all exploration percentages to zero, clears visited cells,
   void resetExploration() {
     _countryPercentage = 0;
     _continentPercentage = 0;

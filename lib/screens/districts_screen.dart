@@ -52,13 +52,13 @@ class DistrictsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          ...sorted.map((name) => _buildRow(name, visits[name] ?? 0)),
+          ...sorted.map((name) => _buildRow(context, name, visits[name] ?? 0)),
         ],
       ),
     );
   }
 
-  Widget _buildRow(String name, int count) {
+  Widget _buildRow(BuildContext context, String name, int count) {
     final l = L10n.of(context);
     final visited = count > 0;
     return ListTile(

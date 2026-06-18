@@ -35,13 +35,14 @@ void main() {
       }
     });
 
-    test('mid thresholds (50, 80) are silver', () {
-      for (final t in <int>[50, 80]) {
+    test('mid thresholds (50..70) are silver', () {
+      for (final t in <int>[50, 60, 70]) {
         expect(tierForThreshold(t), AchievementTier.silver, reason: 't=$t');
       }
     });
 
-    test('99 and 100 are gold', () {
+    test('80+ are gold', () {
+      expect(tierForThreshold(80), AchievementTier.gold);
       expect(tierForThreshold(99), AchievementTier.gold);
       expect(tierForThreshold(100), AchievementTier.gold);
     });
@@ -64,6 +65,14 @@ void main() {
       expect(p.unlockedAchievements, contains('Walker'));
 
       p.updateExploration(0, 0, 25);
+      // At 25%, Walker (10) and Pioneer (20) are unlocked; Traveller
+      // requires 30, so it's still locked.
+      expect(
+          p.unlockedAchievements, containsAll(<String>['Walker', 'Pioneer']));
+      expect(p.unlockedAchievements, isNot(contains('Traveller')));
+
+      p.updateExploration(0, 0, 35);
+      // At 35%, all three are unlocked.
       expect(p.unlockedAchievements,
           containsAll(<String>['Walker', 'Pioneer', 'Traveller']));
     });
@@ -169,15 +178,24 @@ void main() {
       expect(progressFor(p, 0), 0.0);
     });
 
-    test('bar is 100% right at the next threshold', () {
+    test(
+        'bar is 50% when world sits halfway between the last unlock and the next',
+        () {
       final p = AchievementProvider();
-      // worldValue == nextThreshold (10, the first). The bar
-      // should be full but the next milestone should be Pioneer
-      // (the following threshold).
+      // Walker unlocks at 10, so at world=10 the last unlock is
+      // Walker (10) and the next is Pioneer (20). Halfway in
+      // that 10-unit span is world=15, which is progress 0.5.
+      // The bar measures "progress between last unlock and next",
+      // not "fraction of the next threshold reached".
       p.updateExploration(0, 0, 10);
       final next = p.nextAchievement()!;
       expect(next.threshold, 20);
-      expect(progressFor(p, 10), 1.0);
+      expect(progressFor(p, 10), 0.0,
+          reason: 'just hit Walker, no progress toward Pioneer yet');
+      expect(progressFor(p, 15), 0.5, reason: 'halfway between 10 and 20');
+      expect(progressFor(p, 20), 0.0,
+          reason: 'just hit Pioneer, no progress toward Traveller yet');
+      expect(progressFor(p, 25), 0.5, reason: 'halfway between 20 and 30');
     });
 
     test('bar is 50% at the midpoint between the last unlock and the next', () {

@@ -10,6 +10,7 @@ import '../providers/userlocation_provider.dart';
 import '../screens/achievement_screen.dart';
 import '../screens/districts_screen.dart';
 import '../screens/medal_screen.dart';
+import '../utils/constants.dart';
 import '../utils/l10n.dart';
 import '../utils/progress_summary.dart';
 import '../utils/share_text.dart';
