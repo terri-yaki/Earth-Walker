@@ -54,20 +54,24 @@ jobs:
               https://github.com/flutter/flutter.git ${FLUTTER_HOME}
       - name: Verify formatting
         # Format check. Run dart format with --set-exit-if-changed
-        # which exits 1 if anything would change. The result is
-        # reported as a warning, not a hard failure, because
-        # dart format's behaviour differs slightly between
-        # Linux (CI) and Windows (dev) for files committed
-        # across platforms. The actual project source has been
-        # verified clean; the residual diff is whitespace only.
+        # which exits 1 if anything would change. On failure,
+        # dump the diff to an artifact so we can debug it
+        # without auth-gated log access.
         run: |
           echo "==> Verifying dart format"
           if dart format --set-exit-if-changed . ; then
             echo "==> format check: PASS"
           else
-            echo "::warning::dart format reported changes (see diff above). Run 'dart format .' locally to see the diff."
-            dart format --output=show . || true
+            echo "==> format check: FAIL; dumping diff to format_diff.txt"
+            dart format --output=show . > format_diff.txt 2>&1 || true
+            exit 1
           fi
+      - name: Upload format diff artifact (on failure only)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: format-diff-${{ github.run_id }}
+          path: format_diff.txt
 
   # ------------------------------------------------------------
   # Static analysis. Errors fail; infos/warnings don't, by
@@ -88,14 +92,18 @@ jobs:
               https://github.com/flutter/flutter.git ${FLUTTER_HOME}
       - run: flutter pub get
       - run: |
-          # Analyze. --no-fatal-infos keeps the build green when
-          # the analyzer reports info-level lints; only errors
-          # would fail the build. We still surface the output
-          # verbatim so reviewers can see the diagnostics.
           echo "==> Running flutter analyze"
-          flutter analyze --no-fatal-infos || {
-            echo "::warning::flutter analyze reported issues. See output above."
+          flutter analyze --no-fatal-infos > analyze_output.txt 2>&1 || {
+            echo "==> analyze reported issues; dumping to analyze_output.txt"
+            cat analyze_output.txt
+            exit 1
           }
+      - name: Upload analyze output artifact (on failure only)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: analyze-output-${{ github.run_id }}
+          path: analyze_output.txt
 
   # ------------------------------------------------------------
   # Unit + widget tests with coverage. The coverage file is
