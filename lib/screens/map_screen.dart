@@ -1,6 +1,7 @@
 // lib/screens/map_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
@@ -65,7 +66,7 @@ class _MapScreenState extends State<MapScreen> {
     );
     _lastSeenUnlocked = List<String>.from(achievements.unlockedAchievements);
     for (final title in newOnes) {
-      _showSnackBar('Badge unlocked: $title');
+      _showCelebrationSnackBar(title);
     }
   }
 
@@ -102,6 +103,51 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  /// Celebration snackbar shown when the user unlocks a new badge.
+  /// Triggers a medium haptic and shows a green card with a trophy
+  /// icon, so the moment feels distinctly different from a regular
+  /// info snackbar.
+  void _showCelebrationSnackBar(String title) {
+    HapticFeedback.mediumImpact();
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.green.shade700,
+          duration: const Duration(seconds: 3),
+          content: Row(
+            children: [
+              const Icon(Icons.emoji_events, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Badge unlocked!',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     final userLocationProvider = Provider.of<UserLocationProvider>(context);
@@ -124,7 +170,21 @@ class _MapScreenState extends State<MapScreen> {
       drawer: const HamburgerMenu(),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(color: Colors.green),
+                  SizedBox(height: 16),
+                  Text(
+                    'Finding your location…',
+                    style: TextStyle(
+                      fontFamily: 'PixelFont',
+                      fontSize: 16,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
             )
           : Stack(
               children: [
