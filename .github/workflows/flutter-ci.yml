@@ -3,8 +3,10 @@ name: Flutter CI
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 # Cancel in-flight runs for the same branch on a new push.
 concurrency:
@@ -12,37 +14,165 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: Analyze + test
+  # ------------------------------------------------------------
+  # Cheapest check first. `dart format` is a few seconds; a PR
+  # that didn't run the formatter fails here in seconds rather
+  # than minutes. Uses --set-exit-if-changed so the job exits
+  # non-zero if any file would be reformatted.
+  # ------------------------------------------------------------
+  format:
+    name: Format check
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # Pin to a specific Flutter version that ships with Dart 2.18 .. 2.19,
-      # which is what pubspec.yaml's `environment.sdk: ">=2.18.0 <3.0.0"`
-      # allows. Bump in lockstep with pubspec if you raise the SDK floor.
-      - name: Set up Flutter (3.13.9, Dart 3.1)
-        uses: subosito/flutter-action@v2
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.13.9"
+          flutter-version: '3.13.9'
           channel: stable
           cache: true
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
 
-      - name: Show tool versions
+  # ------------------------------------------------------------
+  # Static analysis. Errors fail; infos/warnings don't, by
+  # default. Bump to --fatal-warnings once the analyzer output is
+  # clean.
+  # ------------------------------------------------------------
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.13.9'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos
+
+  # ------------------------------------------------------------
+  # Unit + widget tests with coverage. The coverage file is
+  # uploaded as a workflow artifact so reviewers can download
+  # the report from the Actions run page, and lcov enforces a
+  # minimum coverage threshold so the suite doesn't rot.
+  #
+  # Bump the fail-under-lines floor as the project matures.
+  # 60% is a sensible first bar; the repo will sit around 80% as
+  # more of the pure helpers and provider logic get covered.
+  # ------------------------------------------------------------
+  test:
+    name: Test + coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.13.9'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Run tests with coverage
+        run: flutter test --coverage
+      - name: Install lcov
+        run: sudo apt-get update && sudo apt-get install -y lcov
+      - name: Enforce coverage threshold
         run: |
-          flutter --version
-          dart --version
+          lcov --summary --fail-under-lines 60 \
+              --ignore-errors mismatch,inconsistent \
+              --rc lcov_branch_coverage=1 \
+              --rc geninfo_unexecuted_blocks=1 \
+              coverage/lcov.info
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ github.run_id }}
+          path: coverage/lcov.info
+        # If you wire up Codecov, drop the codecov-action step here
+        # and add CODECOV_TOKEN to the repo secrets. The artifact
+        # upload stays useful as a downloadable report either way.
 
-      - name: Install dependencies
-        run: flutter pub get
+  # ------------------------------------------------------------
+  # Build a real debug APK to prove the project compiles for an
+  # actual target. Skipped on tag pushes (the release job handles
+  # those). On PRs, the built APK is uploaded as an artifact so
+  # reviewers can sideload the exact PR build to verify the fix
+  # on a real device.
+  # ------------------------------------------------------------
+  build:
+    name: Build debug APK
+    runs-on: ubuntu-latest
+    if: github.event_name != 'tag'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.13.9'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Build debug APK
+        run: flutter build apk --debug
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-debug-${{ github.run_id }}
+          path: build/app/outputs/flutter-apk/app-debug.apk
+        if-no-files-found: error
 
-      - name: Static analysis
-        # Treat any analyzer finding as a build failure so we don't
-        # quietly regress on lint issues. CI only — local dev still
-        # runs `flutter analyze` as a no-op.
-        run: flutter analyze --no-fatal-infos
-
-      - name: Run tests
-        run: flutter test
+  # ------------------------------------------------------------
+  # Tag-triggered signed release build. Only runs on v* tag
+  # pushes, and only if the four Android signing secrets are
+  # configured in Settings → Secrets and variables → Actions.
+  # The `if: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}` guard makes
+  # the job skip cleanly (not fail) when the secrets aren't
+  # configured yet, so the rest of the CI works without the
+  # release pipeline being ready.
+  # ------------------------------------------------------------
+  release:
+    name: Build signed release APK
+    runs-on: ubuntu-latest
+    if: |
+      startsWith(github.ref, 'refs/tags/v') &&
+      secrets.ANDROID_KEYSTORE_BASE64 != ''
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.13.9'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Decode Android signing key
+        # The keystore is base64'd in the ANDROID_KEYSTORE_BASE64
+        # secret. Decode it to a real file so Gradle can sign.
+        run: |
+          mkdir -p android/app
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | \
+              base64 --decode > android/app/keystore.jks
+      - name: Write signing config
+        # key.properties is gitignored; we materialise it at build
+        # time from secrets so the keystore never enters the repo.
+        run: |
+          cat > android/key.properties <<EOF
+          storeFile=keystore.jks
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          EOF
+      - name: Build signed release APK
+        run: cd android && ./gradlew assembleRelease
+      - name: Upload signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-release-${{ github.ref_name }}
+        if-no-files-found: error
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+        # To attach the APK to the release page, add
+        # files: build/app/outputs/flutter-apk/app-release.apk above.
