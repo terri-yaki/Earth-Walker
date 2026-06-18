@@ -9,17 +9,32 @@
 
 /// Format a one-line progress summary for copy/share. Pure so it's
 /// trivially unit-testable.
+///
+/// [cellsLabel], [badgesLabel], [medalsLabel], and [distanceLabel] are
+/// passed in (rather than looked up here) so this function stays pure
+/// and the caller owns the localisation. Typical use:
+///
+///   formatProgressSummary(
+///     cellsVisited: ..., badgesUnlocked: ..., medalsEarned: ...,
+///     metersWalked: ...,
+///     cellsLabel: l.cellPlural, badgesLabel: 'badges',
+///     medalsLabel: 'medals', distanceLabel: 'km',
+///   );
 String formatProgressSummary({
   required int cellsVisited,
   required int badgesUnlocked,
   required int medalsEarned,
   required double metersWalked,
+  required String cellsLabel,
+  required String badgesLabel,
+  required String medalsLabel,
+  required String distanceLabel,
 }) {
   final km = (metersWalked / 1000).toStringAsFixed(1);
-  return '$cellsVisited cells visited, '
-      '$badgesUnlocked badges unlocked, '
-      '$medalsEarned medals earned, '
-      '$km km walked.';
+  return '$cellsVisited $cellsLabel visited, '
+      '$badgesUnlocked $badgesLabel unlocked, '
+      '$medalsEarned $medalsLabel earned, '
+      '$km $distanceLabel walked.';
 }
 
 /// Magic prefix for a shareable progress snapshot. The receiver

@@ -124,6 +124,13 @@ class HamburgerMenu extends StatelessWidget {
       badgesUnlocked: snapshot.badgesUnlocked,
       medalsEarned: snapshot.medalsEarned,
       metersWalked: snapshot.metersWalked,
+      // Cell label is localised; the rest are short data nouns
+      // that read naturally in either language (English fallback
+      // is intentional and matches the compare-dialog policy).
+      cellsLabel: snapshot.cellsVisited == 1 ? l.cellSingular : l.cellPlural,
+      badgesLabel: 'badges',
+      medalsLabel: 'medals',
+      distanceLabel: 'km',
     );
     // Smart default brag: if the user has a real streak going
     // (>= 2 days so "today" doesn't count as a brag), surface the
@@ -366,6 +373,12 @@ class HamburgerMenu extends StatelessWidget {
       badgesUnlocked: achievements.unlockedAchievements.length,
       medalsEarned: medals.awardedMedals.length,
       metersWalked: location.totalDistanceMeters,
+      cellsLabel: location.uniqueCellsVisited == 1
+          ? l.cellSingular
+          : l.cellPlural,
+      badgesLabel: 'badges',
+      medalsLabel: 'medals',
+      distanceLabel: 'km',
     );
 
     final confirmed = await showDialog<bool>(

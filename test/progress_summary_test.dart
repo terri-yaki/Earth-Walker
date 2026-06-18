@@ -10,6 +10,10 @@ void main() {
           badgesUnlocked: 0,
           medalsEarned: 0,
           metersWalked: 0,
+          cellsLabel: 'cells',
+          badgesLabel: 'badges',
+          medalsLabel: 'medals',
+          distanceLabel: 'km',
         ),
         '0 cells visited, 0 badges unlocked, 0 medals earned, 0.0 km walked.',
       );
@@ -22,8 +26,32 @@ void main() {
           badgesUnlocked: 3,
           medalsEarned: 2,
           metersWalked: 4321,
+          cellsLabel: 'cells',
+          badgesLabel: 'badges',
+          medalsLabel: 'medals',
+          distanceLabel: 'km',
         ),
         '12 cells visited, 3 badges unlocked, 2 medals earned, 4.3 km walked.',
+      );
+    });
+
+    test('honours caller-supplied labels (i18n plumbing)', () {
+      // The cell word should come from the caller so the share
+      // dialog can show '格' for zh-HK instead of 'cells'. The
+      // grammar template around it stays the same so the
+      // surrounding sentence is still readable.
+      expect(
+        formatProgressSummary(
+          cellsVisited: 5,
+          badgesUnlocked: 2,
+          medalsEarned: 1,
+          metersWalked: 1234,
+          cellsLabel: '格',
+          badgesLabel: 'badges',
+          medalsLabel: 'medals',
+          distanceLabel: 'km',
+        ),
+        '5 格 visited, 2 badges unlocked, 1 medals earned, 1.2 km walked.',
       );
     });
   });

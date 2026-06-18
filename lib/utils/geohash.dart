@@ -33,7 +33,6 @@
 // has been stable since 2008. If the app later needs decoding, neighbors,
 // or bounding-box queries, swap this for a real package.
 
-
 /// Standard base32 alphabet for geohash (RFC: 0123456789bcdefghjkmnpqrstuvwxyz,
 /// note the omission of a, i, l, o to avoid visual ambiguity).
 const String _base32 = '0123456789bcdefghjkmnpqrstuvwxyz';
