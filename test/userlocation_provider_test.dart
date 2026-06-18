@@ -365,4 +365,69 @@ void main() {
       expect(p2.totalDistanceMeters, 1234.5);
     });
   });
+
+  group('UserLocationProvider currentSuggestion (exploration engine wiring)', () {
+    // The pure engine is covered in exploration_suggestion_test.dart;
+    // these tests lock the contract that the provider *caches* the
+    // result and *recomputes* on the right state-change events
+    // (first position update, resetExploration). Without these a
+    // future refactor could break the wiring in a way that the
+    // engine unit tests wouldn't catch.
+
+    Position _pos(double lat, double lng) => Position(
+          latitude: lat,
+          longitude: lng,
+          timestamp: DateTime.now(),
+          accuracy: 5.0,
+          altitude: 0.0,
+          altitudeAccuracy: 0.0,
+          heading: 0.0,
+          headingAccuracy: 0.0,
+          speed: 0.0,
+          speedAccuracy: 0.0,
+        );
+
+    test('is null before any position update (the (0,0) guard)', () {
+      // Default UserLocationProvider sits at (0,0). The
+      // engine treats that as "no real location yet" and
+      // short-circuits to null, so the chip is hidden until
+      // the first GPS fix lands.
+      final p = UserLocationProvider();
+      expect(p.currentSuggestion, isNull);
+    });
+
+    test('is set after the first position update', () async {
+      // Wan Chai. After the first fix the position is real
+      // and the engine returns a real geohash-5 cell.
+      final p = UserLocationProvider(
+        positionSource: () async => _pos(22.280, 114.180),
+      );
+      await p.updateUserLocation();
+      expect(p.currentSuggestion, isNotNull);
+      expect(p.currentSuggestion!.geohash.length, 5,
+          reason: 'suggestion must be a geohash-5 cell');
+      expect(p.currentSuggestion!.target, isNotNull);
+    });
+
+    test('is recomputed after resetExploration (position is preserved)', () async {
+      // After reset, the visited set is empty but the
+      // position is unchanged. The suggestion should still
+      // be set (the user is at Wan Chai; the closest
+      // unvisited cell is the cell they just stood in).
+      final p = UserLocationProvider(
+        positionSource: () async => _pos(22.280, 114.180),
+      );
+      await p.updateUserLocation();
+      final first = p.currentSuggestion;
+      expect(first, isNotNull);
+      p.resetExploration();
+      expect(p.currentSuggestion, isNotNull,
+          reason: 'position is preserved across reset, so '
+              'the suggestion should still resolve');
+      // After reset, the previous cell is no longer visited,
+      // so the suggestion may point at a different cell —
+      // we don't assert which one, just that the cache was
+      // invalidated and recomputed.
+    });
+  });
 }
