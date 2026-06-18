@@ -18,9 +18,15 @@ class RecenterButton extends StatelessWidget {
 
   /// Fetches the user's current location and recenters the map.
   Future<void> _handleRecenter(BuildContext context) async {
+    // Capture the messenger and the localised snack text BEFORE
+    // the await. After `await onRecenter()` the BuildContext may
+    // be stale (the user navigated away, the widget was disposed,
+    // etc.) and looking it up via ScaffoldMessenger.of(context)
+    // could throw or use a detached messenger.
+    final messenger = ScaffoldMessenger.of(context);
     final l = L10n.of(context);
     await onRecenter();
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.showSnackBar(
       SnackBar(
         content: CustomText(text: l.mapRecenteredSnack),
       ),
