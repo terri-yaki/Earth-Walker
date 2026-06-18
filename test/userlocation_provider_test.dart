@@ -575,5 +575,46 @@ void main() {
           reason: 'within-cell move must not change suggestion');
       expect(s2!.geohash, equals(s0.geohash));
     });
+
+    test(
+        'suggestion is set on first position update even when that '
+        'cell was loaded as already-visited (regression for the '
+        '"first fix in a previously-visited cell leaves null" bug)', () async {
+      // BUG REPRO: after loadFromStorage, _currentSuggestion is
+      // null because coords are still (0,0). The first real
+      // position update moves coords off (0,0). The natural
+      // place to recompute is inside _updateExploration — but
+      // _updateExploration only calls _recomputeSuggestion
+      // when a NEW cell is added to _visitedCells. If the
+      // user's first fix lands in a cell that was loaded
+      // from storage, _visitedCells.add() returns false, and
+      // _recomputeSuggestion is never called. The user sees
+      // no suggestion chip until they cross into a new cell.
+      //
+      // Seed SharedPreferences so loadFromStorage reports
+      // wkfft (Central and Western) as already visited.
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'urbix.visited_cells': '["wkfft"]',
+        'urbix.visits_by_district': '{"Central and Western":1}',
+      });
+      final p = UserLocationProvider(
+        positionSource: () async => _pos(22.270, 114.140), // wkfft centre
+      );
+      await p.loadFromStorage();
+      // Pre-condition: suggestion is null until the first
+      // real fix lands.
+      expect(p.currentSuggestion, isNull,
+          reason: 'no real location yet — (0,0) guard');
+      // First fix lands at the cell that was loaded as
+      // already-visited. _updateExploration's
+      // `_visitedCells.add(cell)` will return false because
+      // wkfft is already in the set.
+      await p.updateUserLocation();
+      expect(p.userLocation.coordinates, const LatLng(22.270, 114.140));
+      expect(p.currentSuggestion, isNotNull,
+          reason: 'first real fix must populate the suggestion even '
+              'when the cell is already visited — the user is at a '
+              'real location and the engine has unvisited candidates');
+    });
   });
 }

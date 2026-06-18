@@ -162,6 +162,16 @@ class UserLocationProvider with ChangeNotifier {
       final Position position = await _positionSource();
       if (_mutationEpoch != epochAtStart) return; // a reset won the race
 
+      // Capture the previous coordinates BEFORE updating, so we
+      // can detect the (0,0) -> real-location transition below.
+      // The (0,0) default in the constructor means "no real
+      // location yet" (see [currentDistrictName] and the guard
+      // in [_recomputeSuggestion]); once we have a real fix,
+      // _recomputeSuggestion must run at least once even if
+      // _updateExploration is a no-op (cell already visited).
+      final wasAtDefault = _userLocation.coordinates.latitude == 0.0 &&
+          _userLocation.coordinates.longitude == 0.0;
+
       // Update the user's location
       _userLocation = UserLocation(
           coordinates: LatLng(position.latitude, position.longitude));
@@ -177,6 +187,18 @@ class UserLocationProvider with ChangeNotifier {
 
       // Update exploration percentages
       _updateExploration(_userLocation.coordinates);
+
+      // Seed the suggestion on the first transition off (0,0).
+      // _updateExploration only calls _recomputeSuggestion when
+      // a new cell is added —so if the user's first fix lands in
+      // a cell that was already in _visitedCells (e.g. loaded from
+      // a previous session), _recomputeSuggestion is never called
+      // and the suggestion chip stays null until they cross into
+      // a new cell. Force a recompute here to close that gap.
+      // After this first fix, within-cell moves still skip the
+      // recompute (the "does not recompute when the user moves
+      // within the same cell" performance contract).
+      if (wasAtDefault) _recomputeSuggestion();
 
       // Notify listeners about the update
       notifyListeners();
