@@ -1,16 +1,32 @@
 // lib/utils/geohash.dart
 //
 // Minimal geohash encoder. Given a lat/lng, returns a base32 geohash
-// string of the given precision. Geohash precision table (approximate
-// cell size at the equator):
+// string of the given precision. Geohash cells are RECTANGLES (not
+// squares) and they share the SAME width in degrees as latitude
+// changes — the physical km width changes because a degree of
+// longitude shrinks toward the poles (cos(latitude) factor).
 //
-//   precision 1 ~ 2,500 km
-//   precision 2 ~ 630 km
-//   precision 3 ~ 78 km
-//   precision 4 ~ 20 km
-//   precision 5 ~ 2.4 km
-//   precision 6 ~ 610 m
-//   precision 7 ~ 76 m
+// Cell dimensions at precision 5, measured empirically with the
+// dart encoder below (see geohash_test.dart for the live test):
+//
+//   precision 5: ~0.18° lat × ~0.011° lng
+//               ~ 20 km tall × 1.2 km wide at HK latitude (~22°N)
+//               ~ 20 km tall × 1.3 km wide at the equator
+//   precision 6: ~0.044° lat × ~0.0027° lng
+//               ~ 4.9 km × 0.3 km at the equator
+//
+// Note: a cell is ~17x taller than it is wide, so "you walked into a
+// new cell" effectively means "you crossed a 1.2 km-wide east-west
+// strip" — useful for tracking east-west progress but coarse for
+// north-south.
+//
+// Earlier revisions of this comment claimed precision 5 was "2.4 km
+// squares", which is wrong on two counts: the dimension is closer to
+// 20 km, and the cell is far from square. The visited-cell tracker
+// uses precision 5 because that's a good "one walk = one new cell"
+// size for an urban explorer (you'd cross 1-2 cells per km of east-
+// west walking, but latitudinal movement within a single cell can be
+// 20+ km before triggering a new cell).
 //
 // ponytail: written inline rather than pulling geohash_plus / dart-geohash
 // —it's ~40 lines of pure Dart, has no transitive deps, and the algorithm

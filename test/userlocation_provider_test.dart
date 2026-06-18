@@ -357,7 +357,15 @@ void main() {
     // A regression in the precision constant would silently change the
     // cell size used for the unique-cell counter and break every
     // existing user's persisted data. Lock it down.
-    test('precision is 5 (geohash-5 = ~2.4 km cells at equator)', () {
+    //
+    // Note: geohash-5 cells are NOT 2.4 km squares — that's a stale
+    // comment that survived several refactors. Empirically the cell
+    // is ~0.18° tall × ~0.011° wide (≈ 20 km × 1.2 km at HK latitude).
+    // The east-west width is the relevant dimension for the
+    // "you walked into a new cell" UX: ~1.2 km of east-west travel
+    // is enough to trigger a new cell, while north-south movement
+    // within a cell can be ~20 km before triggering one.
+    test('precision is 5', () {
       // White-box test: reach the private constant via the public
       // uniqueCellsVisited contract by checking that two ~1 km-apart
       // points in HK land in the same precision-5 cell.

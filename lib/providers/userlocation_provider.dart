@@ -66,12 +66,13 @@ class UserLocationProvider with ChangeNotifier {
 
   /// Single-update step beyond this is treated as GPS noise and ignored.
   /// 3.0 km covers fast cycling / driving between two slow updates and
-  /// also covers a single hop across an adjacent geohash-5 cell (~2.4 km
-  /// wide at the equator); anything bigger is almost certainly a
-  /// cold-start fix or a sensor glitch, not real movement.
+  /// also covers crossing several adjacent geohash-5 cells (each is
+  /// ~1.2 km wide at HK latitude — see lib/utils/geohash.dart for the
+  /// size table); anything bigger is almost certainly a cold-start fix
+  /// or a sensor glitch, not real movement.
   /// ponytail: was 1500 m, but that rejected legitimate cross-cell
-  /// walks (geohash-5 is 2.4 km wide) and made the unique-cell
-  /// counter look broken to users.
+  /// walks (geohash-5 is ~1.2 km wide here, ~20 km tall) and made the
+  /// unique-cell counter look broken to users.
   static const double kMaxPlausibleStepMeters = 3000.0;
 
   /// Function that returns the device's current position. The default
@@ -204,9 +205,14 @@ class UserLocationProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Geohash precision used for visited-cell tracking. Precision 5 is about
-  /// a 2.4 km ? 2.4 km cell at the equator —a good size for "you walked
-  /// somewhere new" without inflating the count from GPS noise.
+  /// Geohash precision used for visited-cell tracking. Precision 5
+  /// gives cells of about 20 km tall × 1.2 km wide at HK latitude
+  /// (see lib/utils/geohash.dart for the full table). That's a good
+  /// size for "you walked somewhere new" — east-west movement of
+  /// ~600 m is enough to trigger a new cell, while a single 20 km
+  /// north-south walk stays in the same cell (which is the right
+  /// behaviour: a stroll along the harbour shouldn't rack up 10
+  /// "new places" badges).
   static const int _geohashPrecision = 5;
 
   /// SharedPreferences key for the visited-cell set.

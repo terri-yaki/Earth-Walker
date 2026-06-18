@@ -390,11 +390,12 @@ class _MapScreenState extends State<MapScreen> {
                         circles: userLocationProvider.visitedCellLocations
                             .map((point) => CircleMarker(
                                   point: point,
-                                  // geohash-5 cells are ~2.4 km wide at the
-                                  // equator; render at 800 m so adjacent
-                                  // cells overlap visibly without dominating
-                                  // the map at city zoom.
-                                  radius: 800,
+                                  // geohash-5 cells are ~1.2 km wide at HK
+                                  // latitude (see lib/utils/geohash.dart).
+                                  // Render at 600 m so adjacent cells overlap
+                                  // visibly without dominating the map at
+                                  // city zoom.
+                                  radius: 600,
                                   useRadiusInMeter: true,
                                   color: Colors.green.withOpacity(0.25),
                                   borderColor: Colors.green,
