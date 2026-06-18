@@ -38,7 +38,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     // The chip should be visible and mention Walker. That's the
-    // whole point of the chip — it shows the user what to do first.
+    // whole point of the chip ??it shows the user what to do first.
     expect(find.textContaining('Walker'), findsWidgets);
   });
 
@@ -48,7 +48,7 @@ void main() {
     await tester.pumpWidget(_app(p));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    // English: 'Next: Walker @ 10% · 10 to go'
+    // English: 'Next: Walker @ 10% 繚 10 to go'
     expect(find.textContaining('Next:'), findsOneWidget);
     expect(find.textContaining('to go'), findsOneWidget);
   });
@@ -60,9 +60,9 @@ void main() {
     await tester.pumpWidget(_app(p, locale: const Locale('zh', 'HK')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    // zh-HK: '下一個: Walker @ 10% · 仲差 10'
-    expect(find.textContaining('下一個'), findsOneWidget);
-    expect(find.textContaining('仲差'), findsOneWidget);
+    // zh-HK: '銝??? Walker @ 10% 繚 隞脣榆 10'
+    expect(find.textContaining('銝??'), findsOneWidget);
+    expect(find.textContaining('隞脣榆'), findsOneWidget);
   });
 
   testWidgets('progress bar is present when a next milestone exists',
@@ -71,7 +71,7 @@ void main() {
     await tester.pumpWidget(_app(p));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    // There should be exactly one LinearProgressIndicator — the
+    // There should be exactly one LinearProgressIndicator ??the
     // next-milestone bar. No other progress bar in the HUD.
     expect(find.byType(LinearProgressIndicator), findsOneWidget);
   });
@@ -80,7 +80,7 @@ void main() {
   //
   // The chip is driven by the pure `pickNextExploration` engine
   // (covered in `exploration_suggestion_test.dart`); these widget
-  // tests just verify the HUD wiring — that the chip appears with
+  // tests just verify the HUD wiring ??that the chip appears with
   // a real position, uses the active L10n, and is hidden when the
   // user has no real location yet (the (0,0) default guard).
 
@@ -115,7 +115,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     // The chip's leading icon is Icons.explore, which is
-    // unique to this widget in the HUD — finding one
+    // unique to this widget in the HUD ??finding one
     // confirms the chip rendered. (We don't assert on the
     // "Next:" label because the next-milestone chip also
     // uses that prefix, which would make the test
@@ -128,10 +128,10 @@ void main() {
     await tester.pumpWidget(_app(p, locale: const Locale('zh', 'HK')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    // The next-milestone chip uses "下一個" (next) but the
-    // suggestion chip uses "下一步" (next-step), so this
+    // The next-milestone chip uses "銝??? (next) but the
+    // suggestion chip uses "銝?甇? (next-step), so this
     // text is unique to the suggestion chip.
-    expect(find.textContaining('下一步'), findsOneWidget);
+    expect(find.textContaining('銝?甇?'), findsOneWidget);
   });
 
   testWidgets('hides the chip when the user has no real location (default)',

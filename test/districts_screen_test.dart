@@ -37,7 +37,7 @@ void main() {
     await tester.pumpWidget(_wrap(p));
     expect(find.text('Central and Western'), findsOneWidget);
     expect(find.text('Wan Chai'), findsOneWidget);
-    expect(find.text('—'), findsWidgets,
+    expect(find.text('–'), findsWidgets,
         reason: 'every unvisited district shows an em-dash');
   });
 

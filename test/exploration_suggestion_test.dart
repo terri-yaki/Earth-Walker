@@ -25,7 +25,7 @@ void main() {
     test('covers a sensible number of cells (not 5, not 5000)', () {
       // Lower bound: must cover the 18 districts, so > 50 is
       // safe. Upper bound: bbox area / cell size
-      // is well under 1000 for the HK box at 0.025° step.
+      // is well under 1000 for the HK box at 0.025簞 step.
       expect(kHKCellGrid.length, greaterThan(50));
       expect(kHKCellGrid.length, lessThan(1000));
     });
@@ -131,7 +131,7 @@ void main() {
     test('cells outside all district boxes are returned with districtName=null',
         () {
       // A cell in the middle of the South China Sea (south
-      // of HK) — well outside every bounding box.
+      // of HK) ??well outside every bounding box.
       final ocean = GeohashCell(
         geohash: 'ocean',
         center: const LatLng(21.500, 114.000),

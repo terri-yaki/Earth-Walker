@@ -13,7 +13,7 @@
 //   precision 7 ~ 76 m
 //
 // ponytail: written inline rather than pulling geohash_plus / dart-geohash
-// — it's ~40 lines of pure Dart, has no transitive deps, and the algorithm
+// ??it's ~40 lines of pure Dart, has no transitive deps, and the algorithm
 // has been stable since 2008. If the app later needs decoding, neighbors,
 // or bounding-box queries, swap this for a real package.
 

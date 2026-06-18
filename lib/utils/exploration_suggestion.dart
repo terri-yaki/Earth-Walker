@@ -63,9 +63,9 @@ class ExplorationSuggestion {
 }
 
 /// Approximate step size of a geohash-5 cell at Hong Kong's
-/// latitude (~22° N). Used to walk a lat/lng grid when building
+/// latitude (~22簞 N). Used to walk a lat/lng grid when building
 /// the candidate set. ponytail: a real geohash decoder would
-/// give us the exact cell bounds; the 0.025° step is close
+/// give us the exact cell bounds; the 0.025簞 step is close
 /// enough to the real cell size that the grid covers HK without
 /// missing cells or creating duplicates.
 const double kGeohash5StepDegrees = 0.025;

@@ -16,7 +16,7 @@ String dayKey(DateTime when) {
 }
 
 /// Decode a 'yyyy-mm-dd' string back to a [DateTime] (local midnight).
-/// Returns null on malformed input — callers can choose to drop the
+/// Returns null on malformed input ??callers can choose to drop the
 /// entry rather than crash.
 DateTime? dayKeyParse(String key) {
   final m = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch(key);

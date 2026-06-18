@@ -14,14 +14,14 @@
 const List<int> kStreakShareMilestones = <int>[3, 7, 14, 30];
 
 /// Returns the highest [kStreakShareMilestones] threshold the
-/// user has just crossed — i.e. `currentStreak >= t` and the
+/// user has just crossed ??i.e. `currentStreak >= t` and the
 /// caller hasn't already prompted for `t`. Returns null if no
 /// new milestone was crossed.
 ///
 /// When a user crosses multiple thresholds in one update
 /// (e.g. their first session jumps streak from 0 to 7), we
 /// return the highest one because the lower one is implicitly
-/// subsumed — a "7 day streak" brag is more exciting than
+/// subsumed ??a "7 day streak" brag is more exciting than
 /// "3 day streak" when both are new.
 int? newStreakShareMilestone({
   required int currentStreak,
