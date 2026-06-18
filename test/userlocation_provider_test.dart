@@ -270,6 +270,55 @@ void main() {
           reason: '30 km jump exceeds kMaxPlausibleStepMeters and is dropped');
     });
 
+    test(
+        'after resetExploration, the next fix starts distance accumulation '
+        'fresh (regression for the "old _lastDistanceReference bleeds into '
+        'post-reset counter" bug)', () async {
+      // Build up some distance, reset, then walk a small step. The
+      // post-reset step must NOT add onto a phantom pre-reset
+      // reference point. Without _lastDistanceReference = null on
+      // reset, the provider would compute distance from the
+      // pre-reset location and inflate the counter by ~kilometres
+      // the user never actually walked after the reset.
+      //
+      // The fix coords are picked so:
+      //   - Pre-reset: two fixes 1.1 km apart accumulate ~1.1 km
+      //     of distance (well within kMaxPlausibleStepMeters).
+      //   - Post-reset: a small step (~50 m) that should be the
+      //     ONLY distance recorded after the reset. With the bug,
+      //     the step would be computed against the pre-reset
+      //     location and yield a much larger (wrong) value.
+      final fixes = <Position>[
+        _pos(22.298, 114.170), // pre-reset fix A
+        _pos(22.308, 114.183), // pre-reset fix B, ~1.1 km NE
+        _pos(22.308, 114.184), // post-reset fix C, ~110 m east of B
+        _pos(22.308, 114.1842), // post-reset fix D, ~22 m east of C
+      ];
+      var i = 0;
+      final p = UserLocationProvider(
+        positionSource: () async => fixes[i++],
+      );
+      await p.updateUserLocation(); // fix A
+      await p.updateUserLocation(); // fix B — distance accumulator on
+      expect(p.totalDistanceMeters, greaterThan(1000.0),
+          reason: 'pre-reset walk should have accumulated ~1.1 km');
+      final preResetDistance = p.totalDistanceMeters;
+      p.resetExploration();
+      // After reset the counter is zero; the next fix sets the
+      // new reference but does not accumulate (no previous ref).
+      await p.updateUserLocation(); // fix C — sets _lastDistanceReference = C
+      expect(p.totalDistanceMeters, 0.0,
+          reason: 'first post-reset fix must not accumulate distance; '
+              'reset cleared the reference point');
+      // One more step. With the bug (_lastDistanceReference NOT
+      // cleared on reset), this step would compute distance from
+      // the pre-reset position. With the fix, distance is ~22 m.
+      await p.updateUserLocation(); // fix D, ~22 m east of C
+      expect(p.totalDistanceMeters, lessThan(preResetDistance / 10),
+          reason: 'post-reset distance must be near-zero, not the '
+              'cross-reset phantom distance from the bug');
+    });
+
     test('position source exception is rethrown, no state change', () async {
       final p = UserLocationProvider(
         positionSource: () async => throw Exception('GPS off'),
