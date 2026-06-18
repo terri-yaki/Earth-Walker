@@ -118,7 +118,7 @@ class _MapScreenState extends State<MapScreen> {
           duration: const Duration(seconds: 3),
           content: Row(
             children: [
-              const Icon(Icons.emoji_events, color: Colors.white),
+              const Icon(Icons.emoji_events, color: Colors.white, semanticLabel: 'Badge'),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -234,36 +234,47 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                     // Visited-cell footprint: one green dot per distinct
                     // geohash-5 cell the user has entered this session.
-                    CircleLayer(
-                      circles: userLocationProvider.visitedCellLocations
-                          .map((point) => CircleMarker(
-                                point: point,
-                                // geohash-5 cells are ~2.4 km wide at the
-                                // equator; render at 800 m so adjacent
-                                // cells overlap visibly without dominating
-                                // the map at city zoom.
-                                radius: 800,
-                                useRadiusInMeter: true,
-                                color: Colors.green.withOpacity(0.25),
-                                borderColor: Colors.green,
-                                borderStrokeWidth: 1,
-                              ))
-                          .toList(),
+                    // ExcludeSemantics because a screen reader would
+                    // otherwise enumerate every circle one by one;
+                    // the HUD already carries the count + distance +
+                    // day stats, which is the meaningful summary.
+                    ExcludeSemantics(
+                      child: CircleLayer(
+                        circles: userLocationProvider.visitedCellLocations
+                            .map((point) => CircleMarker(
+                                  point: point,
+                                  // geohash-5 cells are ~2.4 km wide at the
+                                  // equator; render at 800 m so adjacent
+                                  // cells overlap visibly without dominating
+                                  // the map at city zoom.
+                                  radius: 800,
+                                  useRadiusInMeter: true,
+                                  color: Colors.green.withOpacity(0.25),
+                                  borderColor: Colors.green,
+                                  borderStrokeWidth: 1,
+                                ))
+                            .toList(),
+                      ),
                     ),
-                    // User Location Marker with Custom Image
-                    MarkerLayer(
-                      markers: [
-                        Marker(
-                          width: 80.0,
-                          height: 80.0,
-                          point: userLocationProvider.userLocation.coordinates,
-                          child: Image.asset(
-                            'assets/img/user_m.png', // Ensure this path is correct
-                            width: 40,
-                            height: 40,
+                    // User Location Marker with Custom Image. Wrapped
+                    // in Semantics so a screen-reader user hears "You
+                    // are here" rather than a bare image announcement.
+                    Semantics(
+                      label: 'You are here',
+                      child: MarkerLayer(
+                        markers: [
+                          Marker(
+                            width: 80.0,
+                            height: 80.0,
+                            point: userLocationProvider.userLocation.coordinates,
+                            child: Image.asset(
+                              'assets/img/user_m.png',
+                              width: 40,
+                              height: 40,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
