@@ -222,6 +222,48 @@ void main() {
       expect(p.uniqueCellsVisited, 0);
       expect(p.totalDistanceMeters, 0.0);
     });
+
+    test('todayDistanceMeters starts at 0 and accumulates with new cells',
+        () async {
+      final fixes = <Position>[
+        _pos(22.298, 114.170), // Yau Tsim Mong, cell A
+        _pos(22.330, 114.170), // Yau Tsim Mong, cell B (3.5 km north)
+        _pos(22.340, 114.180), // Yau Tsim Mong, cell C (slightly NE)
+      ];
+      var i = 0;
+      final p = UserLocationProvider(
+        positionSource: () async => fixes[i++],
+      );
+      expect(p.todayDistanceMeters, 0.0,
+          reason: 'fresh provider, no fixes yet');
+      await p.updateUserLocation();
+      expect(p.todayDistanceMeters, 0.0,
+          reason: 'first fix sets the reference, no distance yet');
+      await p.updateUserLocation();
+      expect(p.todayDistanceMeters, greaterThan(0.0));
+      // Third fix should bump it further (not reset to 0).
+      final before = p.todayDistanceMeters;
+      await p.updateUserLocation();
+      expect(p.todayDistanceMeters, greaterThan(before));
+    });
+
+    test('resetExploration zeros todayDistanceMeters', () async {
+      final p = UserLocationProvider(
+        positionSource: () async => _pos(22.298, 114.170),
+      );
+      await p.updateUserLocation();
+      // Walking a couple of fixes so todayDistanceMeters > 0.
+      var i = 0;
+      final p2 = UserLocationProvider(
+        positionSource: () async => _pos(22.298 + 0.001 * i++,
+            114.170 + 0.001 * i),
+      );
+      await p2.updateUserLocation();
+      await p2.updateUserLocation();
+      expect(p2.todayDistanceMeters, greaterThan(0.0));
+      p2.resetExploration();
+      expect(p2.todayDistanceMeters, 0.0);
+    });
   });
 
   group('UserLocationProvider geohash precision', () {

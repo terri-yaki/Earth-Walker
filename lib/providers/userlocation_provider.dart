@@ -7,6 +7,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_location.dart';
 import '../utils/district_counts.dart';
+import '../utils/double_map.dart';
 import '../utils/exploration_days.dart';
 import '../utils/geohash.dart';
 import '../utils/hk_districts.dart';
@@ -215,6 +216,10 @@ class UserLocationProvider with ChangeNotifier {
   /// (district name -> unique cells visited in that district).
   static const String _prefsKeyVisitsByDistrict = 'urbix.visits_by_district';
 
+  /// SharedPreferences key for the per-day distance map
+  /// (yyyy-mm-dd -> meters walked that day).
+  static const String _prefsKeyDistanceByDay = 'urbix.distance_by_day';
+
   /// Set of geohash cells the user has already visited.
   /// Tracked so revisiting the same cell doesn't inflate the count.
   /// Backed by SharedPreferences on disk; see [loadFromStorage] / [saveToStorage].
@@ -235,8 +240,20 @@ class UserLocationProvider with ChangeNotifier {
   /// known district box. Read-only externally.
   final Map<String, int> _visitsByDistrict = <String, int>{};
 
+  /// Meters walked per local-time day (yyyy-mm-dd -> meters).
+  /// Bumped in [_accumulateDistance] alongside [_totalDistanceMeters].
+  /// Persisted to SharedPreferences.
+  final Map<String, double> _distanceByDay = <String, double>{};
+
   /// Number of distinct cells the user has entered (read-only).
   int get uniqueCellsVisited => _visitedCells.length;
+
+  /// Distance in meters walked today (local-time). 0 if the user
+  /// hasn't moved yet today. Used by the HUD's 'Today' line.
+  double get todayDistanceMeters {
+    final key = dayKey(DateTime.now());
+    return _distanceByDay[key] ?? 0.0;
+  }
 
   /// Number of distinct calendar days the user has explored on.
   int get daysExplored => _explorationDays.length;
@@ -276,6 +293,10 @@ class UserLocationProvider with ChangeNotifier {
         ..clear()
         ..addAll(districtCountMapFromJson(
             prefs.getString(_prefsKeyVisitsByDistrict)));
+      _distanceByDay
+        ..clear()
+        ..addAll(doubleMapFromJson(
+            prefs.getString(_prefsKeyDistanceByDay)));
       _lastDistanceReference = null; // first new fix will set it
       _recalculatePercentages();
       notifyListeners();
@@ -298,6 +319,8 @@ class UserLocationProvider with ChangeNotifier {
           _prefsKeyExplorationDays, cellsToJson(_explorationDays));
       await prefs.setString(_prefsKeyVisitsByDistrict,
           districtCountMapToJson(_visitsByDistrict));
+      await prefs.setString(
+          _prefsKeyDistanceByDay, doubleMapToJson(_distanceByDay));
     } catch (e) {
       debugPrint('Failed to save visited cells: $e');
     }
@@ -313,6 +336,11 @@ class UserLocationProvider with ChangeNotifier {
       final step = const Distance().as(LengthUnit.Meter, prev, current);
       if (step > 0 && step <= kMaxPlausibleStepMeters) {
         _totalDistanceMeters += step;
+        // Also bump today's bucket so the HUD's 'Today' line tracks
+        // the same step. Keyed by local-time dayKey so the boundary
+        // crosses at the user's midnight, not UTC.
+        final today = dayKey(DateTime.now());
+        _distanceByDay.update(today, (v) => v + step, ifAbsent: () => step);
         // Save on every increment; the value is a single double so this
         // is cheap and keeps the persisted total in sync with the HUD.
         saveToStorage();
@@ -378,6 +406,7 @@ class UserLocationProvider with ChangeNotifier {
     _lastDistanceReference = null;
     _explorationDays.clear();
     _visitsByDistrict.clear();
+    _distanceByDay.clear();
     _mutationEpoch++;
     saveToStorage();
     notifyListeners();

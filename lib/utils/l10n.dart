@@ -98,6 +98,7 @@ class L10n {
       'badge_unlock_header': 'Badge unlocked!',
       'hud_next_milestone': 'Next',
       'hud_cells_to_go': 'to go',
+      'hud_today': 'Today',
     },
     'zh-HK': {
       'app_title': 'Urbix 香港',
@@ -139,6 +140,7 @@ class L10n {
       'badge_unlock_header': '勳章解鎖！',
       'hud_next_milestone': '下一個',
       'hud_cells_to_go': '仲差',
+      'hud_today': '今日',
     },
   };
 
@@ -189,6 +191,7 @@ class L10n {
   String get badgeUnlockHeader => _lookup('badge_unlock_header');
   String get hudNextMilestone => _lookup('hud_next_milestone');
   String get hudCellsToGo => _lookup('hud_cells_to_go');
+  String get hudToday => _lookup('hud_today');
 
   /// Lookup for any key not covered by a typed getter. Useful in
   /// tests; production code should prefer the typed getters.

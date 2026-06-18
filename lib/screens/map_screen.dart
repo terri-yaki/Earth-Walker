@@ -437,6 +437,27 @@ class _MapScreenState extends State<MapScreen> {
                               ),
                             );
                           }),
+                          // Today's distance: only shown when the
+                          // user has actually moved today. Hidden on
+                          // a fresh day (0 m) so the HUD doesn't
+                          // show a meaningless "0 m" line.
+                          if (userLocationProvider.todayDistanceMeters >
+                              0) ...[
+                            Builder(builder: (context) {
+                              final l = L10n.of(context);
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Text(
+                                  '${l.hudToday}: ${formatDistance(userLocationProvider.todayDistanceMeters)}',
+                                  style: TextStyle(
+                                    color:
+                                        Colors.white.withOpacity(0.85),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              );
+                            }),
+                          ],
                         ],
                       ],
                     ),
