@@ -66,8 +66,13 @@ class _MapScreenState extends State<MapScreen> {
       achievements.unlockedAchievements,
     );
     _lastSeenUnlocked = List<String>.from(achievements.unlockedAchievements);
-    for (final title in newOnes) {
-      _showCelebrationSnackBar(title);
+    if (newOnes.isNotEmpty) {
+      // Pass the full list, not one at a time: each per-title
+      // snackbar used to call clearSnackBars() at entry, so a
+      // multi-threshold jump (e.g. world% 0 -> 25% unlocking
+      // Walker + Pioneer + Traveller) used to only show the last
+      // one. Now we show all of them in a single snackbar.
+      _showCelebrationSnackBar(newOnes);
     }
   }
 
@@ -104,11 +109,17 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  /// Celebration snackbar shown when the user unlocks a new badge.
-  /// Triggers a medium haptic and shows a green card with a trophy
-  /// icon, so the moment feels distinctly different from a regular
-  /// info snackbar.
-  void _showCelebrationSnackBar(String title) {
+  /// Celebration snackbar shown when the user unlocks one or more
+  /// badges in a single update. Triggers a medium haptic and shows
+  /// a green card with a trophy icon, so the moment feels
+  /// distinctly different from a regular info snackbar.
+  ///
+  /// Takes a list because multi-threshold jumps are real (e.g. a
+  /// fresh user whose first fix lands them in a 25% world cell
+  /// unlocks Walker + Pioneer + Traveller at once). The previous
+  /// single-title version used clearSnackBars() per call, so only
+  /// the last title ever showed.
+  void _showCelebrationSnackBar(List<String> titles) {
     HapticFeedback.mediumImpact();
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
@@ -133,13 +144,33 @@ class _MapScreenState extends State<MapScreen> {
                         fontSize: 14,
                       ),
                     ),
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
+                    // Show each newly-unlocked title on its own line.
+                    // For multi-threshold jumps (e.g. fresh user
+                    // jumping world% 0 -> 25% and unlocking Walker +
+                    // Pioneer + Traveller in one fix) we list all
+                    // and append a '+ N more' footer so the user
+                    // sees them all without the snackbar getting
+                    // too tall.
+                    for (final t in titles)
+                      Text(
+                        t,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                        ),
                       ),
-                    ),
+                    if (titles.length > 1)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          '+ ${titles.length - 1} more',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.85),
+                            fontSize: 11,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
