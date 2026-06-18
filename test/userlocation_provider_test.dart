@@ -345,6 +345,50 @@ void main() {
       p2.resetExploration();
       expect(p2.todayDistanceMeters, 0.0);
     });
+
+    test(
+        'resetExploration after updateUserLocation has built up state '
+        'wipes everything that the normal code path populated', () async {
+      // The earlier reset test seeded state via constructor args
+      // and called reset on a fresh provider — that path didn't
+      // actually exercise the .clear() calls because the sets
+      // were already empty. This test builds state via the
+      // NORMAL path (updateUserLocation), then verifies reset
+      // actually wipes it.
+      final fixes = <Position>[
+        _pos(22.298, 114.170), // Yau Tsim Mong, cell A
+        _pos(22.308, 114.183), // Yau Tsim Mong, cell B (~1.1 km NE)
+      ];
+      var i = 0;
+      final p = UserLocationProvider(
+        positionSource: () async => fixes[i++],
+      );
+      await p.updateUserLocation();
+      await p.updateUserLocation();
+      // Sanity: state is populated. The two coords hash to
+      // DIFFERENT geohash-5 cells (wkfg8 and wkfg9); see the
+      // "walking into a new cell" test for the same fixture.
+      expect(p.uniqueCellsVisited, 2);
+      expect(p.totalDistanceMeters, greaterThan(0.0));
+      expect(p.visitsByDistrict['Yau Tsim Mong'], 2);
+      expect(p.daysExplored, 1);
+      expect(p.visitedCellLocations, hasLength(2));
+      // Reset. Every populated field must be wiped.
+      p.resetExploration();
+      expect(p.uniqueCellsVisited, 0,
+          reason: 'reset must clear visited-cells set');
+      expect(p.totalDistanceMeters, 0.0,
+          reason: 'reset must zero totalDistanceMeters');
+      expect(p.visitsByDistrict, isEmpty,
+          reason: 'reset must clear per-district counts');
+      expect(p.daysExplored, 0,
+          reason: 'reset must clear exploration-days set');
+      expect(p.visitedCellLocations, isEmpty,
+          reason: 'reset must clear the footprint list');
+      expect(p.currentSuggestion, isNotNull,
+          reason: 'position is preserved across reset, so the suggestion '
+              'recomputes against the empty visited set');
+    });
   });
 
   group('UserLocationProvider currentStreakDays', () {
