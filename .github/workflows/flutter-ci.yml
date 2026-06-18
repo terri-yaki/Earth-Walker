@@ -53,22 +53,22 @@ jobs:
           git clone --depth 1 --branch ${FLUTTER_VERSION} \
               https://github.com/flutter/flutter.git ${FLUTTER_HOME}
       - name: Verify formatting
-        # Format check. Run dart format with --set-exit-if-changed
-        # which exits 1 if anything would change. The result is
-        # reported as a warning, not a hard failure, because
-        # dart format's behaviour differs slightly between
-        # Linux (CI) and Windows (dev) for files committed
-        # across platforms. The actual project source has been
-        # verified clean; the residual diff is whitespace only.
-        # The diff is uploaded as an artifact for review.
+        # Format check. Hard-fail if any file would be reformatted.
+        # The diff (always captured) is uploaded as an artifact so
+        # reviewers can see exactly what dart format wants to change
+        # without reading the raw action log.
         run: |
           echo "==> Verifying dart format"
-          if dart format --set-exit-if-changed . ; then
-            echo "==> format check: PASS"
-            echo "no diff" > format_diff.txt
+          set +e
+          dart format --output=show . > format_diff.txt 2>&1
+          rc=$?
+          set -e
+          if [ "$rc" -eq 0 ]; then
+            echo "==> format check: PASS (no changes needed)"
           else
-            echo "::warning::dart format reported changes. Run 'dart format .' locally to see the diff."
-            dart format --output=show . > format_diff.txt 2>&1 || true
+            echo "::error::dart format reported changes. Run 'dart format .' locally and commit the result."
+            cat format_diff.txt
+            exit 1
           fi
       - name: Upload format diff artifact
         if: always()
@@ -97,9 +97,17 @@ jobs:
       - run: flutter pub get
       - run: |
           echo "==> Running flutter analyze"
-          flutter analyze --no-fatal-infos > analyze_output.txt 2>&1 || {
-            echo "::warning::flutter analyze reported issues. See analyze_output.txt artifact."
-          }
+          # Hard-fail on analyzer errors and warnings. --no-fatal-infos
+          # still allows info-level lints to slip through (we have a
+          # few intentional `// ignore:` comments that surface as
+          # info, and don't want to block on those).
+          flutter analyze --no-fatal-infos > analyze_output.txt 2>&1
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+            echo "::error::flutter analyze reported issues. See analyze_output.txt artifact."
+            cat analyze_output.txt
+            exit "$rc"
+          fi
       - name: Upload analyze output artifact
         if: always()
         uses: actions/upload-artifact@v4
