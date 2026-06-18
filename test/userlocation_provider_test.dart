@@ -642,6 +642,10 @@ void main() {
       );
       await p.updateUserLocation();
       expect(p.uniqueCellsVisited, 1);
+      // Per-district bump should have happened in the same path
+      // (the cell sits in Central and Western).
+      expect(p.visitsByDistrict['Central and Western'], 1,
+          reason: 'visiting wkfft must bump Central and Western');
       // Drain microtasks so the fire-and-forget saveToStorage
       // inside _updateExploration has a chance to complete
       // before we construct the second provider.
@@ -656,6 +660,8 @@ void main() {
       expect(p2.uniqueCellsVisited, 1,
           reason: 'cell visited in session 1 must be persisted to '
               'SharedPreferences and re-loaded in session 2');
+      expect(p2.visitsByDistrict['Central and Western'], 1,
+          reason: 'per-district count must also persist across reload');
     });
 
     test(
