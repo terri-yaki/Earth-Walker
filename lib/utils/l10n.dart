@@ -172,6 +172,12 @@ class L10n {
   /// by TalkBack instead of the bare emoji_events announcement.
   String get badgeSemanticLabel => _lookup('badge_semantic_label');
 
+  /// Prefix for the error snackbar shown when the map fails to
+  /// initialize (e.g. tile-server unreachable). The full message
+  /// is "$prefix $exception" so callers can append the underlying
+  /// error in the user's language.
+  String get mapInitFailed => _lookup('map_init_failed');
+
   /// Lookup for any key not covered by a typed getter. Useful in
   /// tests; production code should prefer the typed getters.
   @visibleForTesting

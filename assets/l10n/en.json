@@ -74,5 +74,6 @@
   "you_are_here": "You are here",
   "map_recentered_snack": "Map recentered to your current location.",
   "recenter_map_tooltip": "Recenter Map",
-  "badge_semantic_label": "Badge"
+  "badge_semantic_label": "Badge",
+  "map_init_failed": "Failed to initialize map:"
 }

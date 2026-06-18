@@ -74,5 +74,6 @@
   "you_are_here": "你喺呢度",
   "map_recentered_snack": "地圖已重新定位到你嘅位置。",
   "recenter_map_tooltip": "重新定位",
-  "badge_semantic_label": "勳章"
+  "badge_semantic_label": "勳章",
+  "map_init_failed": "無法初始化地圖："
 }

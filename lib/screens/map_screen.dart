@@ -190,6 +190,7 @@ class _MapScreenState extends State<MapScreen> {
 
   /// Initializes the map by fetching the user's location.
   Future<void> _initializeMap() async {
+    final l = L10n.of(context);
     try {
       final provider =
           Provider.of<UserLocationProvider>(context, listen: false);
@@ -207,8 +208,11 @@ class _MapScreenState extends State<MapScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      // Handle any errors
-      _showSnackBar('Failed to initialize map: $e');
+      // Handle any errors. The prefix is localised; the
+      // exception's own toString() stays as-is (typed
+      // LocationPermissionDeniedException already routes to the
+      // onboarding-permission copy before we ever get here).
+      _showSnackBar('${l.mapInitFailed} $e');
       setState(() {
         _isLoading = false;
       });

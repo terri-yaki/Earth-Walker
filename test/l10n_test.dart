@@ -89,6 +89,7 @@ const Map<String, String> _enStrings = <String, String>{
   'map_recentered_snack': 'Map recentered to your current location.',
   'recenter_map_tooltip': 'Recenter Map',
   'badge_semantic_label': 'Badge',
+  'map_init_failed': 'Failed to initialize map:',
 };
 
 const Map<String, String> _zhStrings = <String, String>{
@@ -181,6 +182,7 @@ const Map<String, String> _zhStrings = <String, String>{
   'map_recentered_snack': '\u5730\u5716\u5df2\u91cd\u65b0\u5b9a\u4f4d\u5230\u4f60\u7684\u4f4d\u7f6e\u3002',
   'recenter_map_tooltip': '\u91cd\u65b0\u5b9a\u4f4d',
   'badge_semantic_label': '\u52f3\u7ae0',
+  'map_init_failed': '\u7121\u6cd5\u521d\u59cb\u5316\u5730\u5716\uff1a',
 };
 
 void main() {
@@ -345,6 +347,23 @@ void main() {
       expect(en.badgeSemanticLabel, 'Badge');
       expect(zh.badgeSemanticLabel, matches(RegExp(r'[\u4E00-\u9FFF]')));
       expect(zh.badgeSemanticLabel, isNot(en.badgeSemanticLabel));
+    });
+
+    test('map-init error prefix is localised', () {
+      // _initializeMap() catches every exception from
+      // loadFromStorage / updateUserLocation and shows
+      // '$mapInitFailed $e' in a snackbar. Was hardcoded
+      // 'Failed to initialize map: $e' (English) for every
+      // locale before.
+      final en = L10n(const Locale('en'), _enStrings, _enStrings);
+      final zh = L10n(const Locale('zh', 'HK'), _zhStrings, _enStrings);
+      expect(en.mapInitFailed, 'Failed to initialize map:');
+      expect(zh.mapInitFailed, matches(RegExp(r'[\u4E00-\u9FFF]')));
+      expect(zh.mapInitFailed, isNot(en.mapInitFailed));
+      expect(zh.mapInitFailed, anyOf(endsWith(':'), endsWith('：')),
+          reason: 'Chinese prefix should still end with a colon (fullwidth '
+              'or halfwidth) so the concatenated "prefix exception" reads '
+              'naturally');
     });
 
     test('exploration percentage labels are localised', () {
