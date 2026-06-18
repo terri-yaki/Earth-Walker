@@ -133,10 +133,11 @@ ExplorationSuggestion? pickNextExploration({
   required List<GeohashCell> candidateCells,
   Set<String> visitedDistricts = const <String>{},
 }) {
-  GeohashCell? best;
-  double bestScore = double.negativeInfinity;
-  double bestDistance = 0.0;
+  GeohashCell? bestCell;
   String? bestDistrict;
+  double bestDistance = 0.0;
+  bool bestInNewDistrict = false;
+  double bestScore = double.negativeInfinity;
 
   for (final cell in candidateCells) {
     if (visitedCells.contains(cell.geohash)) continue;
@@ -154,18 +155,18 @@ ExplorationSuggestion? pickNextExploration({
     final score = inNewDistrict ? proximity * 1.2 : proximity;
     if (score > bestScore) {
       bestScore = score;
-      best = cell;
-      bestDistance = distance;
+      bestCell = cell;
       bestDistrict = districtName;
+      bestDistance = distance;
+      bestInNewDistrict = inNewDistrict;
     }
   }
-  if (best == null) return null;
+  if (bestCell == null) return null;
   return ExplorationSuggestion(
-    target: best.center,
+    target: bestCell.center,
     districtName: bestDistrict,
-    geohash: best.geohash,
+    geohash: bestCell.geohash,
     distanceFromUserMeters: bestDistance,
-    isInNewDistrict:
-        bestDistrict != null && !visitedDistricts.contains(bestDistrict),
+    isInNewDistrict: bestInNewDistrict,
   );
 }
