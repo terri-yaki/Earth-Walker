@@ -347,6 +347,17 @@ class _MapScreenState extends State<MapScreen> {
                                   ),
                                 ),
                               ),
+                              if (userLocationProvider.cellsInCurrentDistrict >
+                                  0) ...[
+                                const SizedBox(width: 6),
+                                Text(
+                                  '· ${userLocationProvider.cellsInCurrentDistrict} ${userLocationProvider.cellsInCurrentDistrict == 1 ? "visit" : "visits"}',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.75),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ],
