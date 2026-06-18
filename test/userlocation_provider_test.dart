@@ -96,6 +96,61 @@ void main() {
       expect(p.cellsInCurrentDistrict, 0);
     });
 
+    test(
+        'cellsInCurrentDistrict counts the current district\'s cells '
+        'after a visit', () async {
+      // Walk into Yau Tsim Mong (22.298, 114.170). The getter must
+      // read from _visitsByDistrict['Yau Tsim Mong'], NOT from
+      // _visitedCells (which would double-count if visited cells
+      // happen to hash to cells in the current district).
+      final fixes = <Position>[
+        _pos(22.298, 114.170), // Yau Tsim Mong, wkfg8
+        _pos(22.305, 114.160), // Yau Tsim Mong, wkffx (~1.2 km N)
+      ];
+      var i = 0;
+      final p = UserLocationProvider(
+        positionSource: () async => fixes[i++],
+      );
+      await p.updateUserLocation();
+      expect(p.cellsInCurrentDistrict, 1,
+          reason: 'after visiting wkfg8 in Yau Tsim Mong, the count is 1');
+      await p.updateUserLocation();
+      expect(p.cellsInCurrentDistrict, 2,
+          reason: 'after also visiting wkffx in Yau Tsim Mong, the '
+              'count is 2');
+    });
+
+    test(
+        'cellsInCurrentDistrict is 0 if the user is outside any known '
+        'district (even after visiting cells elsewhere)', () async {
+      // Start in Yau Tsim Mong, visit a cell, then jump south of
+      // the HK bbox to open sea. (22.500, 114.000) would actually
+      // fall in Yuen Long per the bbox list — so use 21.500,
+      // 114.000 which is unambiguously south of all 18 boxes.)
+      //
+      // The current district lookup uses the user's CURRENT coords,
+      // not the visited cells'. So at sea, the getter returns 0
+      // even though _visitsByDistrict is non-empty.
+      //
+      // 30+ km jump is past kMaxPlausibleStepMeters (3.0 km), so
+      // the new cell is recorded but the distance accumulator
+      // drops it.
+      final fixes = <Position>[
+        _pos(22.298, 114.170), // Yau Tsim Mong
+        _pos(21.500, 114.000), // ~80 km south — open sea, no district
+      ];
+      var i = 0;
+      final p = UserLocationProvider(
+        positionSource: () async => fixes[i++],
+      );
+      await p.updateUserLocation();
+      expect(p.cellsInCurrentDistrict, 1);
+      await p.updateUserLocation();
+      // At sea, currentDistrictName is null, so cellsInCurrentDistrict
+      // returns 0 regardless of _visitsByDistrict state.
+      expect(p.cellsInCurrentDistrict, 0);
+    });
+
     test('resetExploration clears every counter, map, and set', () {
       // Build up some non-default state via direct constructor args so
       // we don't need Geolocator, then verify the reset wipes it all.
