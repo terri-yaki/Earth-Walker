@@ -184,6 +184,71 @@ void main() {
       );
       expect(lines, isEmpty, reason: '20 m is below the 50 m noise floor');
     });
+
+    test(
+        'distance boundary: exactly 50 m is filtered, 51 m is reported '
+        '(locks the `> 50` strict comparison)', () {
+      // The noise filter uses `dMeters.abs() > 50` (strict).
+      // A regression to `>= 50` would let the boundary value
+      // through and produce "0.1 km" line for a 50 m diff
+      // (visibly noisy to users — "you walked 50 m more" reads
+      // like a rounding artifact, not a real difference).
+      const you3 = ProgressSnapshot(
+        cellsVisited: 0,
+        badgesUnlocked: 0,
+        medalsEarned: 0,
+        metersWalked: 10000.0,
+        daysExplored: 0,
+        currentStreakDays: 0,
+      );
+      const themExactly50 = ProgressSnapshot(
+        cellsVisited: 0,
+        badgesUnlocked: 0,
+        medalsEarned: 0,
+        metersWalked: 10050.0, // exactly 50 m difference —boundary
+        daysExplored: 0,
+        currentStreakDays: 0,
+      );
+      const them51 = ProgressSnapshot(
+        cellsVisited: 0,
+        badgesUnlocked: 0,
+        medalsEarned: 0,
+        metersWalked: 10051.0, // 51 m —just over the boundary
+        daysExplored: 0,
+        currentStreakDays: 0,
+      );
+      // 50 m — filtered (boundary excluded by strict `>`).
+      final lines50 = ProgressSnapshot.compare(
+        other: themExactly50,
+        yours: you3,
+        cellsLabel: 'c',
+        distanceLabel: 'd',
+        badgesLabel: 'b',
+        medalsLabel: 'm',
+        daysLabel: 'd',
+        streakLabel: 's',
+        youWinLabel: 'y',
+        theyWinLabel: 't',
+      );
+      expect(lines50, isEmpty,
+          reason: 'exactly 50 m is at the boundary and must be filtered '
+              '(the `> 50` is strict)');
+      // 51 m — included.
+      final lines51 = ProgressSnapshot.compare(
+        other: them51,
+        yours: you3,
+        cellsLabel: 'c',
+        distanceLabel: 'd',
+        badgesLabel: 'b',
+        medalsLabel: 'm',
+        daysLabel: 'd',
+        streakLabel: 's',
+        youWinLabel: 'y',
+        theyWinLabel: 't',
+      );
+      expect(lines51, hasLength(1),
+          reason: '51 m is one metre over the noise floor');
+    });
   });
 
   group('ProgressSnapshot.fromJson', () {
