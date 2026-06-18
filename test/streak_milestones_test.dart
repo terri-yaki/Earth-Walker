@@ -87,5 +87,33 @@ void main() {
         30,
       );
     });
+
+    test('returns null for a negative streak (defensive)', () {
+      // Defensive: a regression that returned `currentStreak` as
+      // the prompt-threshold would let negative streaks match
+      // the >= 3 comparison. Locks the null return.
+      expect(
+        newStreakShareMilestone(
+          currentStreak: -5,
+          alreadyPrompted: <int>{},
+        ),
+        isNull,
+      );
+    });
+
+    test('ignores non-threshold entries in alreadyPrompted', () {
+      // The alreadyPrompted set might contain other integers from
+      // elsewhere (e.g. a UI state machine). The function must
+      // look up thresholds by VALUE, not iterate blindly. With
+      // garbage values 1, 2, 5 in the set and currentStreak = 7,
+      // the function should still find threshold 7.
+      expect(
+        newStreakShareMilestone(
+          currentStreak: 7,
+          alreadyPrompted: <int>{1, 2, 5},
+        ),
+        7,
+      );
+    });
   });
 }
