@@ -200,6 +200,28 @@ void main() {
       expect(p.uniqueCellsVisited, 0);
       expect(p.totalDistanceMeters, 0.0);
     });
+
+    test('a reset that lands mid-update clobbers neither side', () async {
+      // Simulate the race: the position source takes long enough that
+      // a reset fires while the update is awaiting. The update should
+      // bail at the post-await checkpoint (so it doesn't clobber the
+      // reset), and the reset should still leave the provider at the
+      // freshly-cleared state.
+      final p = UserLocationProvider(
+        positionSource: () async {
+          // Simulate reset happening during the await.
+          Future.microtask(() => p.resetExploration());
+          // Then "return" a real position. The provider should
+          // observe the epoch bump and skip the state mutations.
+          return _pos(22.298, 114.170);
+        },
+      );
+      await p.updateUserLocation();
+      // Reset won: the in-flight update bailed out, so the cells
+      // list is still empty and the reset's clear() is intact.
+      expect(p.uniqueCellsVisited, 0);
+      expect(p.totalDistanceMeters, 0.0);
+    });
   });
 
   group('UserLocationProvider geohash precision', () {

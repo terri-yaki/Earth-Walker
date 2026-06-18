@@ -75,6 +75,13 @@ class UserLocationProvider with ChangeNotifier {
   /// permission mocks.
   final Future<Position> Function() _positionSource;
 
+  /// Monotonic counter bumped by [resetExploration]. An in-flight
+  /// [updateUserLocation] captures the value at entry and bails out
+  /// at the post-await checkpoints if the counter has advanced —
+  /// so a reset that lands mid-update doesn't get clobbered by a
+  /// late-arriving location fix. Closes AUDIT.md A2.
+  int _mutationEpoch = 0;
+
   /// Constructor to initialize the provider with default values.
   UserLocationProvider({
     UserLocation? initialLocation,
@@ -135,10 +142,17 @@ class UserLocationProvider with ChangeNotifier {
   /// In production this defaults to [_geolocatorPositionSource],
   /// which checks permission then calls Geolocator.getCurrentPosition.
   /// Tests inject a stub.
+  ///
+  /// [resetExploration] may run while this is awaiting. We capture
+  /// the [_mutationEpoch] at entry; if it advances (because a
+  /// reset happened), we bail out instead of clobbering the reset
+  /// with late-arriving state. See AUDIT.md A2.
   Future<void> updateUserLocation() async {
+    final epochAtStart = _mutationEpoch;
     try {
       // Get the current position via the (possibly injected) source.
       final Position position = await _positionSource();
+      if (_mutationEpoch != epochAtStart) return; // a reset won the race
 
       // Update the user's location
       _userLocation =
@@ -151,6 +165,7 @@ class UserLocationProvider with ChangeNotifier {
       // implementation should use a Kalman filter or velocity-scaled
       // outlier rejection.
       _accumulateDistance(_userLocation.coordinates);
+      if (_mutationEpoch != epochAtStart) return; // belt and braces
 
       // Update exploration percentages
       _updateExploration(_userLocation.coordinates);
@@ -350,7 +365,9 @@ class UserLocationProvider with ChangeNotifier {
 
   /// Resets all exploration percentages to zero, clears visited cells,
   /// and zeros the cumulative distance, days-explored, and
-  /// per-district counters.
+  /// per-district counters. Bumps [_mutationEpoch] so any in-flight
+  /// [updateUserLocation] bails out at its next checkpoint instead
+  /// of clobbering the reset.
   void resetExploration() {
     _countryPercentage = 0;
     _continentPercentage = 0;
@@ -361,6 +378,7 @@ class UserLocationProvider with ChangeNotifier {
     _lastDistanceReference = null;
     _explorationDays.clear();
     _visitsByDistrict.clear();
+    _mutationEpoch++;
     saveToStorage();
     notifyListeners();
   }

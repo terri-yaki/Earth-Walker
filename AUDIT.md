@@ -35,4 +35,38 @@
   private helpers `_accumulateDistance` and `_updateExploration`
   update state but defer to the caller's notify — contained because
   they are private).
+- L10n coverage is complete: no hard-coded capitalized `Text('...')`
+  widgets remain in `lib/screens/` or `lib/widgets/` (the remaining
+  Text widgets are either non-string, interpolated, or use
+  `AppTextStyles`).
+- No empty `*.dart` files; no leftover default Flutter `widget_test.dart`.
+- `lib/widgets/text.dart` (`CustomText`) is still used by
+  `MapScreen._showSnackBar` and `RecenterButton._handleRecenter` —
+  not dead.
+- `userLocation_provider_test.dart`, `districts_screen_test.dart`,
+  `onboarding_screen_test.dart`, `l10n_test.dart` all reflect
+  production wiring (delegate + supportedLocales + L10nDelegate
+  registered for the locale-aware tests).
+
+## Open
+
+(none)
+
+## Closed (post-initial-audit follow-ups)
+
+- A1 closed by `b17ce3f` (provider tests) + `bd7f379`
+  (position-source injection). See the Closed section above.
+- A2 closed by the follow-up commit. The race between
+  `updateUserLocation()` and `resetExploration()` is fixed by a
+  monotonic `_mutationEpoch` counter: `resetExploration()` bumps
+  it, and `updateUserLocation()` captures it at entry and bails at
+  the post-await checkpoints if it has advanced. Added a new test
+  that drives the race (a stub position source that calls
+  `resetExploration()` during its own `await`) and asserts the
+  provider ends in the reset state.
+
+## Closed (post-initial-audit follow-ups)
+
+- A1 closed by `b17ce3f` (provider tests) + `bd7f379`
+  (position-source injection). See the Closed section above.
 
