@@ -24,12 +24,14 @@ class AchievementScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          _buildPercentageRow('Country', achievementProvider.countryExplored),
+          _buildPercentageRow(l, l.explorationCountry,
+              achievementProvider.countryExplored),
           const SizedBox(height: 10),
-          _buildPercentageRow(
-              'Continent', achievementProvider.continentExplored),
+          _buildPercentageRow(l, l.explorationContinent,
+              achievementProvider.continentExplored),
           const SizedBox(height: 10),
-          _buildPercentageRow('World', achievementProvider.worldExplored),
+          _buildPercentageRow(l, l.explorationWorld,
+              achievementProvider.worldExplored),
           const SizedBox(height: 24),
           Text(
             l.badgesHeader,
@@ -47,6 +49,7 @@ class AchievementScreen extends StatelessWidget {
           else
             ...achievementProvider.achievementThresholds.entries
                 .map((entry) => _buildAchievementTile(
+                      l: l,
                       title: entry.key,
                       threshold: entry.value,
                       unlocked: achievementProvider.isUnlocked(entry.key),
@@ -57,12 +60,16 @@ class AchievementScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPercentageRow(String title, int percentage) {
+  Widget _buildPercentageRow(L10n l, String title, int percentage) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          '$title Exploration:',
+          // '$title Exploration:' as one template would be hard to
+          // translate (e.g. Chinese puts the colon and word order
+          // differently). Pass the label and suffix in separately
+          // so the l10n layer can glue them with locale rules.
+          '$title ${l.explorationSuffix}',
           style: AppTextStyles.achievementTitle,
         ),
         Text(
@@ -74,6 +81,7 @@ class AchievementScreen extends StatelessWidget {
   }
 
   Widget _buildAchievementTile({
+    required L10n l,
     required String title,
     required int threshold,
     required bool unlocked,
@@ -98,7 +106,7 @@ class AchievementScreen extends StatelessWidget {
           if (unlocked) ...[
             const SizedBox(width: 8),
             Text(
-              _tierLabel(tier),
+              _tierLabel(tier, l),
               style: TextStyle(
                 fontSize: 11,
                 color: _tierColor(tier),
@@ -109,7 +117,8 @@ class AchievementScreen extends StatelessWidget {
           ],
         ],
       ),
-      subtitle: Text('$unlockedAtLabel $threshold% world exploration'),
+      subtitle: Text(
+          '$unlockedAtLabel $threshold% ${l.explorationWorldPercent}'),
     );
   }
 
@@ -124,14 +133,14 @@ class AchievementScreen extends StatelessWidget {
     }
   }
 
-  String _tierLabel(AchievementTier tier) {
+  String _tierLabel(AchievementTier tier, L10n l) {
     switch (tier) {
       case AchievementTier.gold:
-        return 'GOLD';
+        return l.tierGold;
       case AchievementTier.silver:
-        return 'SILVER';
+        return l.tierSilver;
       case AchievementTier.bronze:
-        return 'BRONZE';
+        return l.tierBronze;
     }
   }
 }

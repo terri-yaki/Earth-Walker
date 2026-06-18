@@ -58,7 +58,7 @@ class MedalScreen extends StatelessWidget {
                   if (awarded) ...[
                     const SizedBox(width: 8),
                     Text(
-                      _tierLabel(tier),
+                      _tierLabel(tier, l),
                       style: TextStyle(
                         fontSize: 11,
                         color: _tierColor(tier),
@@ -70,7 +70,7 @@ class MedalScreen extends StatelessWidget {
                 ],
               ),
               subtitle: Text(
-                '${l.medalsAwardedAt} ${medal.condition}% world exploration',
+                '${l.medalsAwardedAt} ${medal.condition}% ${l.explorationWorldPercent}',
               ),
             );
           }),
@@ -90,14 +90,14 @@ class MedalScreen extends StatelessWidget {
     }
   }
 
-  String _tierLabel(AchievementTier tier) {
+  String _tierLabel(AchievementTier tier, L10n l) {
     switch (tier) {
       case AchievementTier.gold:
-        return 'GOLD';
+        return l.tierGold;
       case AchievementTier.silver:
-        return 'SILVER';
+        return l.tierSilver;
       case AchievementTier.bronze:
-        return 'BRONZE';
+        return l.tierBronze;
     }
   }
 }

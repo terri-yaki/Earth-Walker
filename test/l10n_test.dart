@@ -77,6 +77,14 @@ const Map<String, String> _enStrings = <String, String>{
   'badge_unlock_header': 'Badge unlocked!',
   'suggestion_chip': 'Next',
   'suggestion_explore_other': 'a new area',
+  'tier_gold': 'GOLD',
+  'tier_silver': 'SILVER',
+  'tier_bronze': 'BRONZE',
+  'exploration_country': 'Country',
+  'exploration_continent': 'Continent',
+  'exploration_world': 'World',
+  'exploration_suffix': 'Exploration:',
+  'exploration_world_percent': 'world exploration',
 };
 
 const Map<String, String> _zhStrings = <String, String>{
@@ -157,6 +165,14 @@ const Map<String, String> _zhStrings = <String, String>{
   'badge_unlock_header': '\u52f3\u7ae0\u89e3\u9396\uff01',
   'suggestion_chip': '\u4e0b\u4e00\u6b65',
   'suggestion_explore_other': '\u65b0\u5730\u65b9',
+  'tier_gold': '\u91d1',
+  'tier_silver': '\u9280',
+  'tier_bronze': '\u9285',
+  'exploration_country': '\u570b\u5bb6',
+  'exploration_continent': '\u6d32',
+  'exploration_world': '\u4e16\u754c',
+  'exploration_suffix': '\u63a2\u7d22\uff1a',
+  'exploration_world_percent': '\u4e16\u754c\u63a2\u7d22',
 };
 
 void main() {
@@ -266,6 +282,50 @@ void main() {
       expect(l.menuDistricts, _enStrings['menu_districts']);
       // The present keys should still come from zhPartial.
       expect(l.menuAchievements, _zhStrings['menu_achievements']);
+    });
+
+    test('tier labels are localised', () {
+      final en = L10n(const Locale('en'), _enStrings, _enStrings);
+      final zh = L10n(const Locale('zh', 'HK'), _zhStrings, _enStrings);
+      expect(en.tierGold, 'GOLD');
+      expect(en.tierSilver, 'SILVER');
+      expect(en.tierBronze, 'BRONZE');
+      // Chinese tier labels should be CJK ideographs, not
+      // English.
+      expect(zh.tierGold, matches(RegExp(r'[\u4E00-\u9FFF]')));
+      expect(zh.tierSilver, matches(RegExp(r'[\u4E00-\u9FFF]')));
+      expect(zh.tierBronze, matches(RegExp(r'[\u4E00-\u9FFF]')));
+    });
+
+    test('exploration percentage labels are localised', () {
+      // The achievement screen used to hardcode 'Country',
+      // 'Continent', 'World', and 'Exploration:' in English
+      // even for zh-HK users. These tests lock down that all
+      // four are localised.
+      final en = L10n(const Locale('en'), _enStrings, _enStrings);
+      final zh = L10n(const Locale('zh', 'HK'), _zhStrings, _enStrings);
+      expect(en.explorationCountry, 'Country');
+      expect(en.explorationContinent, 'Continent');
+      expect(en.explorationWorld, 'World');
+      expect(en.explorationSuffix, 'Exploration:');
+      expect(en.explorationWorldPercent, 'world exploration');
+      // Chinese versions should carry CJK ideographs and should
+      // not be the English fallbacks.
+      expect(zh.explorationCountry, isNot(en.explorationCountry));
+      expect(zh.explorationContinent, isNot(en.explorationContinent));
+      expect(zh.explorationWorld, isNot(en.explorationWorld));
+      expect(zh.explorationSuffix, isNot(en.explorationSuffix));
+      expect(zh.explorationWorldPercent, isNot(en.explorationWorldPercent));
+      for (final s in <String>[
+        zh.explorationCountry,
+        zh.explorationContinent,
+        zh.explorationWorld,
+        zh.explorationSuffix,
+        zh.explorationWorldPercent,
+      ]) {
+        expect(s, matches(RegExp(r'[\u4E00-\u9FFF]')),
+            reason: '$s should contain CJK ideographs');
+      }
     });
   });
 }

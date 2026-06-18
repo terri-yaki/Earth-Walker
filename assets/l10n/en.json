@@ -62,5 +62,13 @@
   "districts_explored": "districts explored",
   "badge_unlock_header": "Badge unlocked!",
   "suggestion_chip": "Next",
-  "suggestion_explore_other": "a new area"
+  "suggestion_explore_other": "a new area",
+  "tier_gold": "GOLD",
+  "tier_silver": "SILVER",
+  "tier_bronze": "BRONZE",
+  "exploration_country": "Country",
+  "exploration_continent": "Continent",
+  "exploration_world": "World",
+  "exploration_suffix": "Exploration:",
+  "exploration_world_percent": "world exploration"
 }

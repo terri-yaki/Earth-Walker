@@ -62,5 +62,13 @@
   "districts_explored": "個地區已探索",
   "badge_unlock_header": "勳章解鎖！",
   "suggestion_chip": "下一步",
-  "suggestion_explore_other": "新地方"
+  "suggestion_explore_other": "新地方",
+  "tier_gold": "金",
+  "tier_silver": "銀",
+  "tier_bronze": "銅",
+  "exploration_country": "國家",
+  "exploration_continent": "洲",
+  "exploration_world": "世界",
+  "exploration_suffix": "探索：",
+  "exploration_world_percent": "世界探索"
 }

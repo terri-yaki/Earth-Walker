@@ -136,6 +136,26 @@ class L10n {
   String get suggestionChip => _lookup('suggestion_chip');
   String get suggestionExploreOther => _lookup('suggestion_explore_other');
 
+  /// Tier label for a gold-tier achievement / medal.
+  String get tierGold => _lookup('tier_gold');
+  String get tierSilver => _lookup('tier_silver');
+  String get tierBronze => _lookup('tier_bronze');
+
+  /// Row labels for the country / continent / world exploration
+  /// percentages on the Achievements screen.
+  String get explorationCountry => _lookup('exploration_country');
+  String get explorationContinent => _lookup('exploration_continent');
+  String get explorationWorld => _lookup('exploration_world');
+
+  /// Trailing label on the percentage row —e.g. 'Exploration:'
+  /// in English or '探索：' in Chinese.
+  String get explorationSuffix => _lookup('exploration_suffix');
+
+  /// Trailing label on the badge / medal subtitle —e.g.
+  /// 'world exploration' in English or '世界探索' in Chinese.
+  String get explorationWorldPercent =>
+      _lookup('exploration_world_percent');
+
   /// Lookup for any key not covered by a typed getter. Useful in
   /// tests; production code should prefer the typed getters.
   @visibleForTesting
