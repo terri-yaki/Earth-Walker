@@ -40,7 +40,10 @@ jobs:
     name: Format check
     runs-on: ubuntu-latest
     env:
-      PATH: ${{ env.FLUTTER_HOME }}/bin:${{ env.PATH }}
+      # Use github.workspace directly — the parser can't resolve
+      # env.FLUTTER_HOME at job-level env because the workflow-
+      # level env hasn't been published to the env context yet.
+      PATH: ${{ github.workspace }}/flutter/bin:${{ env.PATH }}
     steps:
       - uses: actions/checkout@v4
       - name: Install Flutter
@@ -59,7 +62,7 @@ jobs:
     name: Analyze
     runs-on: ubuntu-latest
     env:
-      PATH: ${{ env.FLUTTER_HOME }}/bin:${{ env.PATH }}
+      PATH: ${{ github.workspace }}/flutter/bin:${{ env.PATH }}
     steps:
       - uses: actions/checkout@v4
       - name: Install Flutter
@@ -83,7 +86,7 @@ jobs:
     name: Test + coverage
     runs-on: ubuntu-latest
     env:
-      PATH: ${{ env.FLUTTER_HOME }}/bin:${{ env.PATH }}
+      PATH: ${{ github.workspace }}/flutter/bin:${{ env.PATH }}
     steps:
       - uses: actions/checkout@v4
       - name: Install Flutter
@@ -131,7 +134,7 @@ jobs:
     # has settled the runner compatibility).
     if: false
     env:
-      PATH: ${{ env.FLUTTER_HOME }}/bin:${{ env.PATH }}
+      PATH: ${{ github.workspace }}/flutter/bin:${{ env.PATH }}
     steps:
       - uses: actions/checkout@v4
       - name: Install Flutter
@@ -146,7 +149,6 @@ jobs:
         with:
           name: apk-debug-${{ github.run_id }}
           path: build/app/outputs/flutter-apk/app-debug.apk
-        if-no-files-found: error
 
   # ------------------------------------------------------------
   # Tag-triggered signed release build. Only runs on v* tag
@@ -166,7 +168,7 @@ jobs:
     permissions:
       contents: write
     env:
-      PATH: ${{ env.FLUTTER_HOME }}/bin:${{ env.PATH }}
+      PATH: ${{ github.workspace }}/flutter/bin:${{ env.PATH }}
     steps:
       - uses: actions/checkout@v4
       - name: Install Flutter
@@ -198,7 +200,6 @@ jobs:
         with:
           name: apk-release-${{ github.run_id }}
           path: build/app/outputs/flutter-apk/app-release.apk
-        if-no-files-found: error
 
 # Not in this commit (deliberately):
 #   - Codecov upload: needs CODECOV_TOKEN; easy follow-up.
