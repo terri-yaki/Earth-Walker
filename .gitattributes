@@ -1,0 +1,51 @@
+# Line-ending policy. Without this, the Windows Git client
+# (`core.autocrlf=true`) silently converts LF to CRLF on checkout,
+# which breaks the GitHub Actions YAML parser when the workflow
+# file ends up with mixed line endings. The CI had been failing
+# instantly on every push until I caught the mixed-CRLF issue in
+# b8d8bba; this file prevents the next contributor on a Windows
+# machine from re-introducing it.
+#
+# Pattern: declare LF as the canonical line ending for everything
+# that matters to the build, with a few specific overrides for
+# files that genuinely need CRLF (none in this repo, but the
+# .bat / .cmd escape hatch is here for the day someone adds one).
+*               text=auto eol=lf
+*.bat           text eol=crlf
+*.cmd           text eol=crlf
+*.ps1           text eol=crlf
+*.sh            text eol=lf
+
+# Dart source — LF (Dart formatter emits LF; the analyzer is
+# CRLF-tolerant but the linter and CI formatters assume LF).
+*.dart          text eol=lf
+
+# YAML — must be LF for GitHub Actions; mixed line endings
+# silently break the Actions YAML parser (see b8d8bba).
+*.yml           text eol=lf
+*.yaml          text eol=lf
+
+# JSON — LF; the L10n JSON files in assets/l10n/ are committed
+# as LF and any CRLF injection would break json.load().
+*.json          text eol=lf
+
+# Markdown — LF.
+*.md            text eol=lf
+
+# Plain text — LF.
+*.txt           text eol=lf
+
+# Lockfiles — must be LF for `pub get` to parse.
+pubspec.lock    text eol=lf
+
+# Images, fonts, and other binary assets — never re-encode.
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.gif           binary
+*.webp          binary
+*.ico           binary
+*.ttf           binary
+*.otf           binary
+*.woff          binary
+*.woff2         binary
