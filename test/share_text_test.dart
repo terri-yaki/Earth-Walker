@@ -47,6 +47,24 @@ void main() {
       expect(outMany, contains('7 days streak'));
     });
 
+    test(
+        'zero-day streak renders with "days" (plural for zero, '
+        'consistent with English grammar)', () {
+      // 0 is grammatically plural ("zero days", not "zero day"),
+      // so the streak == 1 special case correctly excludes 0.
+      const zero = ProgressSnapshot(
+        cellsVisited: 5,
+        badgesUnlocked: 0,
+        medalsEarned: 0,
+        metersWalked: 1000.0,
+        daysExplored: 1,
+        currentStreakDays: 0,
+      );
+      final out = formatShareText(snapshot: zero, bragLine: 'x');
+      expect(out, contains('0 days streak'));
+      expect(out, isNot(contains('0 day streak')));
+    });
+
     test('km is rendered with one decimal place', () {
       const snap = ProgressSnapshot(
         cellsVisited: 1,
