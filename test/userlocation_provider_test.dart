@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urbix/models/user_location.dart';
 import 'package:urbix/providers/userlocation_provider.dart';
+import 'package:urbix/utils/exploration_days.dart';
 
 // Top-level test fixture: a `Position` factory. Defined at file
 // scope so every test group (not just the one it was first written
@@ -383,6 +384,53 @@ void main() {
       // to be 1, not 0. Drop the call rather than fake it.
       final p = UserLocationProvider();
       expect(p.currentStreakDays, 0);
+    });
+
+    test(
+        'grace day: walked yesterday but not today still counts '
+        'the unbroken streak', () async {
+      // Seed exploration days so that yesterday is in the set
+      // but today is NOT. The streak algorithm allows up to
+      // one day of grace (so the user doesn't lose their
+      // streak if they just haven't walked yet today). The
+      // expected return is 1 (just the yesterday walk).
+      //
+      // We seed via SharedPreferences.loadFromStorage rather
+      // than calling updateExploration, because the latter
+      // always adds today. The streak logic then reads
+      // DateTime.now() at call time and compares against
+      // the seeded set.
+      final now = DateTime.now();
+      final yesterday = DateTime(now.year, now.month, now.day - 1);
+      final yesterdayKey = dayKey(yesterday);
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'urbix.exploration_days': '["$yesterdayKey"]',
+      });
+      final p = UserLocationProvider();
+      await p.loadFromStorage();
+      expect(p.currentStreakDays, 1,
+          reason: 'a walk yesterday still counts as a 1-day streak '
+              'because of the one-day grace period');
+    });
+
+    test(
+        'grace day: walked the day before yesterday but not yesterday '
+        'breaks the streak', () async {
+      // Seed two-days-ago only. Today and yesterday are NOT in
+      // the set. The streak algorithm's grace check looks at
+      // today first, then yesterday. Both are missing, so the
+      // streak is broken and the result is 0.
+      final now = DateTime.now();
+      final twoDaysAgo = DateTime(now.year, now.month, now.day - 2);
+      final twoDaysAgoKey = dayKey(twoDaysAgo);
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'urbix.exploration_days': '["$twoDaysAgoKey"]',
+      });
+      final p = UserLocationProvider();
+      await p.loadFromStorage();
+      expect(p.currentStreakDays, 0,
+          reason: 'streak is broken when both today and yesterday '
+              'are missing from the exploration days set');
     });
   });
 
