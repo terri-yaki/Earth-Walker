@@ -145,5 +145,84 @@ void main() {
       expect(out!.districtName, isNull);
       expect(out.isInNewDistrict, isFalse);
     });
+
+    test('first candidate wins on a strict-equal-score tie', () {
+      // Two cells equidistant from the user, both in the same
+      // (unvisited) district. Both have score = 1 / (1 + d/1000).
+      // The function picks the first one it sees, which keeps the
+      // suggestion stable across rebuilds (otherwise the ranking
+      // would shuffle on every grid change). If we ever introduce
+      // a deterministic tiebreaker (e.g. alphabetical geohash),
+      // this test will need updating.
+      final a = GeohashCell(
+        geohash: 'aaa00',
+        center: const LatLng(22.281, 114.181), // 1 km east of user
+      );
+      final b = GeohashCell(
+        geohash: 'bbb00',
+        center: const LatLng(22.281, 114.179), // 1 km west of user
+      );
+      final out = pickNextExploration(
+        userLocation: const LatLng(22.281, 114.180),
+        visitedCells: const <String>{},
+        candidateCells: [a, b],
+      );
+      expect(out, isNotNull);
+      expect(out!.geohash, 'aaa00',
+          reason: 'first candidate wins on equal score');
+      // Reversed order should pick the other one.
+      final out2 = pickNextExploration(
+        userLocation: const LatLng(22.281, 114.180),
+        visitedCells: const <String>{},
+        candidateCells: [b, a],
+      );
+      expect(out2!.geohash, 'bbb00');
+    });
+
+    test('handles candidate set larger than the visited set without O(n^2)',
+        () {
+      // Sanity check that we don't accidentally double-iterate.
+      // Build 200 candidate cells, all unvisited, scattered around
+      // the user. The function should return the closest one.
+      // We place a special "right here" cell FIRST so it wins the
+      // tie on equal score (the function picks the first-encountered
+      // candidate on a tie —see the dedicated tie-break test).
+      final candidates = <GeohashCell>[
+        const GeohashCell(geohash: 'here0', center: LatLng(22.30, 114.18)),
+      ];
+      for (var i = 0; i < 200; i++) {
+        // Spread them across a 20 km box around HK.
+        final lat = 22.20 + (i % 20) * 0.01;
+        final lng = 114.10 + (i ~/ 20) * 0.01;
+        candidates.add(GeohashCell(geohash: 'h$i', center: LatLng(lat, lng)));
+      }
+      final out = pickNextExploration(
+        userLocation: const LatLng(22.30, 114.18),
+        visitedCells: const <String>{},
+        candidateCells: candidates,
+      );
+      expect(out, isNotNull);
+      expect(out!.geohash, 'here0',
+          reason: 'first-encountered cell at user position must win');
+      expect(out.distanceFromUserMeters, lessThan(1.0));
+    });
+
+    test('returns the only candidate when there is just one', () {
+      // Trivial case: single candidate. Documents the no-candidates
+      // and single-candidate code paths so a future refactor can't
+      // accidentally drop them.
+      final only = GeohashCell(
+        geohash: 'only1',
+        center: const LatLng(22.30, 114.18),
+      );
+      final out = pickNextExploration(
+        userLocation: const LatLng(22.30, 114.18),
+        visitedCells: const <String>{},
+        candidateCells: [only],
+      );
+      expect(out, isNotNull);
+      expect(out!.geohash, 'only1');
+      expect(out.distanceFromUserMeters, 0.0);
+    });
   });
 }
