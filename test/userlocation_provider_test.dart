@@ -485,31 +485,40 @@ void main() {
     test('is recomputed when the user visits a new cell', () async {
       // After the first fix, the suggestion is for the
       // nearest unvisited cell. The user then walks into a
-      // new geohash cell; the suggestion must drop the now-
-      // visited cell and re-rank. We assert the recompute
-      // happens by comparing before/after values: after the
-      // second fix the new cell should be in _visitedCells,
-      // and currentSuggestion must NOT point at that cell
-      // (because visited cells are skipped by the engine).
+      // new geohash cell; the suggestion must be RECOMPUTED
+      // (a fresh ExplorationSuggestion instance) so the
+      // ranking reflects the updated visited-set.
       //
-      // The two coords are in the SAME district (Central
-      // and Western) but in DIFFERENT geohash-5 cells
-      // (wkfft vs wkfg8). Earlier revisions of this test
-      // used Yau Tsim Mong coords (22.298, 114.170) and
-      // (22.315, 114.170) which actually hash to the SAME
-      // cell (wkfg8) — geohash-5 cells are ~20 km tall, so
-      // a 1.9 km shift stays within the same cell. That
-      // meant the test wasn't actually exercising the cross-
-      // cell recompute path; it would have passed even if
+      // Two layers of assertion:
+      //
+      // 1. Identity (sameInstance): _recomputeSuggestion
+      //    assigns a brand-new ExplorationSuggestion on
+      //    every call. If the recompute is skipped, the
+      //    cached instance is returned unchanged. So
+      //    `after isNot sameInstance before` is the load-
+      //    bearing assertion that catches the
+      //    "no recompute on cell change" regression.
+      //
+      // 2. Exclusion: even if the identity check is somehow
+      //    weakened, the new suggestion must not point at a
+      //    visited cell.
+      //
+      // Earlier revisions of this test used Yau Tsim Mong
+      // coords (22.298, 114.170) and (22.315, 114.170)
+      // which actually hash to the SAME cell (wkfg8) —
+      // geohash-5 cells are ~20 km tall, so a 1.9 km shift
+      // stays within the same cell. That meant the test
+      // wasn't actually exercising the cross-cell recompute
+      // path; it would have passed even if
       // _recomputeSuggestion were never called on cell
       // change.
       //
-      // Stronger assertion: the suggestion must CHANGE,
-      // not just exclude the new cell. Before the second
-      // fix the user is at wkfft — closest unvisited is
-      // wkffx (~0.5 km east). After the second fix the user
-      // is at wkfg8 — closest unvisited is wkffx again,
-      // but only after the recompute picks it fresh.
+      // The current coords (22.270, 114.140) and
+      // (22.270, 114.170) hash to DIFFERENT cells (wkfft
+      // and wkfg8). They're in the same district (Central
+      // and Western) so the recompute is exercised purely by
+      // the cell-boundary crossing, not by a district
+      // transition.
       final fixes = [
         _pos(22.270, 114.140), // cell A: wkfft (Central and Western)
         _pos(22.270,
@@ -525,14 +534,20 @@ void main() {
       await p.updateUserLocation();
       final after = p.currentSuggestion;
       expect(after, isNotNull);
-      // The engine must drop the cell the user just entered
-      // (encodeGeohash(22.270, 114.170, 5) = wkfg8) from the
-      // candidates. We assert that hash is not the
-      // suggestion.
+      // Layer 1: recompute happened. The two suggestions
+      // are different ExplorationSuggestion instances —
+      // _currentSuggestion was reassigned. We use identity
+      // (identical) instead of equality because two
+      // ExplorationSuggestion objects with identical fields
+      // would be == but not identical, and we specifically
+      // want to catch "the cache was returned as-is".
+      expect(identical(after, before), isFalse,
+          reason: 'cell change must trigger _recomputeSuggestion, which '
+              'assigns a new ExplorationSuggestion instance');
+      // Layer 2: the new suggestion excludes both visited
+      // cells (the engine must skip them).
       expect(after!.geohash, isNot(equals('wkfg8')),
           reason: 'suggestion must skip the cell the user just entered');
-      // Sanity: wkfft should also not be suggested (it's in
-      // visitedCells from the first fix).
       expect(after.geohash, isNot(equals('wkfft')),
           reason: 'suggestion must also skip the first fix cell');
     });
