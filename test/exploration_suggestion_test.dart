@@ -370,5 +370,47 @@ void main() {
       expect(out, isNull,
           reason: 'no unexplored cells left in the candidate set');
     });
+
+    test('empty candidateCells returns null (distinct from "all visited")', () {
+      // No candidates at all. This is different from
+      // "all candidates visited" — both produce null, but
+      // for different reasons:
+      //   - empty list: the loop body never executes,
+      //     bestCell stays null
+      //   - all visited: the loop executes, every iteration
+      //     hits `continue`, bestCell stays null
+      //
+      // A future refactor that conflates the two (e.g.
+      // by deleting the early-exit and only handling the
+      // "all visited" case) would still pass the existing
+      // tests but might throw on an empty list. This test
+      // locks down the no-throw invariant on empty input.
+      //
+      // The userLocation is irrelevant here (no candidates
+      // to score), but it must still be a valid LatLng —
+      // pass HK centre for consistency with sibling tests.
+      final out = pickNextExploration(
+        userLocation: const LatLng(22.30, 114.18),
+        visitedCells: const <String>{},
+        candidateCells: const <GeohashCell>[],
+      );
+      expect(out, isNull,
+          reason: 'no candidates to suggest — must return null, not throw');
+    });
+
+    test('empty visitedCells with empty candidateCells also returns null', () {
+      // Sanity check: the visited-set is also empty, but
+      // that doesn't matter — there are still no
+      // candidates. Documents that the function doesn't
+      // implicitly use the visited set to "back-fill" a
+      // suggestion (which would be a strange semantic).
+      final out = pickNextExploration(
+        userLocation: const LatLng(22.30, 114.18),
+        visitedCells: const <String>{},
+        candidateCells: const <GeohashCell>[],
+        visitedDistricts: const <String>{},
+      );
+      expect(out, isNull);
+    });
   });
 }
