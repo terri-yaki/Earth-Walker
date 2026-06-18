@@ -1,15 +1,20 @@
 // lib/utils/l10n.dart
 //
-// Manual localisation. Two locales:
+// Bilingual localisation. Two locales:
 //   en     - English (default)
 //   zh-HK  - Traditional Chinese, as used in Hong Kong
 //
-// Hand-written instead of using flutter_localizations + .arb
-// codegen so the project has no generated files and no extra
-// `flutter gen-l10n` build step — the strings live here, the
-// translations live here, and the test exercises both.
+// Translation strings live in assets/l10n/{en,zh-HK}.json so
+// non-coders can edit translations without touching Dart. The
+// L10n class itself is a pure data carrier; the L10nDelegate
+// does the asset I/O at startup. Tests construct L10n directly
+// with explicit string maps, so they don't need any rootBundle
+// setup.
+
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 /// Supported locales, in preference order. Matches the values in
@@ -21,7 +26,7 @@ const List<Locale> kSupportedLocales = <Locale>[
 
 /// Returns the closest supported [Locale] for [deviceLocale], or
 /// the first entry in [kSupportedLocales] as a fallback. Used by
-/// [L10nDelegate.isSupported.
+/// [L10nDelegate].
 Locale resolveLocale(Locale? deviceLocale) {
   if (deviceLocale == null) return kSupportedLocales.first;
   // Exact match?
@@ -38,129 +43,33 @@ Locale resolveLocale(Locale? deviceLocale) {
   return kSupportedLocales.first;
 }
 
-/// Per-locale string table. The fallback for any missing key is
-/// the English value, so adding a new key without translating it
-/// to zh-HK is safe — the user just sees English.
+/// Pure-data localisation class. The per-locale strings are
+/// passed in by [L10nDelegate.load] (production) or directly by
+/// tests. The fallback for any missing key is the [fallback]
+/// table (typically the English table) so adding a new key
+/// without translating it is safe.
 class L10n {
   final Locale locale;
-  L10n(this.locale);
+  final Map<String, String> _strings;
+  final Map<String, String> _fallback;
+
+  L10n(this.locale, Map<String, String> strings,
+      [Map<String, String>? fallback])
+      : _strings = Map.unmodifiable(strings),
+        _fallback = Map.unmodifiable(fallback ?? const {});
 
   /// Look up the [L10n] instance for [context], which must be inside
   /// a [MaterialApp] that has the [L10nDelegate] registered. Falls
-  /// back to the English L10n if the lookup fails, so a missing
+  /// back to a stub English L10n if the lookup fails, so a missing
   /// delegate (e.g. in a unit test) doesn't crash — it just renders
-  /// English.
+  /// the raw key string.
   static L10n of(BuildContext context) {
     final l = Localizations.of<L10n>(context, L10n);
-    return l ?? L10n(const Locale('en'));
+    return l ?? L10n(const Locale('en'), const {});
   }
 
-  static const Map<String, Map<String, String>> _table = {
-    'en': {
-      'app_title': 'Urbix HK',
-      'menu_achievements': 'Achievements',
-      'menu_medals': 'Medals',
-      'menu_districts': 'Districts',
-      'menu_reset': 'Reset Progress',
-      'reset_dialog_title': 'Reset progress?',
-      'reset_dialog_body':
-          'This will permanently clear your exploration history.',
-      'reset_dialog_confirm': 'Reset',
-      'reset_dialog_cancel': 'Cancel',
-      'reset_dialog_copy': 'Copy',
-      'progress_copied': 'Progress copied to clipboard.',
-      'progress_reset_done': 'Progress reset.',
-      'finding_location': 'Finding your location…',
-      'first_run_hint':
-          'Walk around to discover new places. Visited areas appear as green circles.',
-      'hud_explored': 'explored',
-      'hud_visit': 'visit',
-      'hud_visits': 'visits',
-      'screen_achievements': 'Achievements',
-      'screen_medals': 'Medals',
-      'screen_districts': 'Districts',
-      'onboarding_pitch':
-          'Walk your city. Unlock badges as you explore new neighbourhoods.',
-      'onboarding_get_started': 'Get Started',
-      'onboarding_loc_off':
-          'Location services are off. Please turn them on in Settings, then come back.',
-      'onboarding_perm_denied':
-          'Urbix HK needs your location to track where you explore. Please allow it and try again.',
-      'onboarding_perm_denied_forever':
-          'Location permission is permanently denied. Enable it in Settings to use Urbix HK.',
-      'onboarding_loc_error_prefix': 'Could not request location:',
-      'badges_header': 'Badges',
-      'badges_empty': 'No badges yet. Keep exploring to unlock your first one!',
-      'badge_unlocked_at': 'Unlocked at',
-      'medals_earned': 'earned',
-      'medals_awarded_at': 'Awarded at',
-      'cell_singular': 'cell',
-      'cell_plural': 'cells',
-      'districts_explored': 'districts explored',
-      'badge_unlock_header': 'Badge unlocked!',
-      'hud_next_milestone': 'Next',
-      'hud_cells_to_go': 'to go',
-      'hud_today': 'Today',
-      'hud_streak': 'Streak',
-      'hud_day_streak': 'day streak',
-      'hud_days_streak': 'day streak',
-    },
-    'zh-HK': {
-      'app_title': 'Urbix 香港',
-      'menu_achievements': '成就',
-      'menu_medals': '獎牌',
-      'menu_districts': '地區',
-      'menu_reset': '重設進度',
-      'reset_dialog_title': '確定要重設進度？',
-      'reset_dialog_body': '將會永久清除你所有探索記錄。',
-      'reset_dialog_confirm': '重設',
-      'reset_dialog_cancel': '取消',
-      'reset_dialog_copy': '複製',
-      'progress_copied': '已複製進度至剪貼簿。',
-      'progress_reset_done': '已重設進度。',
-      'finding_location': '正在定位…',
-      'first_run_hint':
-          '周圍行吓啦，探索新地方。已到訪嘅範圍會以綠圈顯示。',
-      'hud_explored': '已探索',
-      'hud_visit': '次到訪',
-      'hud_visits': '次到訪',
-      'screen_achievements': '成就',
-      'screen_medals': '獎牌',
-      'screen_districts': '地區',
-      'onboarding_pitch': '行勻全城，探索新地區，賺取勳章。',
-      'onboarding_get_started': '開始使用',
-      'onboarding_loc_off': '定位服務未開啟。請到「設定」開啟後再試。',
-      'onboarding_perm_denied':
-          'Urbix 香港需要存取你嘅位置先可以記錄到訪過嘅地方。請允許後再試。',
-      'onboarding_perm_denied_forever':
-          '定位權限已被永久拒絕。請到「設定」開啟，先可以用 Urbix 香港。',
-      'onboarding_loc_error_prefix': '無法取得位置：',
-      'badges_header': '勳章',
-      'badges_empty': '你仲未拎到任何勳章。继续探索，等你解鎖第一個！',
-      'badge_unlocked_at': '解鎖門檻',
-      'medals_earned': '已獲得',
-      'medals_awarded_at': '頒發門檻',
-      'cell_singular': '格',
-      'cell_plural': '格',
-      'districts_explored': '個地區已探索',
-      'badge_unlock_header': '勳章解鎖！',
-      'hud_next_milestone': '下一個',
-      'hud_cells_to_go': '仲差',
-      'hud_today': '今日',
-      'hud_streak': '連續',
-      'hud_day_streak': '日',
-      'hud_days_streak': '日',
-    },
-  };
-
-  String _lookup(String key) {
-    final byLocale = _table[locale.toLanguageTag().replaceAll('-', '_')] ??
-        // dart:ui's Locale#toLanguageTag uses hyphens, our table
-        // uses underscores for zh-Hant / zh-HK style — try both.
-        _table[locale.toString()] ??
-        _table['en']!;
-    return byLocale[key] ?? _table['en']![key] ?? key;
-  }
+  String _lookup(String key) =>
+      _strings[key] ?? _fallback[key] ?? key;
 
   String get appTitle => _lookup('app_title');
   String get menuAchievements => _lookup('menu_achievements');
@@ -179,6 +88,12 @@ class L10n {
   String get hudExplored => _lookup('hud_explored');
   String get hudVisit => _lookup('hud_visit');
   String get hudVisits => _lookup('hud_visits');
+  String get hudToday => _lookup('hud_today');
+  String get hudStreak => _lookup('hud_streak');
+  String get hudDayStreak => _lookup('hud_day_streak');
+  String get hudDaysStreak => _lookup('hud_days_streak');
+  String get hudNextMilestone => _lookup('hud_next_milestone');
+  String get hudCellsToGo => _lookup('hud_cells_to_go');
   String get screenAchievements => _lookup('screen_achievements');
   String get screenMedals => _lookup('screen_medals');
   String get screenDistricts => _lookup('screen_districts');
@@ -199,12 +114,6 @@ class L10n {
   String get cellPlural => _lookup('cell_plural');
   String get districtsExplored => _lookup('districts_explored');
   String get badgeUnlockHeader => _lookup('badge_unlock_header');
-  String get hudNextMilestone => _lookup('hud_next_milestone');
-  String get hudCellsToGo => _lookup('hud_cells_to_go');
-  String get hudToday => _lookup('hud_today');
-  String get hudStreak => _lookup('hud_streak');
-  String get hudDayStreak => _lookup('hud_day_streak');
-  String get hudDaysStreak => _lookup('hud_days_streak');
 
   /// Lookup for any key not covered by a typed getter. Useful in
   /// tests; production code should prefer the typed getters.
@@ -212,6 +121,9 @@ class L10n {
   String lookup(String key) => _lookup(key);
 }
 
+/// Localisations delegate. Looks up the closest supported locale,
+/// loads the JSON file for it from rootBundle, and falls back to
+/// English for any missing key.
 class L10nDelegate extends LocalizationsDelegate<L10n> {
   const L10nDelegate();
 
@@ -221,7 +133,26 @@ class L10nDelegate extends LocalizationsDelegate<L10n> {
 
   @override
   Future<L10n> load(Locale locale) async {
-    return L10n(resolveLocale(locale));
+    final resolved = resolveLocale(locale);
+    final tag = resolved.toLanguageTag(); // 'en' or 'zh-HK'
+    final strings = await _loadTag(tag);
+    final fallback = await _loadTag('en');
+    return L10n(resolved, strings, fallback);
+  }
+
+  /// Try to load assets/l10n/<tag>.json. Returns an empty map on any
+  /// failure (corrupt JSON, missing file, asset not bundled) so the
+  /// app still runs — the user just sees the key string instead of
+  /// the localised copy.
+  Future<Map<String, String>> _loadTag(String tag) async {
+    try {
+      final raw = await rootBundle.loadString('assets/l10n/$tag.json');
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map) return <String, String>{};
+      return decoded.map((k, v) => MapEntry(k.toString(), v.toString()));
+    } catch (_) {
+      return <String, String>{};
+    }
   }
 
   @override
