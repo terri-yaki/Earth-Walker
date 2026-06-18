@@ -40,10 +40,12 @@ jobs:
     name: Format check
     runs-on: ubuntu-latest
     env:
-      # Use github.workspace directly — the parser can't resolve
-      # env.FLUTTER_HOME at job-level env because the workflow-
-      # level env hasn't been published to the env context yet.
-      PATH: ${{ github.workspace }}/flutter/bin:${{ env.PATH }}
+      # Hardcode a Linux PATH — the parser rejects `${{ env.PATH }}`
+      # inside a job-level env block (env is empty at parse time
+      # for self-references). Install step still invokes flutter via
+      # the full ${FLUTTER_HOME} path, so PATH doesn't actually need
+      # flutter/bin prepended.
+      PATH: ${{ github.workspace }}/flutter/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     steps:
       - uses: actions/checkout@v4
       - name: Install Flutter
@@ -62,7 +64,8 @@ jobs:
     name: Analyze
     runs-on: ubuntu-latest
     env:
-      PATH: ${{ github.workspace }}/flutter/bin:${{ env.PATH }}
+      # See format job for why we hardcode the PATH.
+      PATH: ${{ github.workspace }}/flutter/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     steps:
       - uses: actions/checkout@v4
       - name: Install Flutter
@@ -86,7 +89,8 @@ jobs:
     name: Test + coverage
     runs-on: ubuntu-latest
     env:
-      PATH: ${{ github.workspace }}/flutter/bin:${{ env.PATH }}
+      # See format job for why we hardcode the PATH.
+      PATH: ${{ github.workspace }}/flutter/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     steps:
       - uses: actions/checkout@v4
       - name: Install Flutter
@@ -134,7 +138,8 @@ jobs:
     # has settled the runner compatibility).
     if: false
     env:
-      PATH: ${{ github.workspace }}/flutter/bin:${{ env.PATH }}
+      # See format job for why we hardcode the PATH.
+      PATH: ${{ github.workspace }}/flutter/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     steps:
       - uses: actions/checkout@v4
       - name: Install Flutter
@@ -168,7 +173,8 @@ jobs:
     permissions:
       contents: write
     env:
-      PATH: ${{ github.workspace }}/flutter/bin:${{ env.PATH }}
+      # See format job for why we hardcode the PATH.
+      PATH: ${{ github.workspace }}/flutter/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     steps:
       - uses: actions/checkout@v4
       - name: Install Flutter
