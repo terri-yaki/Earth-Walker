@@ -180,8 +180,7 @@ void main() {
       expect(progressFor(p, 10), 1.0);
     });
 
-    test('bar is 50% at the midpoint between the last unlock and the next',
-        () {
+    test('bar is 50% at the midpoint between the last unlock and the next', () {
       final p = AchievementProvider();
       // Walker is unlocked at 10. Next is Pioneer at 20. Midpoint
       // is world=15; the bar should sit at 0.5.
@@ -190,3 +189,4 @@ void main() {
     });
   });
 }
+

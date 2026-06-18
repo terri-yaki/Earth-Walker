@@ -47,7 +47,7 @@ class AppTextStyles {
     color: Colors.black,
   );
 
-    static const TextStyle bodyText2 = TextStyle(
+  static const TextStyle bodyText2 = TextStyle(
     fontFamily: 'PixelFont',
     fontSize: 14,
     color: Colors.black,
@@ -55,3 +55,4 @@ class AppTextStyles {
 
   // Add more styles as needed
 }
+

@@ -47,7 +47,7 @@ class AchievementProvider with ChangeNotifier {
     'Explorer': 40,
     'Coloniser': 50,
     'Dominator': 80,
-    'Are you sure youâ€™re not cheating?': 99, // 99%+
+    'Are you sure you?™re not cheating?': 99, // 99%+
   };
 
   // Getters
@@ -55,7 +55,8 @@ class AchievementProvider with ChangeNotifier {
   int get continentExplored => _continentExplored;
   int get worldExplored => _worldExplored;
 
-  List<String> get unlockedAchievements => List.unmodifiable(_unlockedAchievements);
+  List<String> get unlockedAchievements =>
+      List.unmodifiable(_unlockedAchievements);
 
   /// All achievement titles and the world-% threshold required to unlock them.
   Map<String, int> get achievementThresholds =>
@@ -92,7 +93,7 @@ class AchievementProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Update the userâ€™s exploration progress.
+  /// Update the user?™s exploration progress.
   /// In a real scenario, these would be derived from GPS / location history.
   void updateExploration(int countryValue, int continentValue, int worldValue) {
     _countryExplored = countryValue.clamp(0, 100);
@@ -103,15 +104,17 @@ class AchievementProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Check if any new achievements are unlocked 
-  /// based on the userâ€™s updated exploration progress.
+  /// Check if any new achievements are unlocked
+  /// based on the user?™s updated exploration progress.
   void _checkForNewAchievements() {
-    // For demonstration, letâ€™s track just worldExplored
+    // For demonstration, let?™s track just worldExplored
     final currentProgress = _worldExplored;
     _achievementThresholds.forEach((title, threshold) {
-      if (currentProgress >= threshold && !_unlockedAchievements.contains(title)) {
+      if (currentProgress >= threshold &&
+          !_unlockedAchievements.contains(title)) {
         _unlockedAchievements.add(title);
       }
     });
   }
 }
+

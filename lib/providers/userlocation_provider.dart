@@ -80,7 +80,7 @@ class UserLocationProvider with ChangeNotifier {
 
   /// Monotonic counter bumped by [resetExploration]. An in-flight
   /// [updateUserLocation] captures the value at entry and bails out
-  /// at the post-await checkpoints if the counter has advanced —
+  /// at the post-await checkpoints if the counter has advanced ??
   /// so a reset that lands mid-update doesn't get clobbered by a
   /// late-arriving location fix. Closes AUDIT.md A2.
   int _mutationEpoch = 0;
@@ -97,7 +97,7 @@ class UserLocationProvider with ChangeNotifier {
     LatLng? lastDistanceReference,
     Future<Position> Function()? positionSource,
   })  : _userLocation = initialLocation ??
-                UserLocation(coordinates: LatLng(0.0, 0.0)), // Default to (0,0)
+            UserLocation(coordinates: LatLng(0.0, 0.0)), // Default to (0,0)
         _isRecentered = isRecentered,
         _currentZoom = currentZoom,
         _countryPercentage = countryPercentage,
@@ -133,7 +133,7 @@ class UserLocationProvider with ChangeNotifier {
   /// (e.g. they're at sea, or their location hasn't been fetched).
   String? get currentDistrictName {
     final coords = _userLocation.coordinates;
-    // Skip the (0,0) default — that's "location not set yet", not
+    // Skip the (0,0) default ??that's "location not set yet", not
     // a real reading from the South Atlantic.
     if (coords.latitude == 0.0 && coords.longitude == 0.0) return null;
     return districtFor(coords)?.name;
@@ -158,13 +158,13 @@ class UserLocationProvider with ChangeNotifier {
       if (_mutationEpoch != epochAtStart) return; // a reset won the race
 
       // Update the user's location
-      _userLocation =
-          UserLocation(coordinates: LatLng(position.latitude, position.longitude));
+      _userLocation = UserLocation(
+          coordinates: LatLng(position.latitude, position.longitude));
 
       // Accumulate walking distance since the previous fix. We skip
       // absurdly large jumps (single-update distances above
       // [kMaxPlausibleStepMeters]) to filter out GPS noise / cold-start
-      // swings. ponytail: this is a coarse filter — a future
+      // swings. ponytail: this is a coarse filter ??a future
       // implementation should use a Kalman filter or velocity-scaled
       // outlier rejection.
       _accumulateDistance(_userLocation.coordinates);
@@ -201,7 +201,7 @@ class UserLocationProvider with ChangeNotifier {
   }
 
   /// Geohash precision used for visited-cell tracking. Precision 5 is about
-  /// a 2.4 km × 2.4 km cell at the equator — a good size for "you walked
+  /// a 2.4 km ? 2.4 km cell at the equator ??a good size for "you walked
   /// somewhere new" without inflating the count from GPS noise.
   static const int _geohashPrecision = 5;
 
@@ -301,8 +301,7 @@ class UserLocationProvider with ChangeNotifier {
   }
 
   /// Per-district unique-cell counts. Returns an unmodifiable view.
-  Map<String, int> get visitsByDistrict =>
-      Map.unmodifiable(_visitsByDistrict);
+  Map<String, int> get visitsByDistrict => Map.unmodifiable(_visitsByDistrict);
 
   /// Number of unique cells the user has recorded in their current
   /// district (or 0 if they're not in a known district).
@@ -337,12 +336,11 @@ class UserLocationProvider with ChangeNotifier {
             prefs.getString(_prefsKeyVisitsByDistrict)));
       _distanceByDay
         ..clear()
-        ..addAll(doubleMapFromJson(
-            prefs.getString(_prefsKeyDistanceByDay)));
+        ..addAll(doubleMapFromJson(prefs.getString(_prefsKeyDistanceByDay)));
       _visitedCellLocations
         ..clear()
-        ..addAll(latLngListFromJson(
-            prefs.getString(_prefsKeyVisitedCellLocations)));
+        ..addAll(
+            latLngListFromJson(prefs.getString(_prefsKeyVisitedCellLocations)));
       _lastDistanceReference = null; // first new fix will set it
       _recalculatePercentages();
       // Seed the suggestion from the loaded state. The user's
@@ -370,8 +368,8 @@ class UserLocationProvider with ChangeNotifier {
       await prefs.setDouble(_prefsKeyTotalDistance, _totalDistanceMeters);
       await prefs.setString(
           _prefsKeyExplorationDays, cellsToJson(_explorationDays));
-      await prefs.setString(_prefsKeyVisitsByDistrict,
-          districtCountMapToJson(_visitsByDistrict));
+      await prefs.setString(
+          _prefsKeyVisitsByDistrict, districtCountMapToJson(_visitsByDistrict));
       await prefs.setString(
           _prefsKeyDistanceByDay, doubleMapToJson(_distanceByDay));
       await prefs.setString(_prefsKeyVisitedCellLocations,
@@ -412,21 +410,22 @@ class UserLocationProvider with ChangeNotifier {
   ///
   /// ponytail: the "1 cell = 1% world" scaling is intentionally generous so
   /// the prototype feels responsive. A real implementation would divide by
-  /// a more honest denominator (e.g. total cells covering land) — easy
+  /// a more honest denominator (e.g. total cells covering land) ??easy
   /// upgrade later, no architectural change required.
   void _updateExploration(LatLng location) {
-    final cell = encodeGeohash(location.latitude, location.longitude, _geohashPrecision);
+    final cell =
+        encodeGeohash(location.latitude, location.longitude, _geohashPrecision);
     if (_visitedCells.add(cell)) {
       _visitedCellLocations.add(location);
       _explorationDays.add(dayKey(DateTime.now()));
       // Per-district bump: a cell inside a known HK district box
       // increments that district's count. Cells outside HK stay out
-      // of the map, which is correct — we only have district boxes
+      // of the map, which is correct ??we only have district boxes
       // for Hong Kong.
-    // The visited set may have just changed; recompute the
-    // suggestion so the HUD's "Next" chip points at the best
-    // new target.
-    _recomputeSuggestion();
+      // The visited set may have just changed; recompute the
+      // suggestion so the HUD's "Next" chip points at the best
+      // new target.
+      _recomputeSuggestion();
       final district = districtFor(location);
       if (district != null) {
         _visitsByDistrict.update(
@@ -497,3 +496,4 @@ class UserLocationProvider with ChangeNotifier {
     );
   }
 }
+

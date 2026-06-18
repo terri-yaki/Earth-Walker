@@ -28,8 +28,8 @@ void main() {
         'Wan Chai': 1,
         'Yau Tsim Mong': 12,
       };
-      expect(districtCountMapFromJson(districtCountMapToJson(original)),
-          original);
+      expect(
+          districtCountMapFromJson(districtCountMapToJson(original)), original);
     });
 
     test('returns empty map on malformed input (does not throw)', () {
@@ -45,3 +45,4 @@ void main() {
     });
   });
 }
+

@@ -81,7 +81,7 @@ const double kHKMaxLng = 114.43;
 /// The static candidate grid: every geohash-5 cell covering HK,
 /// deduplicated by hash. ~300 cells, computed once at module
 /// load. The list is intentionally an unmodifiable view of a
-/// pre-computed list — callers should never mutate it.
+/// pre-computed list ??callers should never mutate it.
 final List<GeohashCell> kHKCellGrid = _computeHKCellGrid();
 
 List<GeohashCell> _computeHKCellGrid() {
@@ -93,14 +93,13 @@ List<GeohashCell> _computeHKCellGrid() {
   // city-zoom map.
   for (var lat = kHKMinLat; lat <= kHKMaxLat; lat += kGeohash5StepDegrees) {
     for (var lng = kHKMinLng; lng <= kHKMaxLng; lng += kGeohash5StepDegrees) {
-      final hash =
-          encodeGeohash(lat, lng, 5);
+      final hash = encodeGeohash(lat, lng, 5);
       byHash.putIfAbsent(
         hash,
         () => GeohashCell(
           geohash: hash,
-          center: LatLng(lat + kGeohash5StepDegrees / 2,
-              lng + kGeohash5StepDegrees / 2),
+          center: LatLng(
+              lat + kGeohash5StepDegrees / 2, lng + kGeohash5StepDegrees / 2),
         ),
       );
     }
@@ -112,7 +111,7 @@ List<GeohashCell> _computeHKCellGrid() {
 /// or null if every cell in [candidateCells] is in [visitedCells]
 /// (i.e. the user has explored everything we know about).
 ///
-/// Pure function — no Provider / SharedPreferences coupling, so
+/// Pure function ??no Provider / SharedPreferences coupling, so
 /// the unit test can drive it with hand-built cells without any
 /// platform mocking.
 ExplorationSuggestion? pickNextExploration({
@@ -153,7 +152,8 @@ ExplorationSuggestion? pickNextExploration({
     districtName: bestDistrict,
     geohash: best.geohash,
     distanceFromUserMeters: bestDistance,
-    isInNewDistrict: bestDistrict != null &&
-        !visitedDistricts.contains(bestDistrict),
+    isInNewDistrict:
+        bestDistrict != null && !visitedDistricts.contains(bestDistrict),
   );
 }
+

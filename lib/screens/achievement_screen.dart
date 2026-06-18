@@ -24,8 +24,7 @@ class AchievementScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          _buildPercentageRow(
-              'Country', achievementProvider.countryExplored),
+          _buildPercentageRow('Country', achievementProvider.countryExplored),
           const SizedBox(height: 10),
           _buildPercentageRow(
               'Continent', achievementProvider.continentExplored),
@@ -136,3 +135,4 @@ class AchievementScreen extends StatelessWidget {
     }
   }
 }
+

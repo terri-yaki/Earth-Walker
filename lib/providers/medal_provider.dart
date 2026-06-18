@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// Manages logic related to awarding and displaying medals
 /// for certain achievements or exploration milestones.
 class MedalProvider with ChangeNotifier {
-  // Example structure for storing medals. 
+  // Example structure for storing medals.
   // Each medal might have an ID, a name, description, and a condition.
   final List<Medal> _medals = [
     Medal(id: 1, name: 'Walker Medal', condition: 10),
@@ -12,7 +12,7 @@ class MedalProvider with ChangeNotifier {
     Medal(id: 4, name: 'Explorer Medal', condition: 40),
     Medal(id: 5, name: 'Coloniser Medal', condition: 50),
     Medal(id: 6, name: 'Dominator Medal', condition: 80),
-    Medal(id: 7, name: 'Are you sure youâ€™re not cheating?', condition: 99),
+    Medal(id: 7, name: 'Are you sure you?™re not cheating?', condition: 99),
   ];
 
   // Holds the IDs of medals already awarded
@@ -22,8 +22,8 @@ class MedalProvider with ChangeNotifier {
   List<Medal> get medals => List.unmodifiable(_medals);
   List<int> get awardedMedals => List.unmodifiable(_awardedMedals);
 
-  /// Check if the userâ€™s progress meets the condition for awarding a medal.
-  /// For example, if `progress` is the userâ€™s overall world exploration percentage,
+  /// Check if the user?™s progress meets the condition for awarding a medal.
+  /// For example, if `progress` is the user?™s overall world exploration percentage,
   /// this method checks which medals are unlocked.
   void checkAndAwardMedals(int progress) {
     for (final medal in _medals) {
@@ -60,3 +60,4 @@ class Medal {
     required this.condition,
   });
 }
+

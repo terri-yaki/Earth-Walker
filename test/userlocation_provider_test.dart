@@ -38,7 +38,7 @@ void main() {
     });
 
     test('currentDistrictName is null at default (0,0) coordinates', () {
-      // (0,0) is the "not yet fetched" default — we must not
+      // (0,0) is the "not yet fetched" default ??we must not
       // accidentally resolve that to some real district.
       final p = UserLocationProvider();
       expect(p.currentDistrictName, isNull);
@@ -48,14 +48,16 @@ void main() {
     test('currentDistrictName resolves a known location to a district', () {
       // Tsim Sha Tsui, well inside the Yau Tsim Mong box.
       final p = UserLocationProvider(
-        initialLocation: UserLocation(coordinates: const LatLng(22.298, 114.170)),
+        initialLocation:
+            UserLocation(coordinates: const LatLng(22.298, 114.170)),
       );
       expect(p.currentDistrictName, 'Yau Tsim Mong');
     });
 
     test('cellsInCurrentDistrict is 0 before any cells are recorded', () {
       final p = UserLocationProvider(
-        initialLocation: UserLocation(coordinates: const LatLng(22.298, 114.170)),
+        initialLocation:
+            UserLocation(coordinates: const LatLng(22.298, 114.170)),
       );
       expect(p.cellsInCurrentDistrict, 0);
     });
@@ -64,7 +66,8 @@ void main() {
       // Build up some non-default state via direct constructor args so
       // we don't need Geolocator, then verify the reset wipes it all.
       final p = UserLocationProvider(
-        initialLocation: UserLocation(coordinates: const LatLng(22.298, 114.170)),
+        initialLocation:
+            UserLocation(coordinates: const LatLng(22.298, 114.170)),
         isRecentered: false,
         currentZoom: 5.0,
         countryPercentage: 12,
@@ -80,7 +83,8 @@ void main() {
       expect(p.visitsByDistrict, isEmpty);
     });
 
-    test('resetExploration notifies exactly once even when everything was already 0',
+    test(
+        'resetExploration notifies exactly once even when everything was already 0',
         () {
       final p = UserLocationProvider();
       var notifyCount = 0;
@@ -116,7 +120,8 @@ void main() {
           speedAccuracy: 0.0,
         );
 
-    test('first fix records one cell, bumps the district, sets today', () async {
+    test('first fix records one cell, bumps the district, sets today',
+        () async {
       var calls = 0;
       final p = UserLocationProvider(
         positionSource: () async {
@@ -153,7 +158,7 @@ void main() {
     });
 
     test('walking into a new cell adds distance and a new cell', () async {
-      // ~1.1 km apart — same geohash-5 cell? No: geohash-5 cells
+      // ~1.1 km apart ??same geohash-5 cell? No: geohash-5 cells
       // are ~2.4 km wide, so two points 1.1 km apart could land in
       // either the same or different cells. To be safe, use points
       // ~5 km apart, which guarantees different cells.
@@ -173,7 +178,7 @@ void main() {
     });
 
     test('an absurdly large step is dropped as GPS noise', () async {
-      // First fix in HK, second fix 100 km away — should NOT
+      // First fix in HK, second fix 100 km away ??should NOT
       // contribute to totalDistanceMeters (and should still
       // record the new cell, since cell recording is independent
       // of distance accounting).
@@ -255,8 +260,8 @@ void main() {
       // Walking a couple of fixes so todayDistanceMeters > 0.
       var i = 0;
       final p2 = UserLocationProvider(
-        positionSource: () async => _pos(22.298 + 0.001 * i++,
-            114.170 + 0.001 * i),
+        positionSource: () async =>
+            _pos(22.298 + 0.001 * i++, 114.170 + 0.001 * i),
       );
       await p2.updateUserLocation();
       await p2.updateUserLocation();
@@ -288,7 +293,8 @@ void main() {
       expect(p.currentStreakDays, 1);
     });
 
-    test('returns 0 when the most recent exploration day is older than yesterday',
+    test(
+        'returns 0 when the most recent exploration day is older than yesterday',
         () {
       // Build a set whose newest entry is 3 days ago. We can't
       // reach into the provider's private set, but we can
@@ -299,7 +305,7 @@ void main() {
       //
       // The provider's currentStreakDays reads DateTime.now() at
       // call time, so this test can only assert the lower bound
-      // (0) — anything else depends on the wall clock the test
+      // (0) ??anything else depends on the wall clock the test
       // runs under.
       final p = UserLocationProvider();
       expect(p.currentStreakDays, 0);
@@ -323,13 +329,14 @@ void main() {
       // uniqueCellsVisited contract by checking that two ~1 km-apart
       // points in HK land in the same precision-5 cell.
       final p = UserLocationProvider(
-        initialLocation: UserLocation(coordinates: const LatLng(22.298, 114.170)),
+        initialLocation:
+            UserLocation(coordinates: const LatLng(22.298, 114.170)),
       );
       // We can't poke the private const directly, but we can
       // demonstrate the implicit contract: recording 50 nearby points
       // (within ~1 km of each other) produces fewer than 50 unique
       // cells. We don't go through the recorder here (it would need
-      // Geolocator) — this just guards against the const being
+      // Geolocator) ??this just guards against the const being
       // accidentally tightened to 12, which would put every point
       // in its own cell.
       expect(p.uniqueCellsVisited, 0,
@@ -345,28 +352,31 @@ void main() {
     test('saveToStorage then loadFromStorage restores distance, days, cells',
         () async {
       final p = UserLocationProvider(
-        initialLocation: UserLocation(coordinates: const LatLng(22.298, 114.170)),
+        initialLocation:
+            UserLocation(coordinates: const LatLng(22.298, 114.170)),
         totalDistanceMeters: 1234.5,
       );
       // Simulate a session: record one cell, then save.
       // _recordCell is private, so we go through the public surface
-      // via _updateExploration's effect on _visitedCells — but that
+      // via _updateExploration's effect on _visitedCells ??but that
       // is also private. Instead, mutate via reflection-free public
       // method: we know resetExploration + the storage round-trip
       // preserves the constructor-arg totalDistanceMeters.
       await p.saveToStorage();
       // Construct a fresh provider with the same in-memory seed and
-      // load — they should agree.
+      // load ??they should agree.
       final p2 = UserLocationProvider(
         totalDistanceMeters: 1234.5,
-        initialLocation: UserLocation(coordinates: const LatLng(22.298, 114.170)),
+        initialLocation:
+            UserLocation(coordinates: const LatLng(22.298, 114.170)),
       );
       await p2.loadFromStorage();
       expect(p2.totalDistanceMeters, 1234.5);
     });
   });
 
-  group('UserLocationProvider currentSuggestion (exploration engine wiring)', () {
+  group('UserLocationProvider currentSuggestion (exploration engine wiring)',
+      () {
     // The pure engine is covered in exploration_suggestion_test.dart;
     // these tests lock the contract that the provider *caches* the
     // result and *recomputes* on the right state-change events
@@ -409,7 +419,8 @@ void main() {
       expect(p.currentSuggestion!.target, isNotNull);
     });
 
-    test('is recomputed after resetExploration (position is preserved)', () async {
+    test('is recomputed after resetExploration (position is preserved)',
+        () async {
       // After reset, the visited set is empty but the
       // position is unchanged. The suggestion should still
       // be set (the user is at Wan Chai; the closest
@@ -425,9 +436,10 @@ void main() {
           reason: 'position is preserved across reset, so '
               'the suggestion should still resolve');
       // After reset, the previous cell is no longer visited,
-      // so the suggestion may point at a different cell —
+      // so the suggestion may point at a different cell ??
       // we don't assert which one, just that the cache was
       // invalidated and recomputed.
     });
   });
 }
+

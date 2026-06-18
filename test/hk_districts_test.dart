@@ -9,8 +9,7 @@ void main() {
       expect(districtFor(const LatLng(22.281, 114.158))?.name,
           'Central and Western');
       // Tsim Sha Tsui Clock Tower.
-      expect(districtFor(const LatLng(22.298, 114.170))?.name,
-          'Yau Tsim Mong');
+      expect(districtFor(const LatLng(22.298, 114.170))?.name, 'Yau Tsim Mong');
       // Sha Tin Town Hall.
       expect(districtFor(const LatLng(22.381, 114.187))?.name, 'Sha Tin');
       // Hong Kong International Airport (on Lantau).
@@ -24,7 +23,11 @@ void main() {
 
     test('contains() respects the closed interval on all four sides', () {
       const d = HkDistrict(
-          name: 'Test', minLat: 22.0, maxLat: 23.0, minLng: 114.0, maxLng: 115.0);
+          name: 'Test',
+          minLat: 22.0,
+          maxLat: 23.0,
+          minLng: 114.0,
+          maxLng: 115.0);
       expect(d.contains(const LatLng(22.0, 114.0)), isTrue);
       expect(d.contains(const LatLng(23.0, 115.0)), isTrue);
       expect(d.contains(const LatLng(21.999, 114.0)), isFalse);
@@ -32,3 +35,4 @@ void main() {
     });
   });
 }
+

@@ -117,10 +117,9 @@ class _MapScreenState extends State<MapScreen> {
   /// on every app open.
   void _onLocationChanged() {
     if (!mounted) return;
-    final location =
-        Provider.of<UserLocationProvider>(context, listen: false);
+    final location = Provider.of<UserLocationProvider>(context, listen: false);
     final newStreak = location.currentStreakDays;
-    // No increase → nothing to do. (Streak decreasing or staying
+    // No increase ??nothing to do. (Streak decreasing or staying
     // flat both fall through; only crossings upward trigger a
     // prompt.)
     if (newStreak <= _lastSeenStreak) {
@@ -152,8 +151,7 @@ class _MapScreenState extends State<MapScreen> {
           backgroundColor: Colors.orange.shade700,
           content: Row(
             children: [
-              const Icon(Icons.local_fire_department,
-                  color: Colors.white),
+              const Icon(Icons.local_fire_department, color: Colors.white),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -180,13 +178,12 @@ class _MapScreenState extends State<MapScreen> {
 
   /// Recenter the map on the suggestion's target cell. We also
   /// disable auto-recentering so the map doesn't yank itself
-  /// back to the user's current location on the next GPS fix —
+  /// back to the user's current location on the next GPS fix ??
   /// the user explicitly asked to look at the target, so we
   /// respect that. The bottom-right RecenterButton restores
   /// follow-mode when they're done walking.
   void _onSuggestionTap(ExplorationSuggestion s) {
-    final provider =
-        Provider.of<UserLocationProvider>(context, listen: false);
+    final provider = Provider.of<UserLocationProvider>(context, listen: false);
     _mapController.move(s.target, provider.currentZoom);
     provider.setRecentered(false);
   }
@@ -203,7 +200,8 @@ class _MapScreenState extends State<MapScreen> {
       await provider.updateUserLocation();
 
       // Move the map to the user's location with maximum zoom
-      _mapController.move(provider.userLocation.coordinates, provider.currentZoom);
+      _mapController.move(
+          provider.userLocation.coordinates, provider.currentZoom);
 
       setState(() {
         _isLoading = false;
@@ -244,7 +242,8 @@ class _MapScreenState extends State<MapScreen> {
           duration: const Duration(seconds: 3),
           content: Row(
             children: [
-              const Icon(Icons.emoji_events, color: Colors.white, semanticLabel: 'Badge'),
+              const Icon(Icons.emoji_events,
+                  color: Colors.white, semanticLabel: 'Badge'),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -339,7 +338,8 @@ class _MapScreenState extends State<MapScreen> {
                 FlutterMap(
                   mapController: _mapController,
                   options: MapOptions(
-                    initialCenter: userLocationProvider.userLocation.coordinates,
+                    initialCenter:
+                        userLocationProvider.userLocation.coordinates,
                     initialZoom: userLocationProvider.currentZoom,
                     maxZoom: 30.0, // Set maximum zoom level
                     onPositionChanged: (position, bool hasGesture) {
@@ -358,7 +358,8 @@ class _MapScreenState extends State<MapScreen> {
                         );
 
                         // If the distance is greater than a small threshold, recenter the map
-                        if (distance > 10) { // Threshold in meters
+                        if (distance > 10) {
+                          // Threshold in meters
                           _mapController.move(
                             userLocationProvider.userLocation.coordinates,
                             userLocationProvider.currentZoom,
@@ -412,7 +413,8 @@ class _MapScreenState extends State<MapScreen> {
                           Marker(
                             width: 80.0,
                             height: 80.0,
-                            point: userLocationProvider.userLocation.coordinates,
+                            point:
+                                userLocationProvider.userLocation.coordinates,
                             child: Image.asset(
                               'assets/img/user_m.png',
                               width: 40,
@@ -470,14 +472,13 @@ class _MapScreenState extends State<MapScreen> {
                           children: [
                             _hudStat(
                               icon: Icons.straighten,
-                              label:
-                                  formatDistance(userLocationProvider.totalDistanceMeters),
+                              label: formatDistance(
+                                  userLocationProvider.totalDistanceMeters),
                             ),
                             const SizedBox(width: 14),
                             _hudStat(
                               icon: Icons.calendar_today,
-                              label:
-                                  '${userLocationProvider.daysExplored}d',
+                              label: '${userLocationProvider.daysExplored}d',
                             ),
                             const SizedBox(width: 14),
                             _hudStat(
@@ -487,7 +488,8 @@ class _MapScreenState extends State<MapScreen> {
                             ),
                           ],
                         ),
-                        if (userLocationProvider.currentDistrictName != null) ...[
+                        if (userLocationProvider.currentDistrictName !=
+                            null) ...[
                           const SizedBox(height: 6),
                           Row(
                             mainAxisSize: MainAxisSize.min,
@@ -510,8 +512,8 @@ class _MapScreenState extends State<MapScreen> {
                                 const SizedBox(width: 6),
                                 Builder(builder: (context) {
                                   final l = L10n.of(context);
-                                  final n =
-                                      userLocationProvider.cellsInCurrentDistrict;
+                                  final n = userLocationProvider
+                                      .cellsInCurrentDistrict;
                                   return Text(
                                     '· $n ${n == 1 ? l.hudVisit : l.hudVisits}',
                                     style: TextStyle(
@@ -542,41 +544,37 @@ class _MapScreenState extends State<MapScreen> {
                                 _previousUnlockedThreshold(
                                     context.read<AchievementProvider>(),
                                     next.threshold);
-                            final span =
-                                (next.threshold - previousThreshold)
-                                    .clamp(1, 100);
-                            final filledSoFar =
-                                (context.read<UserLocationProvider>().worldPercentage -
-                                        previousThreshold)
-                                    .clamp(0, span);
+                            final span = (next.threshold - previousThreshold)
+                                .clamp(1, 100);
+                            final filledSoFar = (context
+                                        .read<UserLocationProvider>()
+                                        .worldPercentage -
+                                    previousThreshold)
+                                .clamp(0, span);
                             final progress = filledSoFar / span;
                             final tierColor = _tierColorForThreshold(
                                 tierForThreshold(next.threshold));
                             return Padding(
                               padding: const EdgeInsets.only(top: 8),
                               child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     '${l.hudNextMilestone}: ${next.title} @ ${next.threshold}% · ${next.cellsToGo} ${l.hudCellsToGo}',
                                     style: TextStyle(
-                                      color:
-                                          Colors.white.withOpacity(0.85),
+                                      color: Colors.white.withOpacity(0.85),
                                       fontSize: 12,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   ClipRRect(
-                                    borderRadius:
-                                        BorderRadius.circular(4),
+                                    borderRadius: BorderRadius.circular(4),
                                     child: LinearProgressIndicator(
                                       value: progress,
                                       minHeight: 6,
                                       backgroundColor: Colors.white24,
-                                      valueColor:
-                                          AlwaysStoppedAnimation<Color>(
-                                              tierColor),
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          tierColor),
                                     ),
                                   ),
                                 ],
@@ -587,8 +585,7 @@ class _MapScreenState extends State<MapScreen> {
                           // user has actually moved today. Hidden on
                           // a fresh day (0 m) so the HUD doesn't
                           // show a meaningless "0 m" line.
-                          if (userLocationProvider.todayDistanceMeters >
-                              0) ...[
+                          if (userLocationProvider.todayDistanceMeters > 0) ...[
                             Builder(builder: (context) {
                               final l = L10n.of(context);
                               return Padding(
@@ -596,8 +593,7 @@ class _MapScreenState extends State<MapScreen> {
                                 child: Text(
                                   '${l.hudToday}: ${formatDistance(userLocationProvider.todayDistanceMeters)}',
                                   style: TextStyle(
-                                    color:
-                                        Colors.white.withOpacity(0.85),
+                                    color: Colors.white.withOpacity(0.85),
                                     fontSize: 12,
                                   ),
                                 ),
@@ -610,12 +606,10 @@ class _MapScreenState extends State<MapScreen> {
                           // is already implicit in the data; we
                           // reserve the chip for the more
                           // interesting case of an actual streak.
-                          if (userLocationProvider.currentStreakDays >=
-                              2) ...[
+                          if (userLocationProvider.currentStreakDays >= 2) ...[
                             Builder(builder: (context) {
                               final l = L10n.of(context);
-                              final s =
-                                  userLocationProvider.currentStreakDays;
+                              final s = userLocationProvider.currentStreakDays;
                               return Padding(
                                 padding: const EdgeInsets.only(top: 6),
                                 child: Row(
@@ -627,8 +621,7 @@ class _MapScreenState extends State<MapScreen> {
                                     Text(
                                       '${l.hudStreak}: $s ${s == 1 ? l.hudDayStreak : l.hudDaysStreak}',
                                       style: TextStyle(
-                                        color: Colors.white
-                                            .withOpacity(0.85),
+                                        color: Colors.white.withOpacity(0.85),
                                         fontSize: 12,
                                       ),
                                     ),
@@ -650,13 +643,11 @@ class _MapScreenState extends State<MapScreen> {
                                         onTap: () =>
                                             HamburgerMenu.showShareDialog(
                                                 context),
-                                        borderRadius:
-                                            BorderRadius.circular(12),
+                                        borderRadius: BorderRadius.circular(12),
                                         child: const Padding(
                                           padding: EdgeInsets.all(2),
                                           child: Icon(Icons.ios_share,
-                                              color: Colors.white,
-                                              size: 14),
+                                              color: Colors.white, size: 14),
                                         ),
                                       ),
                                     ],
@@ -674,12 +665,10 @@ class _MapScreenState extends State<MapScreen> {
                         // bounding boxes don't cover (the engine
                         // ranks candidates by proximity, the
                         // district name is just the label).
-                        if (userLocationProvider.currentSuggestion !=
-                            null) ...[
+                        if (userLocationProvider.currentSuggestion != null) ...[
                           Builder(builder: (context) {
                             final l = L10n.of(context);
-                            final s =
-                                userLocationProvider.currentSuggestion!;
+                            final s = userLocationProvider.currentSuggestion!;
                             return Padding(
                               padding: const EdgeInsets.only(top: 6),
                               child: InkWell(
@@ -689,16 +678,14 @@ class _MapScreenState extends State<MapScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     const Icon(Icons.explore,
-                                        color: Colors.greenAccent,
-                                        size: 14),
+                                        color: Colors.greenAccent, size: 14),
                                     const SizedBox(width: 4),
                                     Text(
                                       '${l.suggestionChip}: '
                                       '${s.districtName ?? l.suggestionExploreOther}'
                                       ' · ${formatDistance(s.distanceFromUserMeters)}',
                                       style: TextStyle(
-                                        color: Colors.white
-                                            .withOpacity(0.85),
+                                        color: Colors.white.withOpacity(0.85),
                                         fontSize: 12,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -830,3 +817,4 @@ Color _tierColorForThreshold(AchievementTier tier) {
       return const Color(0xFFB87333);
   }
 }
+

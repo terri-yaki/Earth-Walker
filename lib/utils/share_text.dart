@@ -18,7 +18,7 @@ const String kShareHashtag = '#UrbixHK';
 /// into the Compare dialog and the parser will still see the
 /// `URBIX:SNAP:1:` prefix.
 ///
-/// [bragLine] is whatever the share dialog chose — the default
+/// [bragLine] is whatever the share dialog chose ??the default
 /// "I've walked X km" line, a streak brag, or a badge brag.
 /// Templates are passed in (rather than looked up here) so this
 /// function stays pure and testable; the caller owns L10n.
@@ -36,8 +36,10 @@ String formatShareText({
   // monospace blob and don't break on it.
   final buf = StringBuffer()
     ..writeln(bragLine)
-    ..writeln('$km km • $cells cells • $streak ${streak == 1 ? "day" : "days"} streak')
+    ..writeln(
+        '$km km ??$cells cells ??$streak ${streak == 1 ? "day" : "days"} streak')
     ..writeln(kShareHashtag)
     ..write(encodeProgressSnapshot(snapshot));
   return buf.toString();
 }
+

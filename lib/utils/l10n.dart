@@ -61,15 +61,14 @@ class L10n {
   /// Look up the [L10n] instance for [context], which must be inside
   /// a [MaterialApp] that has the [L10nDelegate] registered. Falls
   /// back to a stub English L10n if the lookup fails, so a missing
-  /// delegate (e.g. in a unit test) doesn't crash — it just renders
+  /// delegate (e.g. in a unit test) doesn't crash ??it just renders
   /// the raw key string.
   static L10n of(BuildContext context) {
     final l = Localizations.of<L10n>(context, L10n);
     return l ?? L10n(const Locale('en'), const {});
   }
 
-  String _lookup(String key) =>
-      _strings[key] ?? _fallback[key] ?? key;
+  String _lookup(String key) => _strings[key] ?? _fallback[key] ?? key;
 
   String get appTitle => _lookup('app_title');
   String get menuAchievements => _lookup('menu_achievements');
@@ -100,8 +99,7 @@ class L10n {
   String get compareDialogYouWin => _lookup('compare_dialog_you_win');
   String get compareDialogTheyWin => _lookup('compare_dialog_they_win');
   String get compareDialogYouTie => _lookup('compare_dialog_you_tie');
-  String get compareDialogParseFailed =>
-      _lookup('compare_dialog_parse_failed');
+  String get compareDialogParseFailed => _lookup('compare_dialog_parse_failed');
   String get compareDialogTied => _lookup('compare_dialog_tied');
   String get progressCopied => _lookup('progress_copied');
   String get progressResetDone => _lookup('progress_reset_done');
@@ -125,8 +123,7 @@ class L10n {
   String get onboardingPermDenied => _lookup('onboarding_perm_denied');
   String get onboardingPermDeniedForever =>
       _lookup('onboarding_perm_denied_forever');
-  String get onboardingLocErrorPrefix =>
-      _lookup('onboarding_loc_error_prefix');
+  String get onboardingLocErrorPrefix => _lookup('onboarding_loc_error_prefix');
   String get badgesHeader => _lookup('badges_header');
   String get badgesEmpty => _lookup('badges_empty');
   String get badgeUnlockedAt => _lookup('badge_unlocked_at');
@@ -166,7 +163,7 @@ class L10nDelegate extends LocalizationsDelegate<L10n> {
 
   /// Try to load assets/l10n/<tag>.json. Returns an empty map on any
   /// failure (corrupt JSON, missing file, asset not bundled) so the
-  /// app still runs — the user just sees the key string instead of
+  /// app still runs ??the user just sees the key string instead of
   /// the localised copy.
   Future<Map<String, String>> _loadTag(String tag) async {
     try {
@@ -182,3 +179,4 @@ class L10nDelegate extends LocalizationsDelegate<L10n> {
   @override
   bool shouldReload(L10nDelegate old) => false;
 }
+

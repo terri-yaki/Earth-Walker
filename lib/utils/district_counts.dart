@@ -20,9 +20,9 @@ Map<String, int> districtCountMapFromJson(String? json) {
   try {
     final decoded = jsonDecode(json);
     if (decoded is! Map) return <String, int>{};
-    return decoded
-        .map((k, v) => MapEntry(k.toString(), (v as num).toInt()));
+    return decoded.map((k, v) => MapEntry(k.toString(), (v as num).toInt()));
   } catch (_) {
     return <String, int>{};
   }
 }
+

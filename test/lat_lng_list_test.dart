@@ -9,8 +9,7 @@ void main() {
       expect(latLngListToJson(<LatLng>[]), '[]');
     });
 
-    test('serializes a populated list to a JSON array of [lat, lng] pairs',
-        () {
+    test('serializes a populated list to a JSON array of [lat, lng] pairs', () {
       expect(
         latLngListToJson(const [
           LatLng(22.298, 114.170),
@@ -45,12 +44,15 @@ void main() {
     test('skips entries that are not [lat, lng] pairs', () {
       // Mixed valid + invalid entries; only the valid ones should
       // come back.
-      final decoded = latLngListFromJson(
-          '[[22.1, 114.1], "bad", [22.2], [22.3, 114.3]]');
-      expect(decoded, equals(<LatLng>[
-        const LatLng(22.1, 114.1),
-        const LatLng(22.3, 114.3),
-      ]));
+      final decoded =
+          latLngListFromJson('[[22.1, 114.1], "bad", [22.2], [22.3, 114.3]]');
+      expect(
+          decoded,
+          equals(<LatLng>[
+            const LatLng(22.1, 114.1),
+            const LatLng(22.3, 114.3),
+          ]));
     });
   });
 }
+

@@ -6,7 +6,7 @@
 //
 // Ponytail note: the welcome copy is intentionally short. A real
 // onboarding flow with multiple pages / illustrations would be overkill
-// for a prototype — three lines of text and one button is enough.
+// for a prototype ??three lines of text and one button is enough.
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -18,8 +18,7 @@ class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
 
   /// SharedPreferences key for the "user has finished onboarding" flag.
-  static const String prefsKeyOnboardingComplete =
-      'urbix.onboarding_complete';
+  static const String prefsKeyOnboardingComplete = 'urbix.onboarding_complete';
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -86,7 +85,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         return;
       }
 
-      // Permission granted — remember and proceed.
+      // Permission granted ??remember and proceed.
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(OnboardingScreen.prefsKeyOnboardingComplete, true);
       if (!mounted) return;
@@ -180,3 +179,4 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 }
+

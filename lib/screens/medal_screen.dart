@@ -2,7 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/achievement_provider.dart' show tierForThreshold, AchievementTier;
+import '../providers/achievement_provider.dart'
+    show tierForThreshold, AchievementTier;
 import '../providers/medal_provider.dart';
 import '../utils/l10n.dart';
 
@@ -50,8 +51,7 @@ class MedalScreen extends StatelessWidget {
                       style: TextStyle(
                         fontWeight:
                             awarded ? FontWeight.bold : FontWeight.normal,
-                        color:
-                            awarded ? Colors.black : Colors.grey.shade600,
+                        color: awarded ? Colors.black : Colors.grey.shade600,
                       ),
                     ),
                   ),
@@ -101,3 +101,4 @@ class MedalScreen extends StatelessWidget {
     }
   }
 }
+

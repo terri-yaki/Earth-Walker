@@ -43,7 +43,8 @@ class HamburgerMenu extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AchievementScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const AchievementScreen()),
               );
             },
           ),
@@ -63,7 +64,8 @@ class HamburgerMenu extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const DistrictsScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const DistrictsScreen()),
               );
             },
           ),
@@ -182,7 +184,7 @@ class HamburgerMenu extends StatelessWidget {
               // where the dialog is a separate window).
               Navigator.of(dialogContext).pop();
               // share_plus: Rect is required on iPad (popover
-              // anchor). Pass a zero Rect on phones — the OS
+              // anchor). Pass a zero Rect on phones ??the OS
               // ignores it. ponytail: a future iPad-only
               // pass-through of the share button's RenderBox
               // would tighten the popover arrow to the actual
@@ -190,8 +192,7 @@ class HamburgerMenu extends StatelessWidget {
               await Share.share(
                 shareText,
                 subject: l.shareDialogTitle,
-                sharePositionOrigin:
-                    const Rect.fromLTWH(0, 0, 0, 0),
+                sharePositionOrigin: const Rect.fromLTWH(0, 0, 0, 0),
               );
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -238,8 +239,8 @@ class HamburgerMenu extends StatelessWidget {
             child: Text(l.compareDialogClose),
           ),
           FilledButton(
-            onPressed: () => Navigator.of(dialogContext)
-                .pop(controller.text.trim()),
+            onPressed: () =>
+                Navigator.of(dialogContext).pop(controller.text.trim()),
             child: Text(l.compareDialogCompare),
           ),
         ],
@@ -287,7 +288,7 @@ class HamburgerMenu extends StatelessWidget {
     final deltas = ProgressSnapshot.compare(
       other: theirs,
       yours: mine,
-      // Field labels are plain English — the badges/medals
+      // Field labels are plain English ??the badges/medals
       // themselves aren't localised, and the comparison strings
       // read most naturally as the same nouns the user sees on
       // the achievement / medal screens.
@@ -408,3 +409,4 @@ class HamburgerMenu extends StatelessWidget {
     );
   }
 }
+
