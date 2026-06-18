@@ -132,6 +132,28 @@ void main() {
           reason: 'reset is a meaningful event, listeners need to know');
     });
 
+    test('updateUserLocation notifies listeners exactly once on a fix',
+        () async {
+      // The MapScreen rebuilds on notifyListeners(). updateUserLocation
+      // touches multiple fields in one fix (location, distance, possibly
+      // visited set), so a single notification per call is the contract
+      // —the UI does not need to know that several fields changed, only
+      // that the state did.
+      //
+      // Locks down: notifyListeners() is called once per successful
+      // updateUserLocation(), and never on the failure path (the catch
+      // block rethrows without notifying —see the test below for that
+      // side).
+      final p = UserLocationProvider(
+        positionSource: () async => _pos(22.298, 114.170),
+      );
+      var notifyCount = 0;
+      p.addListener(() => notifyCount++);
+      await p.updateUserLocation();
+      expect(notifyCount, 1,
+          reason: 'one fix must produce exactly one notification');
+    });
+
     test('visitsByDistrict returns an unmodifiable view', () {
       final p = UserLocationProvider();
       expect(() => p.visitsByDistrict['Foo'] = 1, throwsUnsupportedError);
