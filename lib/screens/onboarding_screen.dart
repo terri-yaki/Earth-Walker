@@ -57,6 +57,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     try {
       // Ensure location services are enabled at the device level.
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!mounted) return;
       if (!serviceEnabled) {
         setState(() {
           _busy = false;
@@ -69,9 +70,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       // distinctly so we can tell the user whether to try again or to
       // open system Settings.
       LocationPermission permission = await Geolocator.checkPermission();
+      if (!mounted) return;
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
       }
+      if (!mounted) return;
       if (permission == LocationPermission.deniedForever) {
         setState(() {
           _busy = false;
@@ -93,6 +96,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       if (!mounted) return;
       _goToMap();
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _busy = false;
         // Map the typed permission-denied exception to the
