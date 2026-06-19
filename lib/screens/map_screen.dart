@@ -549,7 +549,7 @@ class _MapScreenState extends State<MapScreen> {
                                   final n = userLocationProvider
                                       .cellsInCurrentDistrict;
                                   return Text(
-                                    '蝜?$n ${pluralize(n, l.hudVisit, l.hudVisits)}',
+                                    ' · $n ${pluralize(n, l.hudVisit, l.hudVisits)}',
                                     style: TextStyle(
                                       color: Colors.white.withOpacity(0.75),
                                       fontSize: 12,
@@ -600,7 +600,7 @@ class _MapScreenState extends State<MapScreen> {
                                   // HUD card on narrow phones.
                                   Flexible(
                                     child: Text(
-                                      '${l.hudNextMilestone}: ${next.title} @ ${next.threshold}% 蝜?${next.cellsToGo} ${l.hudCellsToGo}',
+                                      '${l.hudNextMilestone}: ${next.title} @ ${next.threshold}% · ${next.cellsToGo} ${l.hudCellsToGo}',
                                       style: TextStyle(
                                         color: Colors.white.withOpacity(0.85),
                                         fontSize: 12,
@@ -773,7 +773,7 @@ class _MapScreenState extends State<MapScreen> {
                                       child: Text(
                                         '${l.suggestionChip}: '
                                         '${s.districtName ?? l.suggestionExploreOther}'
-                                        ' 蝜?${formatDistance(s.distanceFromUserMeters)}',
+                                        ' · ${formatDistance(s.distanceFromUserMeters)}',
                                         style: TextStyle(
                                           color: Colors.white.withOpacity(0.85),
                                           fontSize: 12,
