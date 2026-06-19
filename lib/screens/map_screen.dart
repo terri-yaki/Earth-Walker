@@ -156,7 +156,7 @@ class _MapScreenState extends State<MapScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  '$days ${l.hudDaysStreak}',
+                  '$days ${pluralize(days, l.hudDayStreak, l.hudDaysStreak)}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
