@@ -534,7 +534,7 @@ class _MapScreenState extends State<MapScreen> {
                                   final n = userLocationProvider
                                       .cellsInCurrentDistrict;
                                   return Text(
-                                    '蝜?$n ${n == 1 ? l.hudVisit : l.hudVisits}',
+                                    '蝜?$n ${pluralize(n, l.hudVisit, l.hudVisits)}',
                                     style: TextStyle(
                                       color: Colors.white.withOpacity(0.75),
                                       fontSize: 12,
