@@ -637,11 +637,23 @@ class _MapScreenState extends State<MapScreen> {
                                     const Icon(Icons.local_fire_department,
                                         color: Colors.orange, size: 14),
                                     const SizedBox(width: 4),
-                                    Text(
-                                      '${l.hudStreak}: $s ${pluralize(s, l.hudDayStreak, l.hudDaysStreak)}',
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(0.85),
-                                        fontSize: 12,
+                                    // Flexible so a very large streak
+                                    // (e.g. 9999 days) doesn't push
+                                    // the share icon off the HUD on
+                                    // narrow screens. softWrap is left
+                                    // off because the chip should stay
+                                    // one line; the worst case is a
+                                    // mid-word ellipsis, which is
+                                    // preferable to a layout overflow
+                                    // stripe.
+                                    Flexible(
+                                      child: Text(
+                                        '${l.hudStreak}: $s ${pluralize(s, l.hudDayStreak, l.hudDaysStreak)}',
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.85),
+                                          fontSize: 12,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     // Visible share affordance: a
