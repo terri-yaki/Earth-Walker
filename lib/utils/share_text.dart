@@ -50,7 +50,7 @@ String formatShareText({
   final buf = StringBuffer()
     ..writeln(bragLine)
     ..writeln(
-        '$dist 蝜?$cells ${pluralize(cells, "cell", "cells")} 蝜?$streak ${pluralize(streak, "day", "days")} streak')
+        '$dist · $cells ${pluralize(cells, "cell", "cells")} · $streak ${pluralize(streak, "day", "days")} streak')
     ..writeln(kShareHashtag)
     ..write(encodeProgressSnapshot(snapshot));
   return buf.toString();

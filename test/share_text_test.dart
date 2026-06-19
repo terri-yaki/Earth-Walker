@@ -150,5 +150,33 @@ void main() {
       final outMany = formatShareText(snapshot: many, bragLine: 'x');
       expect(outMany, contains('12 cells'));
     });
+
+    test(
+        'uses middle dot (·) as field separator, not literal "??" '
+        '(regression for the placeholder-looking separator bug)', () {
+      // The share post body has three fields (distance, cells,
+      // streak) separated by a separator. Originally the
+      // separator was literal `??` — visually it read like a
+      // placeholder or "I don't know" rather than a deliberate
+      // separator. Middle dot (U+00B7) is the conventional
+      // separator in compact status lines and reads as an
+      // intentional pause between fields.
+      const snap = ProgressSnapshot(
+        cellsVisited: 5,
+        badgesUnlocked: 0,
+        medalsEarned: 0,
+        metersWalked: 4321,
+        daysExplored: 0,
+        currentStreakDays: 0,
+      );
+      final out = formatShareText(snapshot: snap, bragLine: 'x');
+      // Two separators between three fields.
+      const middleDot = ' · ';
+      expect(out, contains(middleDot),
+          reason:
+              'share post body should use middle-dot separator, not ??');
+      expect(out, isNot(contains('??')),
+          reason: 'literal "??" must not leak into the share post');
+    });
   });
 }
