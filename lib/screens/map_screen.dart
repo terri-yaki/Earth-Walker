@@ -411,7 +411,9 @@ class _MapScreenState extends State<MapScreen> {
                     TileLayer(
                       urlTemplate:
                           "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                      subdomains: const ['a', 'b', 'c'],
+                      // subdomains default to ['a', 'b', 'c']
+                      // in flutter_map's TileLayer — omit
+                      // rather than repeat.
                       additionalOptions: const {
                         'user_agent': 'UrbixHK/1.0.0',
                       },

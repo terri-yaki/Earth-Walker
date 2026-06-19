@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
@@ -97,7 +95,7 @@ void main() {
     });
 
     test(
-        'cellsInCurrentDistrict counts the current district\'s cells '
+        "cellsInCurrentDistrict counts the current district's cells "
         'after a visit', () async {
       // Walk into Yau Tsim Mong (22.298, 114.170). The getter must
       // read from _visitsByDistrict['Yau Tsim Mong'], NOT from

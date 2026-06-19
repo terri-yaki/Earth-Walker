@@ -138,7 +138,7 @@ void main() {
           reason:
               'share-icon threshold must equal the first share '
               'milestone, otherwise the icon would be visible '
-              'at a streak length that doesn\'t trigger a '
+              "at a streak length that doesn't trigger a "
               '"Share your streak?" prompt (or vice versa).');
     });
   });

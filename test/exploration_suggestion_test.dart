@@ -83,8 +83,8 @@ void main() {
         final reencoded =
             encodeGeohash(c.center.latitude, c.center.longitude, 5);
         expect(reencoded, equals(c.geohash),
-            reason: 'center of cell ${c.geohash} hashes to a different cell '
-                '${reencoded}; the bbox-walk step is too coarse');
+            reason: 'center of cell $c.geohash hashes to a different cell '
+                '$reencoded; the bbox-walk step is too coarse');
       }
     });
   });
