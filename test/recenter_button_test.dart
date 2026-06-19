@@ -43,7 +43,6 @@ void main() {
     // BuildContext, not a disposed-widget scenario.
     final onRecenterCompleter = Completer<void>();
     final button = RecenterButton(
-      mapController: MapController(),
       onRecenter: () => onRecenterCompleter.future,
     );
     await tester.pumpWidget(_wrap(
@@ -80,7 +79,6 @@ void main() {
     // snackbar; the RecenterButton's success snackbar must NOT
     // also fire, otherwise the user sees contradictory messages.
     final button = RecenterButton(
-      mapController: MapController(),
       onRecenter: () => Future<void>.error(
           Exception('GPS unavailable')),
     );

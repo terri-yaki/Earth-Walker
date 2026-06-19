@@ -857,7 +857,6 @@ class _MapScreenState extends State<MapScreen> {
                   bottom: 20,
                   right: 20,
                   child: RecenterButton(
-                    mapController: _mapController,
                     onRecenter: _initializeMap,
                   ),
                 ),

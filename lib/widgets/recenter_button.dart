@@ -1,17 +1,21 @@
 // lib/widgets/recenter_button.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 
 import '../utils/l10n.dart';
 
 class RecenterButton extends StatelessWidget {
-  final MapController mapController;
+  // The map controller used to live on the widget as
+  // `final MapController mapController;` — but the FAB never
+  // touched it (the map screen owns the controller, and the
+  // recenter callback `onRecenter` does the actual move via
+  // its own reference). Storing it here was dead state.
+  // Removing the parameter; the call site (map_screen.dart)
+  // and tests stop passing it.
   final Future<void> Function() onRecenter;
 
   const RecenterButton({
     Key? key,
-    required this.mapController,
     required this.onRecenter,
   }) : super(key: key);
 
