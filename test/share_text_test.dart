@@ -91,5 +91,46 @@ void main() {
       expect(out.endsWith('\n'), isFalse);
       expect(out, endsWith(encodeProgressSnapshot(snap)));
     });
+
+    test('singular "cell" / plural "cells" matches the count', () {
+      // Regression: the format used to hardcode "cells" even
+      // for cellsVisited=1, producing "1 cells". Now the noun
+      // agrees with the number.
+      const one = ProgressSnapshot(
+        cellsVisited: 1,
+        badgesUnlocked: 0,
+        medalsEarned: 0,
+        metersWalked: 1000.0,
+        daysExplored: 1,
+        currentStreakDays: 0,
+      );
+      final outOne = formatShareText(snapshot: one, bragLine: 'x');
+      expect(outOne, contains('1 cell '),
+          reason: 'cellsVisited=1 should render as "1 cell "');
+      expect(outOne, isNot(contains('1 cells')),
+          reason: 'must not say "1 cells"');
+      // 0 is grammatically plural ("zero cells", not "zero
+      // cell"), and 2+ is naturally plural.
+      const zero = ProgressSnapshot(
+        cellsVisited: 0,
+        badgesUnlocked: 0,
+        medalsEarned: 0,
+        metersWalked: 1000.0,
+        daysExplored: 1,
+        currentStreakDays: 0,
+      );
+      final outZero = formatShareText(snapshot: zero, bragLine: 'x');
+      expect(outZero, contains('0 cells'));
+      const many = ProgressSnapshot(
+        cellsVisited: 12,
+        badgesUnlocked: 0,
+        medalsEarned: 0,
+        metersWalked: 1000.0,
+        daysExplored: 1,
+        currentStreakDays: 0,
+      );
+      final outMany = formatShareText(snapshot: many, bragLine: 'x');
+      expect(outMany, contains('12 cells'));
+    });
   });
 }

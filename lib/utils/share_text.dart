@@ -37,7 +37,7 @@ String formatShareText({
   final buf = StringBuffer()
     ..writeln(bragLine)
     ..writeln(
-        '$km km ??$cells cells ??$streak ${streak == 1 ? "day" : "days"} streak')
+        '$km km ??$cells ${cells == 1 ? "cell" : "cells"} ??$streak ${streak == 1 ? "day" : "days"} streak')
     ..writeln(kShareHashtag)
     ..write(encodeProgressSnapshot(snapshot));
   return buf.toString();
