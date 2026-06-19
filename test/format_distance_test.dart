@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:urbix/screens/map_screen.dart';
+import 'package:urbix/utils/format_distance.dart';
 
 void main() {
   group('formatDistance', () {

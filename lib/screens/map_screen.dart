@@ -13,6 +13,7 @@ import '../widgets/hamburger_menu.dart';
 import '../widgets/text.dart'; // Ensure this points to your custom text widget
 import '../utils/constants.dart';
 import '../utils/exploration_suggestion.dart';
+import '../utils/format_distance.dart';
 import '../utils/l10n.dart';
 import '../utils/progress_summary.dart';
 import '../utils/streak_milestones.dart';
@@ -778,32 +779,6 @@ class _MapScreenState extends State<MapScreen> {
             ),
     );
   }
-}
-
-/// Format a distance in meters as a short, human-friendly string.
-/// < 1 km -> "X m", >= 1 km -> "X.Y km" with one decimal.
-///
-/// The branch is on the *rounded* integer-meter value, not the
-/// raw double, so 999.5 rounds to "1000 m" (correctly) but
-/// 999.5 vs 1000.0 doesn't produce a jarring jump from "1000 m"
-/// to "1.0 km" —both render the same way. (toStringAsFixed
-/// rounds-half-to-even in Dart; without the rounded comparison
-/// the user would see "999.5 m -> 1000 m" then "1000 m ->
-/// 1.0 km" on the very next position update, which feels
-/// broken.)
-String formatDistance(double meters) {
-  // The domain is non-negative distance in meters. A negative
-  // reading (or NaN, or Infinity from a bad fix) would render
-  // as e.g. "-1 m" or "NaN km" — visually nonsense. Clamp to
-  // 0 so the worst case is "0 m", which the HUD already uses
-  // for fresh users.
-  if (meters.isNaN || meters.isInfinite || meters < 0) meters = 0.0;
-  final metersRounded = meters.toStringAsFixed(0);
-  // Use double compare on the parsed rounded value, so e.g.
-  // 999.5 -> "1000" -> 1000.0 < 1000 is false -> km branch.
-  if (double.parse(metersRounded) < 1000) return '$metersRounded m';
-  final km = meters / 1000;
-  return '${km.toStringAsFixed(1)} km';
 }
 
 /// Compact icon + label pair used in the map HUD's secondary row.

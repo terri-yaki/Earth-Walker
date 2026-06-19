@@ -131,7 +131,6 @@ class HamburgerMenu extends StatelessWidget {
           pluralize(snapshot.cellsVisited, l.cellSingular, l.cellPlural),
       badgesLabel: 'badges',
       medalsLabel: 'medals',
-      distanceLabel: 'km',
     );
     // Smart default brag: if the user has a real streak going
     // (>= 2 days so "today" doesn't count as a brag), surface the
@@ -404,7 +403,6 @@ class HamburgerMenu extends StatelessWidget {
       ),
       badgesLabel: 'badges',
       medalsLabel: 'medals',
-      distanceLabel: 'km',
     );
 
     final confirmed = await showDialog<bool>(

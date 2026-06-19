@@ -6,6 +6,7 @@
 // not a data dump: one brag line, a hashtag, then the snapshot
 // string at the bottom so the receiver can still compare.
 
+import 'format_distance.dart';
 import 'progress_summary.dart'
     show ProgressSnapshot, encodeProgressSnapshot, pluralize;
 
@@ -27,7 +28,10 @@ String formatShareText({
   required ProgressSnapshot snapshot,
   required String bragLine,
 }) {
-  final km = (snapshot.metersWalked / 1000).toStringAsFixed(1);
+  // Use [formatDistance] so sub-kilometre walkers render as
+  // "50 m" rather than "0.1 km" / "0.0 km" — the latter
+  // round to zero and read like the user hasn't moved.
+  final dist = formatDistance(snapshot.metersWalked);
   final cells = snapshot.cellsVisited;
   final streak = snapshot.currentStreakDays;
   // 3 short lines, then snapshot. ~200 chars before the snapshot,
@@ -46,7 +50,7 @@ String formatShareText({
   final buf = StringBuffer()
     ..writeln(bragLine)
     ..writeln(
-        '$km km ??$cells ${pluralize(cells, "cell", "cells")} ??$streak ${pluralize(streak, "day", "days")} streak')
+        '$dist ??$cells ${pluralize(cells, "cell", "cells")} ??$streak ${pluralize(streak, "day", "days")} streak')
     ..writeln(kShareHashtag)
     ..write(encodeProgressSnapshot(snapshot));
   return buf.toString();

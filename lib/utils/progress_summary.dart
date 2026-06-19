@@ -7,6 +7,8 @@
 // another (via copy/share) and the receiver compare against
 // their own.
 
+import 'format_distance.dart';
+
 /// Pick the singular or plural form of a count-noun label based
 /// on [count]. `count == 1` (or `-1`) -> [singular], otherwise
 /// [plural]. Lives in this file because the compare-dialog
@@ -31,16 +33,22 @@ String pluralize(int count, String singular, String plural) {
 /// Format a one-line progress summary for copy/share. Pure so it's
 /// trivially unit-testable.
 ///
-/// [cellsLabel], [badgesLabel], [medalsLabel], and [distanceLabel] are
-/// passed in (rather than looked up here) so this function stays pure
-/// and the caller owns the localisation. Typical use:
+/// [cellsLabel], [badgesLabel], and [medalsLabel] are passed in
+/// (rather than looked up here) so this function stays pure and
+/// the caller owns the localisation. Typical use:
 ///
 ///   formatProgressSummary(
 ///     cellsVisited: ..., badgesUnlocked: ..., medalsEarned: ...,
 ///     metersWalked: ...,
 ///     cellsLabel: l.cellPlural, badgesLabel: 'badges',
-///     medalsLabel: 'medals', distanceLabel: 'km',
+///     medalsLabel: 'medals',
 ///   );
+///
+/// The distance is rendered via [formatDistance], which picks
+/// meters for sub-kilometre values and km with one decimal
+/// otherwise — a flat km conversion would render "0.0 km
+/// walked." for the user who's only walked 49 m, which is
+/// visually misleading.
 String formatProgressSummary({
   required int cellsVisited,
   required int badgesUnlocked,
@@ -49,13 +57,12 @@ String formatProgressSummary({
   required String cellsLabel,
   required String badgesLabel,
   required String medalsLabel,
-  required String distanceLabel,
 }) {
-  final km = (metersWalked / 1000).toStringAsFixed(1);
+  final dist = formatDistance(metersWalked);
   return '$cellsVisited $cellsLabel visited, '
       '$badgesUnlocked $badgesLabel unlocked, '
       '$medalsEarned $medalsLabel earned, '
-      '$km $distanceLabel walked.';
+      '$dist walked.';
 }
 
 /// Magic prefix for a shareable progress snapshot. The receiver

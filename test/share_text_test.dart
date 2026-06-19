@@ -78,6 +78,24 @@ void main() {
       expect(out, contains('12.3 km'));
     });
 
+    test('sub-kilometre distances render as meters, not 0.0 km', () {
+      // 49 m would round to "0.0 km" under the old flat-km
+      // conversion — visually misleading for the user who has
+      // walked 49 m. formatDistance picks meters for
+      // sub-1000 m values.
+      const snap = ProgressSnapshot(
+        cellsVisited: 0,
+        badgesUnlocked: 0,
+        medalsEarned: 0,
+        metersWalked: 49,
+        daysExplored: 0,
+        currentStreakDays: 0,
+      );
+      final out = formatShareText(snapshot: snap, bragLine: 'x');
+      expect(out, contains('49 m'));
+      expect(out, isNot(contains('0.0 km')));
+    });
+
     test('ends with the snapshot (no trailing newline)', () {
       const snap = ProgressSnapshot(
         cellsVisited: 0,

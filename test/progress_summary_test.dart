@@ -13,9 +13,8 @@ void main() {
           cellsLabel: 'cells',
           badgesLabel: 'badges',
           medalsLabel: 'medals',
-          distanceLabel: 'km',
         ),
-        '0 cells visited, 0 badges unlocked, 0 medals earned, 0.0 km walked.',
+        '0 cells visited, 0 badges unlocked, 0 medals earned, 0 m walked.',
       );
     });
 
@@ -29,9 +28,43 @@ void main() {
           cellsLabel: 'cells',
           badgesLabel: 'badges',
           medalsLabel: 'medals',
-          distanceLabel: 'km',
         ),
         '12 cells visited, 3 badges unlocked, 2 medals earned, 4.3 km walked.',
+      );
+    });
+
+    test('renders sub-kilometre distances in meters, not 0.0 km', () {
+      // 450 m would render as "0.5 km" but more importantly,
+      // 49 m would round to "0.0 km" under the old flat-km
+      // conversion — visually misleading for the user who
+      // has walked 49 m. [formatDistance] picks the meter
+      // branch for sub-1000 m values, so this regression
+      // covers both the "small but nonzero" case and the
+      // "would round to 0 km" case.
+      expect(
+        formatProgressSummary(
+          cellsVisited: 1,
+          badgesUnlocked: 0,
+          medalsEarned: 0,
+          metersWalked: 450,
+          cellsLabel: 'cells',
+          badgesLabel: 'badges',
+          medalsLabel: 'medals',
+        ),
+        '1 cells visited, 0 badges unlocked, 0 medals earned, 450 m walked.',
+      );
+      expect(
+        formatProgressSummary(
+          cellsVisited: 0,
+          badgesUnlocked: 0,
+          medalsEarned: 0,
+          metersWalked: 49,
+          cellsLabel: 'cells',
+          badgesLabel: 'badges',
+          medalsLabel: 'medals',
+        ),
+        '0 cells visited, 0 badges unlocked, 0 medals earned, 49 m walked.',
+        reason: '49 m must not round down to "0.0 km walked."',
       );
     });
 
@@ -49,7 +82,6 @@ void main() {
           cellsLabel: '格',
           badgesLabel: 'badges',
           medalsLabel: 'medals',
-          distanceLabel: 'km',
         ),
         '5 格 visited, 2 badges unlocked, 1 medals earned, 1.2 km walked.',
       );
