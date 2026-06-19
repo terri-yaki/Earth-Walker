@@ -6,6 +6,7 @@ import '../providers/achievement_provider.dart'
     show tierForThreshold, AchievementTier;
 import '../providers/medal_provider.dart';
 import '../utils/l10n.dart';
+import '../utils/tier_styling.dart';
 
 class MedalScreen extends StatelessWidget {
   const MedalScreen({Key? key}) : super(key: key);
@@ -41,7 +42,7 @@ class MedalScreen extends StatelessWidget {
               contentPadding: EdgeInsets.zero,
               leading: Icon(
                 awarded ? Icons.emoji_events : Icons.lock_outline,
-                color: awarded ? _tierColor(tier) : Colors.grey,
+                color: awarded ? tierColor(tier) : Colors.grey,
               ),
               title: Row(
                 children: [
@@ -58,10 +59,10 @@ class MedalScreen extends StatelessWidget {
                   if (awarded) ...[
                     const SizedBox(width: 8),
                     Text(
-                      _tierLabel(tier, l),
+                      tierLabel(tier, l),
                       style: TextStyle(
                         fontSize: 11,
-                        color: _tierColor(tier),
+                        color: tierColor(tier),
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.5,
                       ),
@@ -77,27 +78,5 @@ class MedalScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Color _tierColor(AchievementTier tier) {
-    switch (tier) {
-      case AchievementTier.gold:
-        return const Color(0xFFD4A017);
-      case AchievementTier.silver:
-        return const Color(0xFF8E96A1);
-      case AchievementTier.bronze:
-        return const Color(0xFFB87333);
-    }
-  }
-
-  String _tierLabel(AchievementTier tier, L10n l) {
-    switch (tier) {
-      case AchievementTier.gold:
-        return l.tierGold;
-      case AchievementTier.silver:
-        return l.tierSilver;
-      case AchievementTier.bronze:
-        return l.tierBronze;
-    }
   }
 }
