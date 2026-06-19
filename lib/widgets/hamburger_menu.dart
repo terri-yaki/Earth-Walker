@@ -127,7 +127,8 @@ class HamburgerMenu extends StatelessWidget {
       // Cell label is localised; the rest are short data nouns
       // that read naturally in either language (English fallback
       // is intentional and matches the compare-dialog policy).
-      cellsLabel: snapshot.cellsVisited == 1 ? l.cellSingular : l.cellPlural,
+      cellsLabel:
+          pluralize(snapshot.cellsVisited, l.cellSingular, l.cellPlural),
       badgesLabel: 'badges',
       medalsLabel: 'medals',
       distanceLabel: 'km',
@@ -396,9 +397,11 @@ class HamburgerMenu extends StatelessWidget {
       badgesUnlocked: achievements.unlockedAchievements.length,
       medalsEarned: medals.awardedMedals.length,
       metersWalked: location.totalDistanceMeters,
-      cellsLabel: location.uniqueCellsVisited == 1
-          ? l.cellSingular
-          : l.cellPlural,
+      cellsLabel: pluralize(
+        location.uniqueCellsVisited,
+        l.cellSingular,
+        l.cellPlural,
+      ),
       badgesLabel: 'badges',
       medalsLabel: 'medals',
       distanceLabel: 'km',
