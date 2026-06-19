@@ -221,38 +221,17 @@ class HamburgerMenu extends StatelessWidget {
   /// the per-field deltas. Parse failure surfaces a SnackBar.
   Future<void> _showCompareDialog(BuildContext context) async {
     final l = L10n.of(context);
-    final controller = TextEditingController();
 
-    // Show the input dialog. We use a stateful local widget so
-    // the dialog can keep its own TextEditingController for the
-    // pasted text.
+    // The TextEditingController for the paste field lives in a
+    // dedicated stateful widget ([_CompareDialog]) so it gets
+    // disposed when the dialog closes. The previous inline
+    // controller was created here and never disposed, leaking a
+    // controller (and its listeners) every time the user opened
+    // Compare. After ~10 opens, that's 10 leaked controllers
+    // and growing.
     final pasted = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l.compareDialogTitle),
-        content: TextField(
-          controller: controller,
-          maxLines: 5,
-          minLines: 3,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: l.compareDialogPasteHint,
-            border: const OutlineInputBorder(),
-            isDense: true,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(l.compareDialogClose),
-          ),
-          FilledButton(
-            onPressed: () =>
-                Navigator.of(dialogContext).pop(controller.text.trim()),
-            child: Text(l.compareDialogCompare),
-          ),
-        ],
-      ),
+      builder: (dialogContext) => _CompareDialog(l: l),
     );
     // The user closed without comparing.
     if (pasted == null) return;
@@ -444,6 +423,64 @@ class HamburgerMenu extends StatelessWidget {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l.progressResetDone)),
+    );
+  }
+}
+
+/// Dialog that asks the user to paste a friend's snapshot. Owns
+/// the [TextEditingController] for the paste field so the
+/// controller's listeners are disposed when the dialog closes.
+/// Without this, every Compare open would leak a controller
+/// (the inline-controller pattern in [HamburgerMenu._showCompareDialog]
+/// had exactly this bug).
+class _CompareDialog extends StatefulWidget {
+  final L10n l;
+  const _CompareDialog({required this.l});
+
+  @override
+  State<_CompareDialog> createState() => _CompareDialogState();
+}
+
+class _CompareDialogState extends State<_CompareDialog> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.l.compareDialogTitle),
+      content: TextField(
+        controller: _controller,
+        maxLines: 5,
+        minLines: 3,
+        autofocus: true,
+        decoration: InputDecoration(
+          hintText: widget.l.compareDialogPasteHint,
+          border: const OutlineInputBorder(),
+          isDense: true,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(widget.l.compareDialogClose),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(_controller.text.trim()),
+          child: Text(widget.l.compareDialogCompare),
+        ),
+      ],
     );
   }
 }
