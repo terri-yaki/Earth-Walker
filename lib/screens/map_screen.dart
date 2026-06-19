@@ -605,6 +605,15 @@ class _MapScreenState extends State<MapScreen> {
                                         color: Colors.white.withOpacity(0.85),
                                         fontSize: 12,
                                       ),
+                                      // softWrap: false + ellipsis:
+                                      // without softWrap off, the
+                                      // long milestone title would
+                                      // wrap into two lines and
+                                      // visually split the
+                                      // progress-bar row in half.
+                                      // Force one line and ellipsize
+                                      // at the end.
+                                      softWrap: false,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
@@ -673,6 +682,14 @@ class _MapScreenState extends State<MapScreen> {
                                           color: Colors.white.withOpacity(0.85),
                                           fontSize: 12,
                                         ),
+                                        // softWrap: false + ellipsis:
+                                        // a 9999-day streak would wrap
+                                        // into two lines and visually
+                                        // split the chip in half,
+                                        // looking like a layout bug.
+                                        // Force one line and ellipsize
+                                        // at the end instead.
+                                        softWrap: false,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
@@ -762,6 +779,15 @@ class _MapScreenState extends State<MapScreen> {
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,
                                         ),
+                                        // softWrap: false + ellipsis:
+                                        // without softWrap off, a
+                                        // long district name +
+                                        // distance string would wrap
+                                        // into two lines and visually
+                                        // split the suggestion chip
+                                        // row in half. Force one line
+                                        // and ellipsize at the end.
+                                        softWrap: false,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
