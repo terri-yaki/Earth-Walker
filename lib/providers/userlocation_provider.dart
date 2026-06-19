@@ -53,7 +53,15 @@ Future<Position> _geolocatorPositionSource() async {
       throw const LocationPermissionDeniedException();
     }
   }
-  return Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+  return Geolocator.getCurrentPosition(
+    // desiredAccuracy is deprecated in newer geolocator
+    // versions; the replacement is the LocationSettings
+    // parameter (which also lets iOS/Android pick the
+    // right settings type automatically).
+    locationSettings: const LocationSettings(
+      accuracy: LocationAccuracy.high,
+    ),
+  );
 }
 
 /// A Provider that manages the user's location, map auto-centering,
