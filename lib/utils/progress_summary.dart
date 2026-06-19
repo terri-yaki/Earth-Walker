@@ -158,7 +158,7 @@ class ProgressSnapshot {
   }) {
     String line(int delta, String label, {bool isMeters = false}) {
       final value = isMeters
-          ? '${(delta.abs() / 1000).toStringAsFixed(1)} $distanceLabel'
+          ? formatDistance(delta.abs().toDouble())
           : '${delta.abs()} $label';
       return '$value (${delta > 0 ? theyWinLabel : youWinLabel})';
     }
@@ -169,6 +169,9 @@ class ProgressSnapshot {
     final dMeters = other.metersWalked - yours.metersWalked;
     if (dMeters.abs() > 50) {
       // > 50 m counts as a real difference; smaller is GPS noise.
+      // Use [formatDistance] so a 75 m delta renders as "75 m"
+      // rather than "0.1 km" — the rounded km value would
+      // visually understate small-but-real differences.
       lines.add(line(dMeters.toInt(), distanceLabel, isMeters: true));
     }
     final dBadges = other.badgesUnlocked - yours.badgesUnlocked;

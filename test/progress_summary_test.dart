@@ -352,6 +352,48 @@ void main() {
       expect(lines51, hasLength(1),
           reason: '51 m is one metre over the noise floor');
     });
+
+    test(
+        'sub-kilometre distance deltas render in meters, not 0.1 km '
+        '(regression for the "75 m round-tripped through km looks like '
+        'rounding noise" UI bug)', () {
+      // 75 m passes the 50 m noise floor but rounds to "0.1 km"
+      // under the old inline-toStringAsFixed(1) conversion —
+      // visually indistinguishable from rounding error. Routing
+      // through [formatDistance] picks the meter branch.
+      const youSmall = ProgressSnapshot(
+        cellsVisited: 0,
+        badgesUnlocked: 0,
+        medalsEarned: 0,
+        metersWalked: 1000,
+        daysExplored: 0,
+        currentStreakDays: 0,
+      );
+      const themSmall = ProgressSnapshot(
+        cellsVisited: 0,
+        badgesUnlocked: 0,
+        medalsEarned: 0,
+        metersWalked: 1075, // 75 m over the noise floor
+        daysExplored: 0,
+        currentStreakDays: 0,
+      );
+      final lines = ProgressSnapshot.compare(
+        other: themSmall,
+        yours: youSmall,
+        cellsLabel: 'c',
+        distanceLabel: 'km',
+        badgesLabel: 'b',
+        medalsLabel: 'm',
+        daysLabel: 'd',
+        streakLabel: 's',
+        youWinLabel: 'you win',
+        theyWinLabel: 'they win',
+      );
+      expect(lines, hasLength(1));
+      expect(lines.first, contains('75 m'),
+          reason: '75 m delta should render as "75 m", not "0.1 km"');
+      expect(lines.first, isNot(contains('0.1 km')));
+    });
   });
 
   group('ProgressSnapshot.fromJson', () {
