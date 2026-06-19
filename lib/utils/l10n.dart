@@ -86,6 +86,7 @@ class L10n {
   String get shareDialogCopy => _lookup('share_dialog_copy');
   String get shareDialogCopied => _lookup('share_dialog_copied');
   String get shareDialogShare => _lookup('share_dialog_share');
+  String get shareDialogCancel => _lookup('share_dialog_cancel');
   String get shareDialogShared => _lookup('share_dialog_shared');
   String get shareBragDefault => _lookup('share_brag_default');
   String get shareBragStreak => _lookup('share_brag_streak');

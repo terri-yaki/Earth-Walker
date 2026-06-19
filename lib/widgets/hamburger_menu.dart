@@ -170,7 +170,7 @@ class HamburgerMenu extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(l.resetDialogCancel),
+            child: Text(l.shareDialogCancel),
           ),
           TextButton(
             onPressed: () {
