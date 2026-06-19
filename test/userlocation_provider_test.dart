@@ -793,6 +793,32 @@ void main() {
       expect(p.worldPercentage, 100,
           reason: 'worldPercentage must plateau at 100');
     });
+
+    test(
+        'malformed day keys in storage are filtered out by loadFromStorage '
+        '(regression for the "garbage in the JSON keeps the streak '
+        'calculation broken silently" bug)', () async {
+      // The exploration-day set is stored as a JSON array of
+      // yyyy-mm-dd strings, but a corrupted prefs file could include
+      // arbitrary strings. cellsFromJson preserves them all (it's a
+      // permissive parser). loadFromStorage must additionally run
+      // each entry through [dayKeyParse] and drop the ones that
+      // don't decode — otherwise [currentStreakDays] would never
+      // match any properly-formatted day key produced by [dayKey],
+      // and a fresh user would see streak == 0 forever.
+      const goodKey1 = '2025-11-29';
+      const goodKey2 = '2025-11-30';
+      const malformed = 'yesterday-ish';
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'urbix.exploration_days':
+            '["$goodKey1","$goodKey2","$malformed"]',
+      });
+      final p = UserLocationProvider();
+      await p.loadFromStorage();
+      expect(p.daysExplored, 2,
+          reason: 'only the two well-formed yyyy-mm-dd entries '
+              'should count; the malformed one must be dropped');
+    });
   });
 
   group('UserLocationProvider currentSuggestion (exploration engine wiring)',

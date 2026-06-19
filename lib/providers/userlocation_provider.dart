@@ -368,9 +368,20 @@ class UserLocationProvider with ChangeNotifier {
         ..clear()
         ..addAll(cellsFromJson(prefs.getString(_prefsKeyVisitedCells)));
       _totalDistanceMeters = prefs.getDouble(_prefsKeyTotalDistance) ?? 0.0;
+      // The exploration-day set is stored as a JSON array of
+      // yyyy-mm-dd strings (same shape as the visited-cell set),
+      // but every entry must validate as a day key. A corrupted
+      // prefs file could include arbitrary strings — letting
+      // them through would silently break [currentStreakDays]
+      // because [_explorationDays.contains] would never match a
+      // properly-formatted key produced by [dayKey]. Filter with
+      // [dayKeyParse] (which returns null on malformed input).
       _explorationDays
         ..clear()
-        ..addAll(cellsFromJson(prefs.getString(_prefsKeyExplorationDays)));
+        ..addAll(
+          cellsFromJson(prefs.getString(_prefsKeyExplorationDays))
+              .where((key) => dayKeyParse(key) != null),
+        );
       _visitsByDistrict
         ..clear()
         ..addAll(districtCountMapFromJson(
