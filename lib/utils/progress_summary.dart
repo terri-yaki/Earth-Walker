@@ -130,7 +130,7 @@ class ProgressSnapshot {
   }) {
     String line(int delta, String label, {bool isMeters = false}) {
       final value = isMeters
-          ? '${(delta.abs() / 1000).toStringAsFixed(1)} km $distanceLabel'
+          ? '${(delta.abs() / 1000).toStringAsFixed(1)} $distanceLabel'
           : '${delta.abs()} $label';
       return '$value (${delta > 0 ? theyWinLabel : youWinLabel})';
     }
@@ -187,11 +187,16 @@ String encodeProgressSnapshot(ProgressSnapshot s) {
 /// check, a corrupted or malicious paste could silently
 /// override a field with the second occurrence.
 ///
-/// Negative values are rejected (clamped to 0 instead): the
-/// domain is "things you've accumulated", which can't be
-/// negative. A snapshot like '...cells=-5,...' would
-/// otherwise produce a ProgressSnapshot with cellsVisited: -5
-/// and render as "you walked -5 cells" in the compare dialog.
+/// Negative values are rejected (treated as parse failure
+/// rather than clamped to 0): the domain is "things you've
+/// accumulated", which can't be negative. A snapshot like
+/// '...cells=-5,...' would otherwise produce a
+/// ProgressSnapshot with cellsVisited: -5 and render as
+/// "you walked -5 cells" in the compare dialog. Returning
+/// null surfaces "couldn't parse" to the user, which is
+/// the right signal that the paste is malformed rather than
+/// silently turning "-5 cells" into "0 cells" and showing a
+/// misleading "you've explored 0 cells" comparison.
 ProgressSnapshot? parseProgressSnapshot(String text) {
   if (!text.startsWith(kProgressSnapshotPrefix)) return null;
   final body = text.substring(kProgressSnapshotPrefix.length);
