@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:urbix/utils/l10n.dart';
 
+import 'helpers/test_l10n.dart';
+
 /// Inlined test strings. Mirrors assets/l10n/{en,zh-HK}.json but
 /// without the JSON I/O so unit tests don't need a rootBundle
 /// binding. The provider in the asset file is the source of
@@ -180,8 +182,8 @@ const Map<String, String> _zhStrings = <String, String>{
   'exploration_world': '\u4e16\u754c',
   'exploration_suffix': '\u63a2\u7d22\uff1a',
   'exploration_world_percent': '\u4e16\u754c\u63a2\u7d22',
-  'you_are_here': '\u4f60\u54a9\u5b9a\u8aaa',
-  'map_recentered_snack': '\u5730\u5716\u5df2\u91cd\u65b0\u5b9a\u4f4d\u5230\u4f60\u7684\u4f4d\u7f6e\u3002',
+  'you_are_here': '\u4f60\u55ba\u5462\u5ea6',
+  'map_recentered_snack': '\u5730\u5716\u5df2\u91cd\u65b0\u5b9a\u4f4d\u5230\u4f60\u5605\u4f4d\u7f6e\u3002',
   'recenter_map_tooltip': '\u91cd\u65b0\u5b9a\u4f4d',
   'badge_semantic_label': '\u52f3\u7ae0',
   'map_init_failed': '\u7121\u6cd5\u521d\u59cb\u5316\u5730\u5716\uff1a',
@@ -426,6 +428,24 @@ void main() {
         expect(entry.value.trim(), isNotEmpty,
             reason: '${entry.key} has empty/whitespace zh-HK value');
       }
+    });
+
+    test('on-disk JSON matches the inlined _enStrings / _zhStrings', () {
+      // The inlined maps above are maintained by hand and exist
+      // so unit tests don't need a rootBundle binding. The on-
+      // disk JSON files in assets/l10n/ are what the production
+      // app loads. If a developer edits one without the other,
+      // the production copy and the unit-test copy drift, and
+      // tests quietly stop testing the real strings. This test
+      // catches that drift at the next CI run.
+      final enFromDisk = TestL10nDelegate().loadTagSyncForTests('en');
+      final zhFromDisk = TestL10nDelegate().loadTagSyncForTests('zh-HK');
+      expect(enFromDisk, _enStrings,
+          reason:
+              'assets/l10n/en.json has drifted from _enStrings in test/l10n_test.dart');
+      expect(zhFromDisk, _zhStrings,
+          reason:
+              'assets/l10n/zh-HK.json has drifted from _zhStrings in test/l10n_test.dart');
     });
   });
 }

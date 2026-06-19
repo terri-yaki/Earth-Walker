@@ -38,6 +38,11 @@ class TestL10nDelegate extends LocalizationsDelegate<L10n> {
   @override
   bool shouldReload(TestL10nDelegate old) => false;
 
+  /// Public re-export of [_loadTagSync] so test/l10n_test.dart
+  /// can drift-check the on-disk JSON against the inlined maps
+  /// without re-implementing the file-lookup logic.
+  Map<String, String> loadTagSyncForTests(String tag) => _loadTagSync(tag);
+
   /// Read assets/l10n/<tag>.json from disk and return the parsed
   /// string map. Returns an empty map if the file is missing or
   /// malformed so a stray missing-file doesn't crash the whole
