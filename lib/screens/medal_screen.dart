@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/achievement_provider.dart'
-    show tierForThreshold, AchievementTier;
+    show tierForThreshold;
 import '../providers/medal_provider.dart';
 import '../utils/l10n.dart';
 import '../utils/tier_styling.dart';

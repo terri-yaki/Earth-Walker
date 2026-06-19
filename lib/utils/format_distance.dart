@@ -16,9 +16,17 @@
 // Inputs are clamped to 0 m so a bad GPS fix (NaN, Infinity,
 // negative) renders as "0 m" rather than "NaN km" / "-1 m".
 String formatDistance(double meters) {
-  if (meters.isNaN || meters.isInfinite || meters < 0) meters = 0.0;
-  final metersRounded = meters.toStringAsFixed(0);
+  // Clamp bad GPS inputs (NaN, Infinity, negative) to 0 m so
+  // the user sees "0 m" rather than "NaN km" / "-1 m" /
+  // "Infinity km". Using a local `clamped` variable rather
+  // than reassigning the `meters` parameter (the linter flags
+  // the latter as bad form and the test files would need to
+  // ignore the warning).
+  final clamped = meters.isNaN || meters.isInfinite || meters < 0
+      ? 0.0
+      : meters;
+  final metersRounded = clamped.toStringAsFixed(0);
   if (double.parse(metersRounded) < 1000) return '$metersRounded m';
-  final km = meters / 1000;
+  final km = clamped / 1000;
   return '${km.toStringAsFixed(1)} km';
 }
