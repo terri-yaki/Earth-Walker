@@ -186,6 +186,12 @@ String encodeProgressSnapshot(ProgressSnapshot s) {
 /// malformed (the spec is one value per field). Without this
 /// check, a corrupted or malicious paste could silently
 /// override a field with the second occurrence.
+///
+/// Negative values are rejected (clamped to 0 instead): the
+/// domain is "things you've accumulated", which can't be
+/// negative. A snapshot like '...cells=-5,...' would
+/// otherwise produce a ProgressSnapshot with cellsVisited: -5
+/// and render as "you walked -5 cells" in the compare dialog.
 ProgressSnapshot? parseProgressSnapshot(String text) {
   if (!text.startsWith(kProgressSnapshotPrefix)) return null;
   final body = text.substring(kProgressSnapshotPrefix.length);
@@ -211,6 +217,19 @@ ProgressSnapshot? parseProgressSnapshot(String text) {
       meters == null ||
       days == null ||
       streak == null) {
+    return null;
+  }
+  // Reject any negative value — the domain (cells / badges /
+  // medals / meters / days / streak) is non-negative. Allowing
+  // negatives would let a malformed paste produce display
+  // text like "you walked -5 cells". Treat as parse failure
+  // so the caller surfaces "couldn't parse" instead.
+  if (cells < 0 ||
+      badges < 0 ||
+      medals < 0 ||
+      meters < 0 ||
+      days < 0 ||
+      streak < 0) {
     return null;
   }
   return ProgressSnapshot(

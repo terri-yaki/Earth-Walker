@@ -116,6 +116,34 @@ void main() {
     });
 
     test(
+        'parse rejects negative values (the domain is non-negative: '
+        'cells / badges / medals / meters / days / streak)',
+        () {
+      // Previously, 'cells=-5,badges=0,...,streak=0' would
+      // parse successfully and produce a ProgressSnapshot with
+      // cellsVisited: -5, which then rendered as "you walked
+      // -5 cells" in the compare dialog. The fix is to treat
+      // any negative field value as parse failure so the
+      // caller surfaces "couldn't parse" instead.
+      final negCells =
+          '${kProgressSnapshotPrefix}cells=-5,badges=0,medals=0,meters=0,days=0,streak=0';
+      expect(parseProgressSnapshot(negCells), isNull,
+          reason: 'negative cells count is nonsense; reject');
+      final negMeters =
+          '${kProgressSnapshotPrefix}cells=0,badges=0,medals=0,meters=-100,days=0,streak=0';
+      expect(parseProgressSnapshot(negMeters), isNull,
+          reason: 'negative meters walked is nonsense; reject');
+      final negStreak =
+          '${kProgressSnapshotPrefix}cells=0,badges=0,medals=0,meters=0,days=0,streak=-3';
+      expect(parseProgressSnapshot(negStreak), isNull,
+          reason: 'negative streak is nonsense; reject');
+      // Zero is the valid minimum, must still parse.
+      final zeros =
+          '${kProgressSnapshotPrefix}cells=0,badges=0,medals=0,meters=0,days=0,streak=0';
+      expect(parseProgressSnapshot(zeros), isNotNull);
+    });
+
+    test(
         'meters round-trips to one-decimal precision (encoded as integer meters)',
         () {
       // 1500.7 m encodes as '1501' (toStringAsFixed(0)); on parse,
