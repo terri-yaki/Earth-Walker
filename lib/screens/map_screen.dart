@@ -199,6 +199,11 @@ class _MapScreenState extends State<MapScreen> {
       await provider.loadFromStorage();
       // Fetch and update the user's location using the provider
       await provider.updateUserLocation();
+      // _initializeMap is called from both initState (no risk)
+      // and from the RecenterButton onRecenter callback (real
+      // risk: the user may have navigated away during the
+      // await). mounted check before any post-await UI work.
+      if (!mounted) return;
 
       // Move the map to the user's location with maximum zoom
       _mapController.move(
@@ -208,6 +213,11 @@ class _MapScreenState extends State<MapScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      // Same mounted guard in the catch path —if the user
+      // navigated away during one of the awaits, we must not
+      // touch _isLoading or pop a snackbar against a disposed
+      // widget.
+      if (!mounted) return;
       // Handle any errors. The prefix is localised; the
       // exception's own toString() stays as-is (typed
       // LocationPermissionDeniedException already routes to the
