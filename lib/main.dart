@@ -63,7 +63,7 @@ class UrbixApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.green,
           fontFamily: 'PixelFont', // Ensure this matches your pubspec.yaml
-          textTheme: TextTheme(
+          textTheme: const TextTheme(
             headlineLarge: AppTextStyles.appBarTitle,
             headlineSmall: AppTextStyles.drawerHeader,
             bodyLarge: AppTextStyles.bodyText1,

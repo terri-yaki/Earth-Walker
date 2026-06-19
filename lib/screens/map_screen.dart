@@ -388,7 +388,7 @@ class _MapScreenState extends State<MapScreen> {
                       // If auto-centering is enabled, keep the map centered on the user
                       if (userLocationProvider.isRecentered) {
                         // Calculate the distance between current map center and user location
-                        final distance = Distance().as(
+                        final distance = const Distance().as(
                           LengthUnit.Meter,
                           position.center,
                           userLocationProvider.userLocation.coordinates,
@@ -411,8 +411,8 @@ class _MapScreenState extends State<MapScreen> {
                     TileLayer(
                       urlTemplate:
                           "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                      subdomains: ['a', 'b', 'c'],
-                      additionalOptions: {
+                      subdomains: const ['a', 'b', 'c'],
+                      additionalOptions: const {
                         'user_agent': 'UrbixHK/1.0.0',
                       },
                     ),

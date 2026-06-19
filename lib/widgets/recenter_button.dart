@@ -57,8 +57,11 @@ class RecenterButton extends StatelessWidget {
     return FloatingActionButton(
       onPressed: () => _handleRecenter(context),
       backgroundColor: Colors.green,
-      child: const Icon(Icons.my_location),
       tooltip: l.recenterMapTooltip,
+      // child last — Flutter convention is for the widget's
+      // child to be the final argument so the call site reads
+      // "background, behaviour, child" top-to-bottom.
+      child: const Icon(Icons.my_location),
     );
   }
 }

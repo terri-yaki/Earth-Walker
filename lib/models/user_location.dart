@@ -5,5 +5,5 @@ import 'package:latlong2/latlong.dart';
 class UserLocation {
   final LatLng coordinates;
 
-  UserLocation({required this.coordinates});
+  const UserLocation({required this.coordinates});
 }

@@ -200,7 +200,10 @@ class HamburgerMenu extends StatelessWidget {
               await Share.share(
                 shareText,
                 subject: l.shareDialogTitle,
-                sharePositionOrigin: const Rect.fromLTWH(0, 0, 0, 0),
+                // Rect.zero is the canonical Flutter constant
+                // for "no position" — share_plus treats it as
+                // "no anchor" on phones (the OS ignores it).
+                sharePositionOrigin: Rect.zero,
               );
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
