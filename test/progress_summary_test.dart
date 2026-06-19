@@ -355,4 +355,32 @@ void main() {
       expect(decoded.currentStreakDays, original.currentStreakDays);
     });
   });
+
+  group('pluralize', () {
+    test('returns singular for count == 1', () {
+      expect(pluralize(1, 'cell', 'cells'), 'cell');
+    });
+
+    test('returns plural for count > 1', () {
+      expect(pluralize(2, 'cell', 'cells'), 'cells');
+      expect(pluralize(5, 'badge', 'badges'), 'badges');
+    });
+
+    test('returns plural for count == 0 (no items is plural, not singular)',
+        () {
+      // "0 cells visited" is grammatical English, not "0 cell".
+      expect(pluralize(0, 'cell', 'cells'), 'cells');
+    });
+
+    test('returns singular for count == -1 (negative delta of one)', () {
+      // The compare-dialog passes `theirs - yours`, which is
+      // negative when the other person has fewer. -1 is
+      // grammatically still singular.
+      expect(pluralize(-1, 'cell', 'cells'), 'cell');
+    });
+
+    test('returns plural for count < -1 (negative delta of many)', () {
+      expect(pluralize(-5, 'cell', 'cells'), 'cells');
+    });
+  });
 }

@@ -293,19 +293,42 @@ class HamburgerMenu extends StatelessWidget {
     ProgressSnapshot theirs,
   ) async {
     final l = L10n.of(context);
+    // Field labels are plain English —the badges/medals
+    // themselves aren't localised, and the comparison strings
+    // read most naturally as the same nouns the user sees on
+    // the achievement / medal screens.
+    //
+    // The four count-noun labels (cells / badges / medals /
+    // days) are plural-aware via [pluralize]: the caller
+    // passes the singular form for `abs(delta) == 1` and the
+    // plural form otherwise. Without this, "1 cells (you
+    // win)" would leak into the UI —the kind of tiny grammar
+    // bug that earns user trust losses even when the
+    // underlying numbers are correct.
+    final dCells = theirs.cellsVisited - mine.cellsVisited;
+    final dBadges = theirs.badgesUnlocked - mine.badgesUnlocked;
+    final dMedals = theirs.medalsEarned - mine.medalsEarned;
+    final dDays = theirs.daysExplored - mine.daysExplored;
+    final cellsLabel = pluralize(dCells, 'cell', 'cells');
+    final badgesLabel = pluralize(dBadges, 'badge', 'badges');
+    final medalsLabel = pluralize(dMedals, 'medal', 'medals');
+    final daysLabel = pluralize(dDays, 'day', 'days');
+    // "day streak" reads naturally in both singular and
+    // plural positions ("1 day streak", "5 day streak") —
+    // "5 day streak" is the standard compound-noun phrasing
+    // here ("she's on a 5 day streak"). The label is a single
+    // string because "day" in this position is part of the
+    // compound noun phrase, not a counted noun.
+    const streakLabel = 'day streak';
     final deltas = ProgressSnapshot.compare(
       other: theirs,
       yours: mine,
-      // Field labels are plain English —the badges/medals
-      // themselves aren't localised, and the comparison strings
-      // read most naturally as the same nouns the user sees on
-      // the achievement / medal screens.
-      cellsLabel: 'cells',
+      cellsLabel: cellsLabel,
       distanceLabel: 'km',
-      badgesLabel: 'badges',
-      medalsLabel: 'medals',
-      daysLabel: 'days',
-      streakLabel: 'day streak',
+      badgesLabel: badgesLabel,
+      medalsLabel: medalsLabel,
+      daysLabel: daysLabel,
+      streakLabel: streakLabel,
       youWinLabel: l.compareDialogYouWin,
       theyWinLabel: l.compareDialogTheyWin,
     );

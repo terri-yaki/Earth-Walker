@@ -7,6 +7,27 @@
 // another (via copy/share) and the receiver compare against
 // their own.
 
+/// Pick the singular or plural form of a count-noun label based
+/// on [count]. `count == 1` (or `-1`) -> [singular], otherwise
+/// [plural]. Lives in this file because the compare-dialog
+/// callers of [ProgressSnapshot.compare] need plural-aware
+/// labels for cells / badges / medals / days.
+///
+/// Negatives are clamped to plural: the domain is "things
+/// accumulated", so a delta of `-1` is the same grammatical
+/// category as `-5` (both are "more than one"). The caller
+/// passes `count.abs()` so this is defensive — the function
+/// is correct whether or not the caller has already taken
+/// the absolute value.
+///
+/// Example:
+///   pluralize(1, 'cell', 'cells')  // 'cell'
+///   pluralize(5, 'cell', 'cells')  // 'cells'
+///   pluralize(-5, 'cell', 'cells') // 'cells'
+String pluralize(int count, String singular, String plural) {
+  return count.abs() == 1 ? singular : plural;
+}
+
 /// Format a one-line progress summary for copy/share. Pure so it's
 /// trivially unit-testable.
 ///
