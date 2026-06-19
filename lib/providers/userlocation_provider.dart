@@ -227,7 +227,9 @@ class UserLocationProvider with ChangeNotifier {
     } catch (e) {
       // Handle any errors
       debugPrint('Error updating user location: $e');
-      throw e;
+      // `rethrow` preserves the original stack trace; `throw e`
+      // would mutate it (and the lint flags it as a code smell).
+      rethrow;
     }
   }
 
