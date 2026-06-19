@@ -14,6 +14,7 @@ import '../widgets/text.dart'; // Ensure this points to your custom text widget
 import '../utils/constants.dart';
 import '../utils/exploration_suggestion.dart';
 import '../utils/l10n.dart';
+import '../utils/progress_summary.dart';
 import '../utils/streak_milestones.dart';
 
 class MapScreen extends StatefulWidget {
@@ -636,7 +637,7 @@ class _MapScreenState extends State<MapScreen> {
                                         color: Colors.orange, size: 14),
                                     const SizedBox(width: 4),
                                     Text(
-                                      '${l.hudStreak}: $s ${s == 1 ? l.hudDayStreak : l.hudDaysStreak}',
+                                      '${l.hudStreak}: $s ${pluralize(s, l.hudDayStreak, l.hudDaysStreak)}',
                                       style: TextStyle(
                                         color: Colors.white.withOpacity(0.85),
                                         fontSize: 12,
