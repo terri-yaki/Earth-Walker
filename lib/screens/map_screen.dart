@@ -771,8 +771,20 @@ class _MapScreenState extends State<MapScreen> {
 
 /// Format a distance in meters as a short, human-friendly string.
 /// < 1 km -> "X m", >= 1 km -> "X.Y km" with one decimal.
+///
+/// The branch is on the *rounded* integer-meter value, not the
+/// raw double, so 999.5 rounds to "1000 m" (correctly) but
+/// 999.5 vs 1000.0 doesn't produce a jarring jump from "1000 m"
+/// to "1.0 km" —both render the same way. (toStringAsFixed
+/// rounds-half-to-even in Dart; without the rounded comparison
+/// the user would see "999.5 m -> 1000 m" then "1000 m ->
+/// 1.0 km" on the very next position update, which feels
+/// broken.)
 String formatDistance(double meters) {
-  if (meters < 1000) return '${meters.toStringAsFixed(0)} m';
+  final metersRounded = meters.toStringAsFixed(0);
+  // Use double compare on the parsed rounded value, so e.g.
+  // 999.5 -> "1000" -> 1000.0 < 1000 is false -> km branch.
+  if (double.parse(metersRounded) < 1000) return '$metersRounded m';
   final km = meters / 1000;
   return '${km.toStringAsFixed(1)} km';
 }
