@@ -51,7 +51,15 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeMap();
+    // _initializeMap shows its own error snackbar via its
+    // internal catch block, then rethrows so callers (the
+    // RecenterButton) can suppress their success snackbar.
+    // initState is not a caller — it just wants to fire-and-
+    // forget, so we swallow the rethrow here. Without this
+    // wrapper, the rethrow becomes an unhandled async error
+    // and lands in the Flutter framework error log on every
+    // failed app start.
+    _initializeMap().catchError((_) {});
     // Listen for new badge unlocks and surface a snackbar. We can't do
     // this in build() (would re-trigger on every rebuild); a listener
     // fires only when the provider actually notifies.
