@@ -463,10 +463,12 @@ class UserLocationProvider with ChangeNotifier {
       // increments that district's count. Cells outside HK stay out
       // of the map, which is correct —we only have district boxes
       // for Hong Kong.
-      // The visited set may have just changed; recompute the
-      // suggestion so the HUD's "Next" chip points at the best
-      // new target.
-      _recomputeSuggestion();
+      // Bump the per-district count BEFORE recomputing the
+      // suggestion, so the suggestion engine sees the new
+      // district in its visitedDistricts set on the same call
+      // (otherwise a fresh-district cell would not get the
+      // +20% "new district" bonus until the NEXT position
+      // update recomputes).
       final district = districtFor(location);
       if (district != null) {
         _visitsByDistrict.update(
@@ -475,6 +477,10 @@ class UserLocationProvider with ChangeNotifier {
           ifAbsent: () => 1,
         );
       }
+      // The visited set may have just changed; recompute the
+      // suggestion so the HUD's "Next" chip points at the best
+      // new target.
+      _recomputeSuggestion();
       _recalculatePercentages();
       // Fire-and-forget save; failure is non-fatal.
       saveToStorage();
