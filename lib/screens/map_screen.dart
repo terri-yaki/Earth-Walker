@@ -678,29 +678,33 @@ class _MapScreenState extends State<MapScreen> {
                                     // it one tap away afterwards.
                                     if (s >= 3) ...[
                                       const SizedBox(width: 8),
-                                      Builder(builder: (innerContext) {
-                                        final l2 = L10n.of(innerContext);
-                                        return Tooltip(
-                                          // Tooltip on long-press so
-                                          // TalkBack also reads the
-                                          // share-button purpose aloud
-                                          // (the bare ios_share icon
-                                          // has no semantic label).
-                                          message: l2.shareStreakPrompt,
-                                          child: InkWell(
-                                            onTap: () => HamburgerMenu
-                                                .showShareDialog(context),
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                            child: const Padding(
-                                              padding: EdgeInsets.all(2),
-                                              child: Icon(Icons.ios_share,
-                                                  color: Colors.white,
-                                                  size: 14),
-                                            ),
+                                      // Reuse the outer Builder's `l`
+                                      // rather than nesting another
+                                      // Builder — the only purpose of
+                                      // the previous inner Builder
+                                      // was to look up L10n for the
+                                      // Tooltip, but `l` is already
+                                      // in scope here.
+                                      Tooltip(
+                                        // Tooltip on long-press so
+                                        // TalkBack also reads the
+                                        // share-button purpose aloud
+                                        // (the bare ios_share icon
+                                        // has no semantic label).
+                                        message: l.shareStreakPrompt,
+                                        child: InkWell(
+                                          onTap: () => HamburgerMenu
+                                              .showShareDialog(context),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          child: const Padding(
+                                            padding: EdgeInsets.all(2),
+                                            child: Icon(Icons.ios_share,
+                                                color: Colors.white,
+                                                size: 14),
                                           ),
-                                        );
-                                      }),
+                                        ),
+                                      ),
                                     ],
                                   ],
                                 ),
