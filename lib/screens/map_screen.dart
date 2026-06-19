@@ -578,11 +578,19 @@ class _MapScreenState extends State<MapScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    '${l.hudNextMilestone}: ${next.title} @ ${next.threshold}% 蝜?${next.cellsToGo} ${l.hudCellsToGo}',
-                                    style: TextStyle(
-                                      color: Colors.white.withOpacity(0.85),
-                                      fontSize: 12,
+                                  // Flexible + ellipsis because the
+                                  // "Are you sure you're not cheating?"
+                                  // milestone title is ~32 chars and
+                                  // pushes the chip wider than the
+                                  // HUD card on narrow phones.
+                                  Flexible(
+                                    child: Text(
+                                      '${l.hudNextMilestone}: ${next.title} @ ${next.threshold}% 蝜?${next.cellsToGo} ${l.hudCellsToGo}',
+                                      style: TextStyle(
+                                        color: Colors.white.withOpacity(0.85),
+                                        fontSize: 12,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
