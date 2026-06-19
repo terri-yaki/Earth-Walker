@@ -521,7 +521,6 @@ class UserLocationProvider with ChangeNotifier {
   }
 
   /// Resets all exploration percentages to zero, clears visited cells,
-  /// Resets all exploration percentages to zero, clears visited cells,
   /// and zeros the cumulative distance, days-explored, and
   /// per-district counters. Bumps [_mutationEpoch] so any in-flight
   /// [updateUserLocation] bails out at its next checkpoint instead
