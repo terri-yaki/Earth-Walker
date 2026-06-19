@@ -51,11 +51,11 @@ class TestL10nDelegate extends LocalizationsDelegate<L10n> {
     // Walk up from the test working directory until we find the
     // assets folder. `flutter test` sets the cwd to the project
     // root, so a single `assets/...` lookup usually works; the
-    // fallback handles monorepo or unusual layouts.
+    // `../...` fallback handles unusual layouts where the runner
+    // sets cwd to a subdirectory.
     final candidates = <File>[
       File('assets/l10n/$tag.json'),
       File('../assets/l10n/$tag.json'),
-      File('C:/Workspace/Earth-Walker/assets/l10n/$tag.json'),
     ];
     for (final f in candidates) {
       if (f.existsSync()) {
