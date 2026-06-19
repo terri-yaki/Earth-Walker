@@ -10,7 +10,6 @@ import '../providers/achievement_provider.dart';
 import '../providers/userlocation_provider.dart';
 import '../widgets/recenter_button.dart';
 import '../widgets/hamburger_menu.dart';
-import '../widgets/text.dart'; // Ensure this points to your custom text widget
 import '../utils/constants.dart';
 import '../utils/exploration_suggestion.dart';
 import '../utils/format_distance.dart';
@@ -249,7 +248,12 @@ class _MapScreenState extends State<MapScreen> {
   /// Displays a SnackBar with the given message.
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: CustomText(text: message)),
+      // Plain Text: SnackBar provides its own contrast
+      // via theme. The CustomText wrapper forced
+      // color: Colors.black (from AppTextStyles.defaultTextStyle)
+      // which clashes with SnackBar's dark surface and
+      // makes the message hard to read.
+      SnackBar(content: Text(message)),
     );
   }
 

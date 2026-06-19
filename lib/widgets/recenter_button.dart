@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 
 import '../utils/l10n.dart';
-import '../widgets/text.dart'; // Ensure this points to your custom text widget
 
 class RecenterButton extends StatelessWidget {
   final MapController mapController;
@@ -42,7 +41,12 @@ class RecenterButton extends StatelessWidget {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: CustomText(text: l.mapRecenteredSnack),
+        // Plain Text: SnackBar already provides the right
+        // color/contrast via its theme. The previous
+        // CustomText wrapper forced color: Colors.black (from
+        // AppTextStyles.defaultTextStyle) which clashes with
+        // SnackBar's dark default surface in M2/M3.
+        content: Text(l.mapRecenteredSnack),
       ),
     );
   }
