@@ -15,6 +15,7 @@ import 'package:provider/provider.dart';
 import '../providers/userlocation_provider.dart';
 import '../utils/hk_districts.dart';
 import '../utils/l10n.dart';
+import '../utils/progress_summary.dart';
 
 class DistrictsScreen extends StatelessWidget {
   const DistrictsScreen({Key? key}) : super(key: key);
@@ -76,7 +77,7 @@ class DistrictsScreen extends StatelessWidget {
       ),
       trailing: Text(
         visited
-            ? '$count ${count == 1 ? l.cellSingular : l.cellPlural}'
+            ? '$count ${pluralize(count, l.cellSingular, l.cellPlural)}'
             : '0 ${l.cellPlural}',
         style: TextStyle(
           color: visited ? Colors.black : Colors.grey,
