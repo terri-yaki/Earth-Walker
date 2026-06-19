@@ -633,7 +633,8 @@ class _MapScreenState extends State<MapScreen> {
                           // is already implicit in the data; we
                           // reserve the chip for the more
                           // interesting case of an actual streak.
-                          if (userLocationProvider.currentStreakDays >= 2) ...[
+                          if (userLocationProvider.currentStreakDays >=
+                              kMinStreakChipDays) ...[
                             Builder(builder: (context) {
                               final l = L10n.of(context);
                               final s = userLocationProvider.currentStreakDays;
@@ -676,7 +677,7 @@ class _MapScreenState extends State<MapScreen> {
                                     // this to the user's
                                     // attention; this icon keeps
                                     // it one tap away afterwards.
-                                    if (s >= 3) ...[
+                                    if (s >= kMinStreakShareIconDays) ...[
                                       const SizedBox(width: 8),
                                       // Reuse the outer Builder's `l`
                                       // rather than nesting another

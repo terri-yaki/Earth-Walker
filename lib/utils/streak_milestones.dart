@@ -13,6 +13,20 @@
 /// add 60 / 100.
 const List<int> kStreakShareMilestones = <int>[3, 7, 14, 30];
 
+/// Lowest streak (in days) at which the HUD's "Streak: N day streak"
+/// chip is rendered. A single-day streak reads as just "today",
+/// which the HUD already carries implicitly via the percentage /
+/// days-explored rows; surfacing it as a chip would be visual noise
+/// with no new information.
+const int kMinStreakChipDays = 2;
+
+/// Lowest streak (in days) at which the chip's share icon is
+/// shown. Coincides with the first share milestone
+/// ([kStreakShareMilestones][0]); a sub-3-day streak isn't worth
+/// a "Share your streak?" prompt, so there's no point in making
+/// the icon visible either.
+const int kMinStreakShareIconDays = 3;
+
 /// Returns the highest [kStreakShareMilestones] threshold the
 /// user has just crossed —i.e. `currentStreak >= t` and the
 /// caller hasn't already prompted for `t`. Returns null if no
