@@ -23,7 +23,17 @@ class RecenterButton extends StatelessWidget {
     // BuildContext may be stale (the user navigated away, the
     // widget was disposed, etc.).
     final l = L10n.of(context);
-    await onRecenter();
+    try {
+      await onRecenter();
+    } catch (_) {
+      // The map screen's _initializeMap catches and surfaces
+      // errors via its own snackbar. If we also fired our
+      // success snackbar here, the user would see two
+      // contradictory messages back-to-back ("Failed to
+      // initialize map…" then "Map recentered…"). Skip the
+      // success message on any throw.
+      return;
+    }
     // After the await, the host widget tree may have been torn
     // down (e.g. the user pressed the system back button mid-
     // recenter). ScaffoldMessenger.of(context) on a disposed

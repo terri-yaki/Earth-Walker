@@ -68,4 +68,34 @@ void main() {
             'ScaffoldMessenger.of(context) is called after the await '
             '—we capture the messenger reference up-front');
   });
+
+  testWidgets(
+      'recenter success snackbar is suppressed when onRecenter throws '
+      '(regression for the "error + success snackbars back-to-back" bug)',
+      (tester) async {
+    final messengerKey = GlobalKey<ScaffoldMessengerState>();
+    // onRecenter throws — simulates a real GPS / network failure
+    // after the user taps recenter. The map screen's
+    // _initializeMap catches internally and surfaces its own error
+    // snackbar; the RecenterButton's success snackbar must NOT
+    // also fire, otherwise the user sees contradictory messages.
+    final button = RecenterButton(
+      mapController: MapController(),
+      onRecenter: () => Future<void>.error(
+          Exception('GPS unavailable')),
+    );
+    await tester.pumpWidget(_wrap(
+      button: button,
+      messengerKey: messengerKey,
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.byType(SnackBar), findsNothing,
+        reason: 'success snackbar must not fire when onRecenter '
+            'throws — the call site surfaces its own error message');
+  });
 }

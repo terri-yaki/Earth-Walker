@@ -228,6 +228,13 @@ class _MapScreenState extends State<MapScreen> {
       setState(() {
         _isLoading = false;
       });
+      // Rethrow so callers (e.g. the RecenterButton) know the
+      // operation failed and can skip their own success-only
+      // post-actions. Without this, the RecenterButton's
+      // "Map recentered" snackbar would fire even on a failed
+      // recenter, immediately after our error snackbar, leaving
+      // the user with two contradictory messages back-to-back.
+      rethrow;
     }
   }
 
