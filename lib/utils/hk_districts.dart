@@ -5,7 +5,7 @@
 // am I in right now?" HUD readout, not a legal boundary. The
 // districtFor() function is pure and unit-testable.
 //
-// The order of _DISTRICTS matters: smaller / more-specific boxes
+// The order of _districts matters: smaller / more-specific boxes
 // come first so a point in an overlap area resolves to the
 // more-specific match.
 
@@ -38,7 +38,7 @@ class HkDistrict {
 /// All 18 Hong Kong districts, ordered roughly from most-specific
 /// (small, central) to least-specific (the huge 'Islands' entry
 /// last, so it only matches when nothing else did).
-const List<HkDistrict> _DISTRICTS = <HkDistrict>[
+const List<HkDistrict> _districts = <HkDistrict>[
   // Hong Kong Island —the four districts are close-packed, so
   // narrower boxes first.
   HkDistrict(
@@ -156,9 +156,9 @@ const List<HkDistrict> _DISTRICTS = <HkDistrict>[
 
 /// Return the district the given [location] falls in, or null if
 /// the point is outside all 18 boxes. Order matters: see
-/// [_DISTRICTS] —most-specific match wins.
+/// [_districts] —most-specific match wins.
 HkDistrict? districtFor(LatLng location) {
-  for (final d in _DISTRICTS) {
+  for (final d in _districts) {
     if (d.contains(location)) return d;
   }
   return null;
@@ -169,4 +169,4 @@ HkDistrict? districtFor(LatLng location) {
 /// rendering a breakdown screen —avoids hard-coding the list in
 /// a second place.
 List<String> get allDistrictNames =>
-    _DISTRICTS.map((d) => d.name).toList(growable: false);
+    _districts.map((d) => d.name).toList(growable: false);
