@@ -57,6 +57,7 @@ void main() {
       try {
         encodeGeohash(0, double.nan, 5);
         fail('expected ArgumentError to be thrown');
+      // ignore: avoid_catching_errors
       } on ArgumentError catch (e) {
         expect(e.name, equals('lng'),
             reason: 'error should name the bad parameter (lng), '
@@ -70,6 +71,7 @@ void main() {
       try {
         encodeGeohash(double.nan, 0, 5);
         fail('expected ArgumentError to be thrown');
+      // ignore: avoid_catching_errors
       } on ArgumentError catch (e) {
         expect(e.name, equals('lat'));
         expect(e.message?.toString(), contains('NaN'));
