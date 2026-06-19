@@ -791,6 +791,12 @@ class _MapScreenState extends State<MapScreen> {
 /// 1.0 km" on the very next position update, which feels
 /// broken.)
 String formatDistance(double meters) {
+  // The domain is non-negative distance in meters. A negative
+  // reading (or NaN, or Infinity from a bad fix) would render
+  // as e.g. "-1 m" or "NaN km" — visually nonsense. Clamp to
+  // 0 so the worst case is "0 m", which the HUD already uses
+  // for fresh users.
+  if (meters.isNaN || meters.isInfinite || meters < 0) meters = 0.0;
   final metersRounded = meters.toStringAsFixed(0);
   // Use double compare on the parsed rounded value, so e.g.
   // 999.5 -> "1000" -> 1000.0 < 1000 is false -> km branch.

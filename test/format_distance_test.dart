@@ -29,5 +29,20 @@ void main() {
       expect(formatDistance(999), '999 m');
       expect(formatDistance(999.49), '999 m');
     });
+
+    test(
+        'non-finite and negative inputs clamp to 0 m '
+        '(regression for "-1 m" / "NaN km" display)', () {
+      // The domain is non-negative distance in meters. A bad
+      // GPS fix, NaN from a failed arithmetic step, or
+      // Infinity from a corrupted accumulator would otherwise
+      // render as "-1 m" or "NaN km" or "Infinity km" — visually
+      // nonsense. Clamp to 0 m.
+      expect(formatDistance(-0.5), '0 m');
+      expect(formatDistance(-100), '0 m');
+      expect(formatDistance(double.nan), '0 m');
+      expect(formatDistance(double.infinity), '0 m');
+      expect(formatDistance(double.negativeInfinity), '0 m');
+    });
   });
 }
