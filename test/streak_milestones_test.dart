@@ -116,4 +116,30 @@ void main() {
       );
     });
   });
+
+  group('HUD thresholds', () {
+    test('kMinStreakChipDays is 2 (hides single-day streak as noise)',
+        () {
+      expect(kMinStreakChipDays, 2,
+          reason:
+              'regression guard: a single-day streak reads as '
+              '"today", which the HUD already carries implicitly '
+              'via the percentage / days-explored rows. '
+              'Surfacing it as a chip would be visual noise.');
+    });
+
+    test('kMinStreakShareIconDays equals the first share milestone', () {
+      // Locks the coupling between the share-icon threshold and
+      // the first kStreakShareMilestones entry. Changing the
+      // milestone list without re-checking this test would
+      // silently leave the icon visible at the wrong streak
+      // length.
+      expect(kMinStreakShareIconDays, kStreakShareMilestones[0],
+          reason:
+              'share-icon threshold must equal the first share '
+              'milestone, otherwise the icon would be visible '
+              'at a streak length that doesn\'t trigger a '
+              '"Share your streak?" prompt (or vice versa).');
+    });
+  });
 }
