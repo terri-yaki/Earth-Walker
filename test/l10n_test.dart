@@ -23,6 +23,7 @@ const Map<String, String> _enStrings = <String, String>{
   'share_dialog_copy': 'Copy',
   'share_dialog_copied': 'Progress copied. Send it to a friend!',
   'share_dialog_share': 'Share',
+  'share_dialog_cancel': 'Cancel',
   'share_dialog_shared': 'Thanks for spreading the word!',
   'share_brag_default': "I've been exploring Hong Kong with Urbix HK.",
   'share_brag_streak': "On a roll with Urbix HK \u2014 can you beat my streak?",
@@ -110,6 +111,7 @@ const Map<String, String> _zhStrings = <String, String>{
   'share_dialog_copied':
       '\u5df2\u8907\u88fd\u3002\u50b3\u7d66\u670b\u53cb\u5566\uff01',
   'share_dialog_share': '\u5206\u4eab',
+  'share_dialog_cancel': '\u53d6\u6d88',
   'share_dialog_shared': '\u591a\u8b1d\u4f60\u5e6b\u5fd9\u5ba3\u50b3\uff01',
   'share_brag_default':
       '\u6211\u7528 Urbix \u9999\u6e2f\u63a2\u7d22\u7dca\u5168\u57ce\u3002',
@@ -394,6 +396,35 @@ void main() {
       ]) {
         expect(s, matches(RegExp(r'[\u4E00-\u9FFF]')),
             reason: '$s should contain CJK ideographs');
+      }
+    });
+
+    test('en and zh-HK have the same key set', () {
+      // If a new key is added to one table but not the other, the
+      // missing one will silently fall back to English at runtime
+      // and look like a "zh-HK is missing X" bug to the user. This
+      // test makes that drift a compile-time / test-time failure.
+      final missingInZh = _enStrings.keys.toSet().difference(
+            _zhStrings.keys.toSet(),
+          );
+      final missingInEn = _zhStrings.keys.toSet().difference(
+            _enStrings.keys.toSet(),
+          );
+      expect(missingInZh, isEmpty,
+          reason: 'keys present in en but missing in zh-HK: $missingInZh');
+      expect(missingInEn, isEmpty,
+          reason: 'keys present in zh-HK but missing in en: $missingInEn');
+    });
+
+    test('every en value is non-empty and not just whitespace', () {
+      // Empty strings would render as blank labels —lock that out.
+      for (final entry in _enStrings.entries) {
+        expect(entry.value.trim(), isNotEmpty,
+            reason: '${entry.key} has empty/whitespace English value');
+      }
+      for (final entry in _zhStrings.entries) {
+        expect(entry.value.trim(), isNotEmpty,
+            reason: '${entry.key} has empty/whitespace zh-HK value');
       }
     });
   });
