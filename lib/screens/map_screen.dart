@@ -735,14 +735,22 @@ class _MapScreenState extends State<MapScreen> {
                                     const Icon(Icons.explore,
                                         color: Colors.greenAccent, size: 14),
                                     const SizedBox(width: 4),
-                                    Text(
-                                      '${l.suggestionChip}: '
-                                      '${s.districtName ?? l.suggestionExploreOther}'
-                                      ' 蝜?${formatDistance(s.distanceFromUserMeters)}',
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(0.85),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
+                                    // Flexible + ellipsis because
+                                    // "Central and Western" +
+                                    // distance can push past the
+                                    // HUD card's right edge on
+                                    // narrow phones.
+                                    Flexible(
+                                      child: Text(
+                                        '${l.suggestionChip}: '
+                                        '${s.districtName ?? l.suggestionExploreOther}'
+                                        ' 蝜?${formatDistance(s.distanceFromUserMeters)}',
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.85),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                   ],
