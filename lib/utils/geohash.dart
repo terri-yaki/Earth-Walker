@@ -58,15 +58,17 @@ String encodeGeohash(double lat, double lng, int precision) {
     throw ArgumentError.value(lng, 'lng', 'must be in -180..180');
   }
 
-  double latMin = -90.0, latMax = 90.0;
-  double lngMin = -180.0, lngMax = 180.0;
+  double latMin = -90.0;
+  double latMax = 90.0;
+  double lngMin = -180.0;
+  double lngMax = 180.0;
 
   final buffer = StringBuffer();
   int charIndex = 0;
   int bits = 0;
 
   while (buffer.length < precision) {
-    if (bits % 2 == 0) {
+    if (bits.isEven) {
       // Even bit: bisect longitude.
       final mid = (lngMin + lngMax) / 2;
       if (lng >= mid) {

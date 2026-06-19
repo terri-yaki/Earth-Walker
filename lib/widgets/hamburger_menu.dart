@@ -222,6 +222,16 @@ class HamburgerMenu extends StatelessWidget {
   Future<void> _showCompareDialog(BuildContext context) async {
     final l = L10n.of(context);
 
+    // Capture the providers BEFORE the await so we don't
+    // touch BuildContext across an async gap (which the
+    // use_build_context_synchronously lint flags). The
+    // Provider<T>.read() calls themselves are safe even if the
+    // context is unmounted, but capturing up-front removes the
+    // lint warning AND keeps the data flow explicit.
+    final location = context.read<UserLocationProvider>();
+    final achievements = context.read<AchievementProvider>();
+    final medals = context.read<MedalProvider>();
+
     // The TextEditingController for the paste field lives in a
     // dedicated stateful widget ([_CompareDialog]) so it gets
     // disposed when the dialog closes. The previous inline
@@ -237,9 +247,6 @@ class HamburgerMenu extends StatelessWidget {
     if (pasted == null) return;
 
     // Build the local snapshot for the compare side.
-    final location = context.read<UserLocationProvider>();
-    final achievements = context.read<AchievementProvider>();
-    final medals = context.read<MedalProvider>();
     final mine = ProgressSnapshot.fromValues(
       cellsVisited: location.uniqueCellsVisited,
       badgesUnlocked: achievements.unlockedAchievements.length,
