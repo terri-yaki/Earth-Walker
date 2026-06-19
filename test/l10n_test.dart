@@ -71,9 +71,9 @@ const Map<String, String> _enStrings = <String, String>{
   'onboarding_loc_error_prefix': 'Could not request location:',
   'badges_header': 'Badges',
   'badges_empty': 'No badges yet. Keep exploring to unlock your first one!',
-  'badge_unlocked_at': 'Unlocked at',
+  'badge_unlocked_at': 'Unlocks at',
   'medals_earned': 'earned',
-  'medals_awarded_at': 'Awarded at',
+  'medals_awarded_at': 'Awards at',
   'cell_singular': 'cell',
   'cell_plural': 'cells',
   'districts_explored': 'districts explored',
@@ -183,7 +183,8 @@ const Map<String, String> _zhStrings = <String, String>{
   'exploration_suffix': '\u63a2\u7d22\uff1a',
   'exploration_world_percent': '\u4e16\u754c\u63a2\u7d22',
   'you_are_here': '\u4f60\u55ba\u5462\u5ea6',
-  'map_recentered_snack': '\u5730\u5716\u5df2\u91cd\u65b0\u5b9a\u4f4d\u5230\u4f60\u5605\u4f4d\u7f6e\u3002',
+  'map_recentered_snack':
+      '\u5730\u5716\u5df2\u91cd\u65b0\u5b9a\u4f4d\u5230\u4f60\u5605\u4f4d\u7f6e\u3002',
   'recenter_map_tooltip': '\u91cd\u65b0\u5b9a\u4f4d',
   'badge_semantic_label': '\u52f3\u7ae0',
   'map_init_failed': '\u7121\u6cd5\u521d\u59cb\u5316\u5730\u5716\uff1a',
@@ -262,7 +263,7 @@ void main() {
       expect(en.cellPlural, 'cells');
       expect(en.districtsExplored, 'districts explored');
       expect(en.badgeUnlockHeader, 'Badge unlocked!');
-      expect(en.medalsAwardedAt, 'Awarded at');
+      expect(en.medalsAwardedAt, 'Awards at');
       // zh-HK: every value should carry at least one CJK ideograph.
       for (final s in <String>[
         zh.badgesHeader,
@@ -322,8 +323,7 @@ void main() {
       final zh = L10n(const Locale('zh', 'HK'), _zhStrings, _enStrings);
       expect(en.appTitle, 'Urbix HK');
       expect(en.youAreHere, 'You are here');
-      expect(en.mapRecenteredSnack,
-          'Map recentered to your current location.');
+      expect(en.mapRecenteredSnack, 'Map recentered to your current location.');
       expect(en.recenterMapTooltip, 'Recenter Map');
       // Chinese versions should NOT be the English fallbacks.
       expect(zh.appTitle, isNot(en.appTitle));
