@@ -22,6 +22,19 @@ import '../utils/visited_cells_store.dart';
 /// hardcoded English string into the zh-HK UI.
 class LocationPermissionDeniedException implements Exception {
   const LocationPermissionDeniedException();
+
+  /// Friendly English identifier used when this exception is
+  /// stringified (e.g. when it bubbles past [_initializeMap]'s
+  /// catch block and is rendered in the map-init failure
+  /// snackbar). Without this override, the default
+  /// `Object.toString()` returns
+  /// `"Instance of 'LocationPermissionDeniedException'"`,
+  /// which is technical noise a user can't act on. The
+  /// onboarding screen still does its own localised mapping
+  /// via the `is LocationPermissionDeniedException` check, so
+  /// this string is only seen as a fallback.
+  @override
+  String toString() => 'Location permission denied';
 }
 
 /// Default [UserLocationProvider] position source: the Geolocator
